@@ -1,0 +1,468 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+p {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: #737791;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Avatar                  */
+/* ------------------------------------ */
+.ant-space-gap-col-small {
+  column-gap: 12px;
+}
+
+.ant-space-gap-col-small:hover {
+  font-weight: 600;
+  color: black !important;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Card                    */
+/* ------------------------------------ */
+.ant-card .ant-card-head {
+  border-bottom: none;
+  min-height: 120px;
+}
+
+.ant-card-head-title {
+  color: white !important;
+}
+
+:where(.css-dev-only-do-not-override-1qeagc6).ant-card:not(.ant-card-bordered) {
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Collapse                */
+/* ------------------------------------ */
+.ant-collapse > .ant-collapse-item {
+  border-bottom: 1px solid rgba(226, 226, 226, 0.8);
+}
+
+.ant-collapse > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+  margin-top: 20px;
+  font-size: large;
+  color: white;
+  padding: 20px;
+}
+
+.ant-collapse
+  > .ant-collapse-item
+  > .ant-collapse-header
+  .ant-collapse-header-text {
+  padding: 10px;
+}
+
+.ant-collapse-borderless > .ant-collapse-item > .ant-collapse-content {
+  border-bottom: none;
+  margin-left: 60px;
+}
+
+:where(.css-dev-only-do-not-override-11lehqq).ant-collapse-borderless
+  > .ant-collapse-item
+  > .ant-collapse-content {
+  border-bottom: 2px solid #535353;
+  margin-left: 60px;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Modal                   */
+/* ------------------------------------ */
+.ant-modal-footer {
+  margin-top: 0 !important;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Menu                    */
+/* ------------------------------------ */
+
+.ant-menu-title-content {
+  color: black !important;
+}
+
+.ant-menu .ant-menu-item .ant-menu-item-icon + span {
+  transition: none !important;
+}
+
+.ant-menu-item-icon {
+  font-size: xx-large;
+  font-weight: bolder;
+  color: black !important;
+}
+
+.ant-menu .ant-menu-submenu-title {
+  color: red !important;
+}
+
+.ant-menu .ant-menu-submenu-title .ant-menu-item-icon {
+  color: black !important;
+  font-size: 40px;
+}
+
+.ant-menu .ant-menu-submenu > div {
+  display: flex;
+  align-items: center;
+}
+
+:where(.css-dev-only-do-not-override-11lehqq).ant-menu-vertical
+  > .ant-menu-submenu
+  > .ant-menu-submenu-title
+  > .ant-menu-item-icon {
+  transform: scale(1.8);
+  transition: transform 0.4s ease-in;
+}
+
+.ant-menu-inline-collapsed > .ant-menu-item {
+  padding-inline: calc(50% - 15px - 4px);
+}
+.ant-menu-light.ant-menu-submenu-popup > .ant-menu > li {
+  display: flex;
+  align-items: center;
+}
+
+.ant-menu-light.ant-menu-root.ant-menu-vertical > li {
+  display: flex;
+}
+
+.ant-menu-light.ant-menu-submenu-popup > .ant-menu > li {
+  display: flex;
+  align-items: center;
+}
+
+.ant-menu
+  .ant-menu-submenu-open.ant-menu-submenu-inline
+  > .ant-menu-submenu-title
+  > .ant-menu-submenu-arrow {
+  color: black;
+}
+
+.ant-menu .ant-menu-submenu-arrow {
+  color: #000;
+}
+
+/* NEW MENU STYLES FOR HOVER AND SELECTED STATES */
+/* Selected menu item styles */
+.ant-menu-item-selected {
+  background-color: #04bf61 !important;
+}
+
+.ant-menu-item-selected .ant-menu-title-content,
+.ant-menu-item-selected .ant-menu-title-content a {
+  color: #ffffff !important;
+}
+
+.ant-menu-item-selected .ant-menu-item-icon {
+  color: #ffffff !important;
+}
+
+/* Hover styles for menu items */
+.ant-menu-item:hover {
+  background-color: #ebecf0 !important;
+}
+
+.ant-menu-item:hover .ant-menu-title-content,
+.ant-menu-item:hover .ant-menu-title-content a {
+  color: #04bf61 !important;
+}
+
+.ant-menu-item:hover .ant-menu-item-icon {
+  color: #04bf61 !important;
+}
+
+/* Submenu selected styles */
+.ant-menu-submenu-selected > .ant-menu-submenu-title {
+  background-color: #ebecf0 !important;
+}
+
+.ant-menu-submenu-selected > .ant-menu-submenu-title,
+.ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-title-content {
+  color: #04bf61 !important;
+}
+
+.ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-item-icon {
+  color: #04bf61 !important;
+}
+
+.ant-menu-submenu-selected > .ant-menu-submenu-title .ant-menu-submenu-arrow {
+  color: #04bf61 !important;
+}
+
+/* Submenu hover styles */
+.ant-menu-submenu:hover > .ant-menu-submenu-title {
+  background-color: #ebecf0 !important;
+}
+
+.ant-menu-submenu:hover > .ant-menu-submenu-title,
+.ant-menu-submenu:hover > .ant-menu-submenu-title .ant-menu-title-content {
+  color: #04bf61 !important;
+}
+
+.ant-menu-submenu:hover > .ant-menu-submenu-title .ant-menu-item-icon {
+  color: #04bf61 !important;
+}
+
+.ant-menu-submenu:hover > .ant-menu-submenu-title .ant-menu-submenu-arrow {
+  color: #04bf61 !important;
+}
+
+/* Submenu items in popup hover */
+.ant-menu-submenu-popup .ant-menu-item:hover {
+  background-color: #ebecf0 !important;
+}
+
+.ant-menu-submenu-popup .ant-menu-item:hover .ant-menu-title-content,
+.ant-menu-submenu-popup .ant-menu-item:hover .ant-menu-title-content a {
+  color: #04bf61 !important;
+}
+
+.ant-menu-submenu-popup .ant-menu-item:hover .ant-menu-item-icon {
+  color: #04bf61 !important;
+}
+
+.ant-menu-light.ant-menu-root.ant-menu-vertical > li {
+  display: flex;
+  align-items: center;
+}
+
+.ant-menu-inline-collapsed > .ant-menu-item .ant-menu-item-icon {
+  margin-left: calc(4px * 2); /* Same as 8px */
+}
+
+/* ------------------------------------ */
+/* Ant Design - Pagination              */
+/* ------------------------------------ */
+/* Pagination Active Button */
+.ant-pagination .ant-pagination-item-active {
+  background-color: #04bf61 !important;
+  border-color: #04bf61 !important;
+}
+
+.ant-pagination .ant-pagination-item-active a {
+  color: #ffffff !important;
+}
+
+/* Pagination Item Hover */
+.ant-pagination .ant-pagination-item:hover {
+  transform: scale(1.2);
+  background-color: #ffffff !important;
+  border-color: #04bf61 !important;
+  z-index: 1; /* To prevent layout breaking */
+}
+
+.ant-pagination .ant-pagination-item:hover a {
+  color: #04bf61 !important;
+}
+
+:where(.css-dev-only-do-not-override-1p39ys8).ant-pagination
+  .ant-pagination-item {
+  display: inline-block;
+  min-width: 32px;
+  height: 32px;
+  margin-inline-end: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  line-height: 30px;
+  text-align: center;
+  vertical-align: middle;
+  list-style: none;
+  background-color: #dcdcdc;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  outline: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Table                   */
+/* ------------------------------------ */
+.ant-table-wrapper .ant-table-tbody > tr > td {
+  color: black;
+}
+
+.ant-table-row:nth-child(even) {
+  background-color: #f7f7f7;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Input                   */
+/* ------------------------------------ */
+.ant-input-outlined {
+  outline: none;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Badge                   */
+/* ------------------------------------ */
+/* .ant-badge .ant-badge-count {
+  background: red !important;
+  color: white !important;
+} */
+
+/* ------------------------------------ */
+/* Ant Design - Card                   */
+/* ------------------------------------ */
+.ant-card .ant-card-head {
+  border-bottom: none;
+  min-height: 54px;
+}
+
+/* ------------------------------------ */
+/* Ant Design - Upload                  */
+/* ------------------------------------ */
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select {
+  width: 100%;
+  height: 130px;
+  background-color: #ffffff;
+}
+
+/* ------------------------------------ */
+/* Jodit Editor                         */
+/* ------------------------------------ */
+.jodit-container:not(.jodit_inline) {
+  border-radius: 5px;
+}
+
+.jodit-workplace {
+  height: 550px !important;
+}
+
+.jodit .jodit-workplace .jodit-wysiwyg,
+.jodit .jodit-workplace .jodit-wysiwyg_iframe,
+.jodit-container .jodit-workplace .jodit-wysiwyg,
+.jodit-container .jodit-workplace {
+  border-radius: 5px;
+}
+
+/* ------------------------------------ */
+/* Check Box                       */
+/* ------------------------------------ */
+
+/* Base Checkbox Style */
+.ant-checkbox-inner {
+  /* border-radius: 50% !important; Make checkbox round */
+  /* border-color: #0100fa !important; Custom border color */
+  width: 18px; /* Size */
+  height: 18px; /* Size */
+  background-color: #f0f0f0 !important; /* Default background */
+  transition: background-color 0.3s ease;
+}
+
+/* Checked State */
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #04bf61 !important; /* Custom checked background */
+  border-color: #04bf61 !important; /* Same border color as checked */
+}
+
+/* Checked State - Tick mark color */
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: white !important; /* Custom tick color */
+}
+
+/* Hover Effect */
+.ant-checkbox:hover .ant-checkbox-inner {
+  border-color: #737791 !important; /* Hover border color */
+}
+
+/* Disabled Checkbox */
+.ant-checkbox-disabled .ant-checkbox-inner {
+  background-color: #dcdcdc !important;
+  border-color: #a6a6a6 !important;
+}
+
+/* styles.css */
+.custom-search .ant-input {
+  height: 33px !important;
+}
+
+.custom-search .ant-btn {
+  height: 33px !important;
+  background-color: #04bf61;
+  border-color: #04bf61;
+  color: white; /* Button text color */
+}
+
+.custom-search .ant-btn:hover {
+  background-color: #04a455; /* Darker on hover */
+  border-color: #04a455;
+}
+
+.custom-search .ant-input {
+  height: 100%;
+}
+
+.custom-search .ant-input-search-button {
+  height: 100%;
+}
+
+/* CustomRadio.css */
+.custom-radio .ant-radio-inner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #00c853; /* Green border */
+  background-color: white;
+  position: relative;
+}
+
+.custom-radio .ant-radio-inner::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: #00c853; /* Green fill */
+  border-radius: 50%;
+  transform: translate(-50%, -50%); /* Center it perfectly */
+}
+
+.custom-radio .ant-radio-checked .ant-radio-inner {
+  border-color: #00c853;
+}
+
+.custom-radio .ant-radio-checked .ant-radio-inner::after {
+  background-color: #00c853;
+}
+
+.custom-radio .ant-radio-checked::after {
+  border: 1px solid #00c853;
+}
+
+.custom-radio .ant-radio-wrapper:hover .ant-radio-inner,
+.custom-radio .ant-radio:hover .ant-radio-inner {
+  border-color: #00c853;
+}
+
+.custom-radio .ant-radio-input:focus + .ant-radio-inner {
+  box-shadow: none;
+  border-color: #00c853;
+}
+
+.ant-radio-wrapper .ant-radio-checked .ant-radio-inner {
+  background-color: #00c853;
+}
+
+/* Switch */
+.ant-switch.ant-switch-checked {
+  background-color: #00c853;
+}
+
+.ant-switch.ant-switch-checked:hover {
+  background-color: #04a455 !important;
+}
