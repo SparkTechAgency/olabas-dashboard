@@ -1,10 +1,11 @@
-import { Form, Modal } from "antd";
+import { Button, Form, Modal } from "antd";
 import React, { useState } from "react";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import StepFour from "./StepFour";
-
+import StepFive from "./StepFive";
+import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
   const [step, setStep] = useState(1);
 
@@ -26,26 +27,32 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       footer={null}
       onCancel={handleCancel}
     >
-      <div>
+      <div className="w-full">
         <Form layout="vertical" initialValues={{ remember: true }}>
           <div className="flex justify-between mb-4">
             <h2 className="text-lg font-semibold">Reservation</h2>
           </div>
           {getFormStep({ step })}
         </Form>
-        <div>
+        <div className="w-full flex justify-between mt-4">
           {step > 1 && (
-            <button
-              className="mr-4 text-sm text-gray-500"
+            <Button
+              className=" text-sm text-gray-500 h-8"
               onClick={handlePrevStep}
+              icon={<FaAngleLeft size={20} />}
             >
-              Previous
-            </button>
+              Back
+            </Button>
           )}
-          {step < 4 && (
-            <button className="text-sm text-blue-500" onClick={handleNextStep}>
+          {step < 5 && (
+            <Button
+              className=" flex justify-end text-sm text-gray-500 h-8"
+              onClick={handleNextStep}
+              icon={<FaAngleRight size={20} />}
+              iconPosition="end"
+            >
               Next
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -64,5 +71,7 @@ const getFormStep = ({ step }) => {
       return <StepThree />;
     case 4:
       return <StepFour />;
+    case 5:
+      return <StepFive />;
   }
 };

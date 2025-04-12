@@ -40,7 +40,7 @@ function Reservation() {
           Add reservation
         </Button>
         <div className="flex gap-3">
-          <CustomSearch onSearch={onSearch} />
+          <CustomSearch onSearch={onSearch} placeholder="search..." />
           {selectedRowKeys.length > 0 && (
             <Button
               icon={<DeleteOutlined />}
