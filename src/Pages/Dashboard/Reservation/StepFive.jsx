@@ -40,7 +40,9 @@ const StepFive = () => {
         )}
 
         <div className="flex items-center my-4">
-          <label className="w-40 text-left pr-4">First Name</label>
+          <label className="w-40 font-semibold text-left pr-4">
+            First Name
+          </label>
           <Form.Item
             name="firstName"
             rules={[{ required: true, message: "Please input First Name!" }]}
@@ -51,7 +53,7 @@ const StepFive = () => {
         </div>
 
         <div className="flex items-center mb-4">
-          <label className="w-40 text-left pr-4">Last Name</label>
+          <label className="w-40 font-semibold text-left pr-4">Last Name</label>
           <Form.Item
             name="lastName"
             rules={[{ required: true, message: "Please input the Last Name!" }]}
@@ -61,7 +63,7 @@ const StepFive = () => {
           </Form.Item>
         </div>
         <div className="flex items-center mb-4">
-          <label className="w-40 text-left pr-4">Email</label>
+          <label className="w-40 font-semibold text-left pr-4">Email</label>
           <Form.Item
             name="email"
             rules={[{ required: true, message: "Please input Email!" }]}
@@ -75,7 +77,9 @@ const StepFive = () => {
           </Form.Item>
         </div>
         <div className="flex items-center mb-4">
-          <label className="w-40 text-left pr-4">Return Location</label>
+          <label className="w-40 font-semibold text-left pr-4">
+            Return Location
+          </label>
           <Form.Item
             name="returnLocation"
             rules={[

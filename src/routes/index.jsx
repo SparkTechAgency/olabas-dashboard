@@ -16,7 +16,7 @@ import Setting from "../Pages/Dashboard/Setting/Setting.jsx";
 import Contact from "../Pages/Dashboard/Contact/Contact.jsx";
 import Report from "../Pages/Dashboard/Report/Report.jsx";
 import User from "../Pages/Dashboard/Reservation/Reservation.jsx";
-import PostList from "../Pages/Dashboard/Post management/PostList.jsx";
+
 import Category from "../Pages/Dashboard/Category/Category.jsx";
 import Announcement from "../Pages/Dashboard/Announcement/Announcement.jsx";
 import Logo from "../Pages/Dashboard/Logo/LogoList.jsx";
@@ -24,6 +24,8 @@ import CategoryManagement from "../Pages/Dashboard/Category Management/CategoryM
 import Notifications from "../Pages/Dashboard/Notification/Notifications.jsx";
 import CategoryFAQ from "../Pages/Dashboard/FAQ/CategoryFAQ.jsx";
 import Reservation from "../Pages/Dashboard/Reservation/Reservation.jsx";
+import ClientMangement from "../Pages/Dashboard/Client management/ClientMangement.jsx";
+import FleetManagement from "../Pages/Dashboard/FleetManagement/FleetManagement.jsx";
 
 const router = createBrowserRouter([
   {
@@ -51,8 +53,12 @@ const router = createBrowserRouter([
         element: <Reservation />,
       },
       {
-        path: "/post-list",
-        element: <PostList />,
+        path: "/client-management",
+        element: <ClientMangement />,
+      },
+      {
+        path: "/fleet-management",
+        element: <FleetManagement />,
       },
       {
         path: "/announcement",

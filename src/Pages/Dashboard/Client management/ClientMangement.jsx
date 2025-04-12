@@ -1,69 +1,67 @@
 import React, { useState } from "react";
-import { Table, Button } from "antd";
+import { Table, Avatar, ConfigProvider, Input, Button } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
 import GetPageName from "../../../components/common/GetPageName";
 import { LuDownload } from "react-icons/lu";
-
+import man from "../../../assets/man.png";
 import CustomSearch from "../../../components/common/CustomSearch";
 
-// Sample Data
+// ✅ Correct Data matching columns
 const initialData = [
   {
     key: 1,
+    name: "John Lennon",
+    contact: "john@example.com",
+    phone: "+1 234 567 890",
+    totalRentals: 5,
+    totalSpent: 10000,
     date: "2/12/2025",
     time: "12:00 PM",
-    bookingID: "#10234",
-    name: "John Lennon",
-    transactionID: "#1214454",
-    ammount: 10000,
-    status: "Paid",
   },
   {
     key: 2,
+    name: "Paul McCartney",
+    contact: "paul@example.com",
+    phone: "+1 987 654 321",
+    totalRentals: 8,
+    totalSpent: 15000,
     date: "2/12/2025",
     time: "12:00 PM",
-    bookingID: "#10234",
-    name: "Paul McCartney",
-    transactionID: "#121idj54",
-    ammount: 10000,
-
-    status: "Pending",
   },
   {
     key: 3,
+    name: "George Harrison",
+    contact: "george@example.com",
+    phone: "+1 555 123 456",
+    totalRentals: 3,
+    totalSpent: 7000,
     date: "2/12/2025",
     time: "12:00 PM",
-    bookingID: "#10234",
-    name: "George Harrison",
-    transactionID: "#1256789",
-    ammount: 10000,
-
-    status: "Paid",
   },
   {
     key: 4,
+    name: "Ringo Starr",
+    contact: "ringo@example.com",
+    phone: "+1 444 666 777",
+    totalRentals: 6,
+    totalSpent: 12000,
     date: "2/12/2025",
     time: "12:00 PM",
-    bookingID: "#10234",
-    name: "Ringo Starr",
-    transactionID: "#1239874",
-    ammount: 10000,
-    status: "Paid",
   },
   {
     key: 5,
+    name: "Yoko Ono",
+    contact: "yoko@example.com",
+    phone: "+1 333 222 111",
+    totalRentals: 2,
+    totalSpent: 4000,
     date: "2/12/2025",
     time: "12:00 PM",
-    bookingID: "#10234",
-    name: "Ringo Starr",
-    transactionID: "#1239874",
-    ammount: 10000,
-    status: "Pending",
   },
 ];
 
-function Transaction() {
+function ClientMangement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [data, setData] = useState(initialData);
@@ -71,19 +69,17 @@ function Transaction() {
   const handleSearch = (value) => setSearchQuery(value);
 
   const filteredData = data.filter(
-    ({ name, ...rest }) =>
-      Object.entries(rest).some(([key, value]) => {
-        if (key === "date") {
-          return new Date(value).toLocaleDateString().includes(searchQuery);
-        }
-        if (key === "ammount") {
-          return value.toString().includes(searchQuery);
-        }
-        return (
-          typeof value === "string" &&
-          value.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }) || name.toLowerCase().includes(searchQuery.toLowerCase())
+    ({ name, contact, phone, totalRentals, totalSpent, date }) => {
+      const lowerQuery = searchQuery.toLowerCase();
+      return (
+        name.toLowerCase().includes(lowerQuery) ||
+        contact.toLowerCase().includes(lowerQuery) ||
+        phone.toLowerCase().includes(lowerQuery) ||
+        totalRentals.toString().includes(lowerQuery) ||
+        totalSpent.toString().includes(lowerQuery) ||
+        date.includes(lowerQuery)
+      );
+    }
   );
 
   const rowSelection = {
@@ -98,10 +94,39 @@ function Transaction() {
 
   const columns = [
     {
-      title: "Date & Time",
+      title: "Client",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Contact",
+      dataIndex: "contact",
+      key: "contact",
+    },
+    {
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
+    },
+    {
+      title: "Total Rentals",
+      dataIndex: "totalRentals",
+      key: "totalRentals",
+    },
+    {
+      title: "Total Spent",
+      dataIndex: "totalSpent",
+      key: "totalSpent",
+      sorter: (a, b) => a.totalSpent - b.totalSpent,
+      render: (totalSpent) => (
+        <p className="text-black font-medium">₦ {totalSpent}</p>
+      ),
+    },
+    {
+      title: "Last Rental Date",
       dataIndex: "dateTime",
       key: "dateTime",
-      render: (text, record) => (
+      render: (_, record) => (
         <div className="flex flex-col">
           <span>{record.date}</span>
           <span>{record.time}</span>
@@ -109,65 +134,12 @@ function Transaction() {
       ),
     },
     {
-      title: "Booking ID",
-      dataIndex: "bookingID",
-      key: "bookingID",
-    },
-    {
-      title: "Transaction ID",
-      dataIndex: "transactionID",
-      key: "transactionID",
-    },
-
-    {
-      title: "User Name",
-      dataIndex: "name",
-      key: "name",
-    },
-
-    {
-      title: "Ammount",
-      dataIndex: "ammount",
-      key: "ammount",
-      sorter: (a, b) => a.ammount - b.ammount,
-      render: (ammount) => (
-        <p className="text-black font-medium">₦ {ammount}</p>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (text) => {
-        const getStatusColor = (status) => {
-          switch (status) {
-            case "Paid":
-              return "bg-[#90BE6D]";
-            case "Pending":
-              return "bg-[#F9C74F]";
-          }
-        };
-        return (
-          <div className="flex justify-start">
-            <span
-              className={`text-xs font-light text-white px-2 py-0.5 rounded ${getStatusColor(
-                text
-              )}`}
-            >
-              {text}
-            </span>
-          </div>
-        );
-      },
-    },
-
-    {
       title: "Actions",
       key: "action",
       render: (_, record) => (
         <div className="flex items-center gap-4">
           <Button className="p-1 border-smart">
-            <AiOutlineEye size={20} className="text-black " />
+            <AiOutlineEye size={20} className="text-black" />
           </Button>
         </div>
       ),
@@ -188,13 +160,12 @@ function Transaction() {
         columns={columns}
         rowSelection={rowSelection}
         dataSource={filteredData}
-        size="default"
+        size="defult"
         pagination={{
           defaultPageSize: 5,
-          position: ["bottomRight"],
-          total: filteredData.length,
           showSizeChanger: false,
-          showQuickJumper: false,
+          showQuickJumper: true,
+          position: ["bottomRight"],
         }}
         showSorterTooltip={{ target: "sorter-icon" }}
       />
@@ -202,7 +173,7 @@ function Transaction() {
   );
 }
 
-export default Transaction;
+export default ClientMangement;
 
 // ✅ Head Component
 function Head({ onSearch, selectedRowKeys, handleDelete, filteredData }) {

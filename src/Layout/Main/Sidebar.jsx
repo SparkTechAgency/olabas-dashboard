@@ -19,6 +19,8 @@ import { MdOutlinePrivacyTip } from "react-icons/md";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { GrAnnounce } from "react-icons/gr";
 import logo from "../../assets/logo.png";
+import { BiSolidCarMechanic } from "react-icons/bi";
+import { FaUserTie } from "react-icons/fa";
 const Sidebar = ({ isCollapsed }) => {
   const location = useLocation();
   const path = location.pathname;
@@ -48,12 +50,21 @@ const Sidebar = ({ isCollapsed }) => {
       ),
     },
     {
-      key: "/post-list",
-      icon: <BsFilePost size={23} />,
+      key: "/client-management",
+      icon: <FaUserTie size={23} />,
       label: isCollapsed ? (
-        <Link to="/post-list">Post</Link>
+        <Link to="/client-management">Client Management</Link>
       ) : (
-        <Link to="/post-list">Post</Link>
+        <Link to="/client-management">Client Management</Link>
+      ),
+    },
+    {
+      key: "/fleet-management",
+      icon: <BiSolidCarMechanic size={23} />,
+      label: isCollapsed ? (
+        <Link to="/fleet-management">Fleet Management</Link>
+      ) : (
+        <Link to="/fleet-management">Fleet Management</Link>
       ),
     },
     {
