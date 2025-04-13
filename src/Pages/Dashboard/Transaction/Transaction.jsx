@@ -188,7 +188,7 @@ function Transaction() {
         columns={columns}
         rowSelection={rowSelection}
         dataSource={filteredData}
-        size="default"
+        size="small"
         pagination={{
           defaultPageSize: 5,
           position: ["bottomRight"],

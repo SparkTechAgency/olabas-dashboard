@@ -1,4 +1,14 @@
-import { Checkbox, Form, Input, Modal, Radio, Select } from "antd";
+import {
+  Button,
+  Checkbox,
+  DatePicker,
+  Form,
+  Input,
+  InputNumber,
+  Modal,
+  Radio,
+  Select,
+} from "antd";
 import React from "react";
 
 function AddNewModal({ isModalOpen, handleOk, handleCancel }) {
@@ -53,7 +63,7 @@ function AddNewModal({ isModalOpen, handleOk, handleCancel }) {
             </Form.Item>
           </div>
         </div>
-        <div className="w-full flex justify-between items-center gap-4 py-2 border-b">
+        <div className="w-full flex justify-between items-center gap-4 py-1 border-b">
           <Form.Item
             label={<p className="text-xs font-semibold">Make</p>}
             name="make"
@@ -76,7 +86,7 @@ function AddNewModal({ isModalOpen, handleOk, handleCancel }) {
             <Input></Input>
           </Form.Item>
         </div>
-        <div className="w-full flex justify-between items-center gap-4 py-2 border-b">
+        <div className="w-full flex justify-between items-center gap-4 py-1  border-b">
           <Form.Item
             label={<p className="text-xs font-semibold">License Plate</p>}
             name="licensePlate"
@@ -110,26 +120,59 @@ function AddNewModal({ isModalOpen, handleOk, handleCancel }) {
             <Input className="" addonAfter={<p>gallons</p>} />
           </div>
         </div>
-        <div className="w-full flex justify-between items-center gap-4 py-2 ">
-          <Form.Item
-            label={<p className="text-xs font-semibold">Locatioin</p>}
-            name="dailyRate"
-            className="w-full"
-          >
-            <Select
-              defaultValue="lucy"
+        <div className="py-2">
+          <div className="w-full flex justify-between items-center gap-4  ">
+            <Form.Item
+              label={<p className="text-xs font-semibold">Locatioin</p>}
+              name="dailyRate"
               className="w-full"
-              // onChange={handleChange}
-              options={location}
+            >
+              <Select
+                defaultValue="lucy"
+                className="w-full"
+                // onChange={handleChange}
+                options={location}
+              />
+            </Form.Item>
+            <Form.Item
+              label={<p className="text-xs font-semibold">Odometer Reading</p>}
+              name="vin"
+              className="w-full"
+            >
+              <Input addonAfter={<p>mile</p>}></Input>
+            </Form.Item>
+          </div>
+          <p className="-mt-3">
+            Manually select current vehicle location so that you can easily
+            track where each vehicle is at the moment.
+          </p>
+        </div>
+        <div className="w-full flex justify-between items-center gap-4 ">
+          <Form.Item
+            label={<p className="text-xs font-semibold">Manufacture Year</p>}
+          >
+            <InputNumber
+              size="middle"
+              min={1}
+              max={100000}
+              defaultValue={3}
+              className="w-full"
             />
           </Form.Item>
           <Form.Item
-            label={<p className="text-xs font-semibold">Odometer Reading</p>}
-            name="vin"
-            className="w-full"
+            label={<p className="text-xs font-semibold">Date purchased</p>}
           >
-            <Input addonAfter={<p>mile</p>}></Input>
+            <DatePicker></DatePicker>
           </Form.Item>
+          <Form.Item
+            label={<p className="text-xs font-semibold">Mileage purchased</p>}
+          >
+            <Input addonAfter={<p>mile</p>} />
+          </Form.Item>
+        </div>
+        <div className="flex gap-4 justify-start">
+          <Button>Cancel</Button>
+          <Button className="bg-smart text-white">Save</Button>
         </div>
       </Form>
     </Modal>

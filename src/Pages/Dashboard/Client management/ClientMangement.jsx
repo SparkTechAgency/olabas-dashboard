@@ -160,7 +160,7 @@ function ClientMangement() {
         columns={columns}
         rowSelection={rowSelection}
         dataSource={filteredData}
-        size="defult"
+        size="small"
         pagination={{
           defaultPageSize: 5,
           showSizeChanger: false,

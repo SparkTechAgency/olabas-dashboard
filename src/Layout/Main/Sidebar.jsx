@@ -1,4 +1,4 @@
-import { FaQuoteRight } from "react-icons/fa6";
+import { FaQuoteRight, FaUserNurse } from "react-icons/fa6";
 import { CgTemplate } from "react-icons/cg";
 import { Menu } from "antd";
 import React, { useEffect, useState } from "react";
@@ -7,7 +7,7 @@ import { BsFilePost } from "react-icons/bs";
 import { SiAntdesign } from "react-icons/si";
 
 import { RxDashboard } from "react-icons/rx";
-import { PiWallet } from "react-icons/pi";
+import { PiMapPinAreaBold, PiWallet } from "react-icons/pi";
 import { FiLogOut } from "react-icons/fi";
 import { RiContactsBook3Line } from "react-icons/ri";
 import {
@@ -59,6 +59,15 @@ const Sidebar = ({ isCollapsed }) => {
       ),
     },
     {
+      key: "/driver-management",
+      icon: <FaUserNurse size={23} />,
+      label: isCollapsed ? (
+        <Link to="/driver-management">Driver Management</Link>
+      ) : (
+        <Link to="/driver-management">Driver Management</Link>
+      ),
+    },
+    {
       key: "/fleet-management",
       icon: <BiSolidCarMechanic size={23} />,
       label: isCollapsed ? (
@@ -87,6 +96,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/transaction">Transaction</Link>
       ) : (
         <Link to="/transaction">Transaction</Link>
+      ),
+    },
+    {
+      key: "/location",
+      icon: <PiMapPinAreaBold size={25} />,
+      label: isCollapsed ? (
+        <Link to="/location">Location</Link>
+      ) : (
+        <Link to="/location">Location</Link>
       ),
     },
     {

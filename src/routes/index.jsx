@@ -26,6 +26,8 @@ import CategoryFAQ from "../Pages/Dashboard/FAQ/CategoryFAQ.jsx";
 import Reservation from "../Pages/Dashboard/Reservation/Reservation.jsx";
 import ClientMangement from "../Pages/Dashboard/Client management/ClientMangement.jsx";
 import FleetManagement from "../Pages/Dashboard/FleetManagement/FleetManagement.jsx";
+import DriverManagement from "../Pages/Dashboard/Driver Management/DriverManagement.jsx";
+import Location from "../Pages/Dashboard/Location/Location.jsx";
 
 const router = createBrowserRouter([
   {
@@ -61,8 +63,16 @@ const router = createBrowserRouter([
         element: <FleetManagement />,
       },
       {
+        path: "/driver-management",
+        element: <DriverManagement />,
+      },
+      {
         path: "/announcement",
         element: <Announcement />,
+      },
+      {
+        path: "/location",
+        element: <Location />,
       },
       {
         path: "/category-subcategory-management",
