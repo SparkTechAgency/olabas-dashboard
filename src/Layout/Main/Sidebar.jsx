@@ -3,7 +3,7 @@ import { CgTemplate } from "react-icons/cg";
 import { Menu } from "antd";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { BsFilePost } from "react-icons/bs";
+import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { SiAntdesign } from "react-icons/si";
 
 import { RxDashboard } from "react-icons/rx";
@@ -20,7 +20,7 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { GrAnnounce } from "react-icons/gr";
 import logo from "../../assets/logo.png";
 import { BiSolidCarMechanic } from "react-icons/bi";
-import { FaUserTie } from "react-icons/fa";
+import { FaTh, FaUserTie } from "react-icons/fa";
 const Sidebar = ({ isCollapsed }) => {
   const location = useLocation();
   const path = location.pathname;
@@ -76,19 +76,7 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/fleet-management">Fleet Management</Link>
       ),
     },
-    {
-      key: "/category-subcategory-management",
-      icon: <MdCategory size={25} />,
-      label: isCollapsed ? (
-        <Link to="/category-subcategory-management">
-          Category-Sub Cateogory
-        </Link>
-      ) : (
-        <Link to="/category-subcategory-management">
-          Category-Sub Cateogory
-        </Link>
-      ),
-    },
+
     {
       key: "/transaction",
       icon: <PiWallet size={25} />,
@@ -105,6 +93,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/location">Location</Link>
       ) : (
         <Link to="/location">Location</Link>
+      ),
+    },
+    {
+      key: "/extra",
+      icon: <FaTh size={25} />,
+      label: isCollapsed ? (
+        <Link to="/extra">Extra</Link>
+      ) : (
+        <Link to="/extra">Extra</Link>
       ),
     },
     {
@@ -240,12 +237,12 @@ const Sidebar = ({ isCollapsed }) => {
         className="flex items-center justify-center py-4 text-white bg-white sticky z-50 mb-10"
       >
         <div className="w-full flex items-center justify-center bg-quilocoP px-4 py-3 -mt-1.5 gap-3 rounded-lg">
-          {/* <TbDashboard size={40} className="text-smart" /> */}
+          <TbLayoutDashboardFilled size={40} className="text-smart" />
 
           {!isCollapsed ? (
-            // <p className="text-2xl text-smart font-semibold ">Dashboard</p>
-            <img src={logo} />
+            <p className="text-2xl text-smart font-semibold ">Dashboard</p>
           ) : (
+            // <img src={logo} />
             <img src={logo} className="mt-3" />
           )}
           {/* <img src={"qilocoLogo"} /> */}

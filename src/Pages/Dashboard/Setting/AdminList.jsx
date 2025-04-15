@@ -302,13 +302,6 @@ const AdminList = () => {
             >
               <Input placeholder="Email" className="h-10" />
             </Form.Item>
-            <Form.Item
-              label="Role"
-              name="role"
-              rules={[{ required: true, message: "Please enter Role" }]}
-            >
-              <Input placeholder="Role" className="h-10" />
-            </Form.Item>
 
             <div className="flex justify-end gap-4 mt-4">
               <ButtonEDU actionType="cancel" onClick={handleCancelEdit}>
@@ -350,7 +343,7 @@ const TableHead = ({ searchText, handleSearch, onAdd }) => {
         placeholder="Search admins..."
         value={searchText}
         onChange={handleSearch}
-        className="w-1/3 h-10"
+        className="w-1/3 h-8"
         allowClear
       />
       <ButtonEDU actionType="add" onClick={onAdd}>
@@ -406,7 +399,10 @@ const columns = (onEdit, onDelete) => [
             <Button onClick={() => onEdit(record)}>
               <EditFilled />
             </Button>
-            <Button onClick={() => onDelete(record)} danger>
+            <Button
+              onClick={() => onDelete(record)}
+              className="text-red-500 hover:text-white"
+            >
               <DeleteFilled />
             </Button>
           </div>

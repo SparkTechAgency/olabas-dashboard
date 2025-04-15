@@ -155,7 +155,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
             className="w-full"
           >
             <Input
-              className="bg-white border border-black h-12 rounded-lg"
+              className="bg-white border border-black h-8 rounded-lg"
               readOnly={!showButton}
               style={{ color: "black" }}
             />
@@ -166,7 +166,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
             className="w-full"
           >
             <Input
-              className="bg-white border border-black h-12 rounded-lg"
+              className="bg-white border border-black h-8 rounded-lg"
               readOnly
               style={{ color: "black" }}
             />
@@ -180,7 +180,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
             className="w-full"
           >
             <Input
-              className="bg-white border border-black h-12 rounded-lg"
+              className="bg-white border border-black h-8 rounded-lg"
               readOnly={!showButton}
               style={{ color: "black" }}
             />
@@ -191,7 +191,7 @@ const ProfileDetails = ({ showButton, setShowButton, user, uploadedImage }) => {
             className="w-full"
           >
             <Input
-              className="bg-white border border-black h-12 rounded-lg"
+              className="bg-white border border-black h-8 rounded-lg"
               readOnly
               style={{ color: "black" }}
             />

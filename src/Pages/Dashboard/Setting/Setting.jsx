@@ -3,6 +3,7 @@ import { ConfigProvider, Segmented } from "antd";
 import AdminList from "./AdminList";
 import AdminPassword from "./AdminPassword";
 import Profile from "./Profile";
+import { AnimatePresence, motion } from "framer-motion";
 
 function Setting() {
   const [selected, setSelected] = useState("Admin");
@@ -30,9 +31,9 @@ function Setting() {
       theme={{
         components: {
           Segmented: {
-            itemHoverBg: "#3b55ff",
+            itemHoverBg: "#000000",
             itemHoverColor: "white",
-            trackBg: "#0100fa",
+            trackBg: "#04bf61",
             itemColor: "white",
             itemSelectedColor: "black",
             fontSize: 18,
@@ -47,10 +48,21 @@ function Setting() {
             value={selected}
             onChange={handleSegmentChange}
             block
-            className="mb-6 border border-[#0100fa]"
+            className="mb-6 border border-[#04bf61]"
           />
         </div>
-        {renderContent()}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selected}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderContent()}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </ConfigProvider>
   );

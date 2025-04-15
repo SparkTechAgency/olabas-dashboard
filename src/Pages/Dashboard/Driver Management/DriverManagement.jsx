@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Table } from "antd";
 import GetPageName from "../../../components/common/GetPageName";
+import App from "./Table";
 
 // List of drivers
 const driverList = [
@@ -22,6 +23,16 @@ const driverList = [
   "bola4",
   "ada5",
   "bola6",
+  "kemi",
+  "tunde",
+  "ada1",
+  "bola1",
+  "ada2",
+  "bola2",
+  "ada3",
+  "bola4",
+  "ada5",
+  "valzsg",
 ];
 
 // Generate initial table data (50 days)
@@ -54,18 +65,16 @@ const generateInitialData = () => {
 const generateBookingData = () => {
   const data = [];
   for (let i = 0; i < 50; i++) {
-    driverList.forEach((driver) => {
-      const random = Math.random();
-      if (random < 0.4) {
-        // 40% chance a driver has a booking
-        data.push({
-          driver: driver,
-          car: driver.toUpperCase() + " CAR",
-          date: `March ${i + 1}, 2025`,
-          isBooked: random < 0.2, // 20% chance booked
-          isCompleted: random >= 0.2, // 20%-40% chance completed
-        });
-      }
+    const date = `March ${i + 1}, 2025`;
+    driverList.forEach((driver, index) => {
+      const isEven = (i + index) % 2 === 0;
+      data.push({
+        driver: driver,
+        car: driver.toUpperCase() + " CAR",
+        date,
+        isBooked: isEven,
+        isCompleted: !isEven,
+      });
     });
   }
   return data;
@@ -132,17 +141,19 @@ function DriverManagement() {
         filteredData={filteredData}
       />
 
-      <div className="max-w-[98%] h-full overflow-auto border rounded-md">
-        <Table
+      {/* <div className="w-[50%] h-full  border rounded-md "> */}
+      {/* <Table
           columns={columns}
           dataSource={data}
-          scroll={{ x: 2500, y: 400 }}
+          scroll={{ x: 800, y: 400 }}
           pagination={false}
           bordered
           sticky
           size="small"
-        />
-      </div>
+          scrollToFirstRowOnChange={true}
+        /> */}
+      <App />
+      {/* </div> */}
     </div>
   );
 }

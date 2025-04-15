@@ -3,24 +3,19 @@ import Auth from "../Layout/Auth/Auth";
 import Main from "../Layout/Main/Main";
 import Home from "../Pages/Dashboard/Home/Home";
 import PrivacyPolicy from "../Pages/Dashboard/PrivacyPolicy/PrivacyPolicy.jsx";
-import ChangePassword from "../Pages/Auth/ChangePassword";
 import Login from "../Pages/Auth/Login";
 import ForgotPassword from "../Pages/Auth/ForgotPassword";
 import VerifyOtp from "../Pages/Auth/VerifyOtp";
 import ResetPassword from "../Pages/Auth/ResetPassword";
 import NotFound from "../NotFound";
-
 import TermsAndCondition from "../Pages/Dashboard/TermsAndCondition/TermsAndCondition";
 import Transaction from "../Pages/Dashboard/Transaction/Transaction.jsx";
 import Setting from "../Pages/Dashboard/Setting/Setting.jsx";
 import Contact from "../Pages/Dashboard/Contact/Contact.jsx";
 import Report from "../Pages/Dashboard/Report/Report.jsx";
-import User from "../Pages/Dashboard/Reservation/Reservation.jsx";
-
 import Category from "../Pages/Dashboard/Category/Category.jsx";
 import Announcement from "../Pages/Dashboard/Announcement/Announcement.jsx";
 import Logo from "../Pages/Dashboard/Logo/LogoList.jsx";
-import CategoryManagement from "../Pages/Dashboard/Category Management/CategoryManagement.jsx";
 import Notifications from "../Pages/Dashboard/Notification/Notifications.jsx";
 import CategoryFAQ from "../Pages/Dashboard/FAQ/CategoryFAQ.jsx";
 import Reservation from "../Pages/Dashboard/Reservation/Reservation.jsx";
@@ -28,6 +23,7 @@ import ClientMangement from "../Pages/Dashboard/Client management/ClientMangemen
 import FleetManagement from "../Pages/Dashboard/FleetManagement/FleetManagement.jsx";
 import DriverManagement from "../Pages/Dashboard/Driver Management/DriverManagement.jsx";
 import Location from "../Pages/Dashboard/Location/Location.jsx";
+import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
 
 const router = createBrowserRouter([
   {
@@ -75,9 +71,10 @@ const router = createBrowserRouter([
         element: <Location />,
       },
       {
-        path: "/category-subcategory-management",
-        element: <CategoryManagement />,
+        path: "/extra",
+        element: <Extra />,
       },
+
       {
         path: "/faq",
         element: <CategoryFAQ />,
