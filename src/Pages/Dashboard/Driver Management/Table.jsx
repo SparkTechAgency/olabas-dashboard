@@ -109,7 +109,7 @@ const App = () => {
       className={styles.customTable}
       columns={columns}
       dataSource={dataSource}
-      scroll={{ x: "max-content", y: 55 * 5 }}
+      scroll={{ x: "max-content", y: 550 }}
     />
   );
 };

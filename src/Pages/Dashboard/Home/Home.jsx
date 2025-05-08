@@ -35,7 +35,7 @@ const stats = [
 export const Card = ({ item }) => {
   return (
     <div
-      className={`flex flex-col w-full items-start justify-center h-32 rounded-lg bg-white p-12 ${item.bg}`}
+      className={`flex flex-col w-full items-start justify-center h-32 rounded-lg border bg-white p-12 ${item.bg}`}
     >
       <p className="text-sm text-gray-500">{item.label}</p>
       <div className="w-full flex items-center justify-between mt-2">
@@ -59,10 +59,10 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="w-full h-[330px]  bg-white rounded-lg mt-4 relative flex flex-col justify-evenly">
+      <div className="w-full h-[330px] border  bg-white rounded-lg mt-4 relative flex flex-col justify-evenly">
         <TotalUserChart />
       </div>
-      <div className="w-full h-[300px] mt-4 flex items-center justify-between bg-transparent rounded-lg">
+      <div className="w-full h-[260px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
         <RevenueAnalysis />
       </div>
     </div>

@@ -13,7 +13,7 @@ import AddNewExtraModal from "./AddNewExtraModal";
 const initialData = [
   {
     key: 1,
-    type: "Driver",
+    description: "Driver",
     price: "$50",
     status: "Active",
     icon: driver,
@@ -21,7 +21,7 @@ const initialData = [
   },
   {
     key: 2,
-    type: "Driver",
+    description: "Driver",
     price: "$60",
     status: "Inactive",
     icon: driver,
@@ -29,7 +29,7 @@ const initialData = [
   },
   {
     key: 3,
-    type: "Driver",
+    description: "Driver",
     price: "$80",
     status: "Inactive",
     icon: driver,
@@ -37,7 +37,7 @@ const initialData = [
   },
   {
     key: 4,
-    type: "Driver",
+    description: "Driver",
     price: "$90",
     status: "Inactive",
     icon: driver,
@@ -45,7 +45,7 @@ const initialData = [
   },
   {
     key: 5,
-    type: "Driver",
+    description: "Driver",
     price: "$100",
     status: "Active",
     icon: driver,
@@ -105,7 +105,6 @@ function Extra() {
     filter === "All" ? data : data.filter((item) => item.status === filter);
 
   const columns = [
-    { title: "Type", dataIndex: "type", key: "type" },
     {
       title: "Image",
       dataIndex: "image",
@@ -126,6 +125,7 @@ function Extra() {
         ),
     },
     { title: "Name", dataIndex: "name", key: "name" },
+    { title: "Description", dataIndex: "description", key: "description" },
     { title: "Price", dataIndex: "price", key: "price" },
     {
       title: "Status",

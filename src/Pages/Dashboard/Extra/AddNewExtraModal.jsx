@@ -43,21 +43,33 @@ function AddNewExtraModal({
     >
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item
-          label="Type"
-          name="type"
-          rules={[{ required: true, message: "Please input the type!" }]}
-        >
-          <Input placeholder="Enter Type" />
-        </Form.Item>
-
-        <Form.Item
           label="Name"
           name="name"
           rules={[{ required: true, message: "Please input the name!" }]}
         >
           <Input placeholder="Enter Name" />
         </Form.Item>
-
+        <Form.Item
+          label="Price"
+          name="price"
+          rules={[{ required: true, message: "Please enter the price!" }]}
+        >
+          <InputNumber
+            prefix="$"
+            style={{ width: "100%" }}
+            placeholder="Enter Price"
+          />
+        </Form.Item>
+        <Form.Item
+          label="Status"
+          name="status"
+          rules={[{ required: true, message: "Please select status!" }]}
+        >
+          <Radio.Group>
+            <Radio value="Active">Active</Radio>
+            <Radio value="Inactive">Inactive</Radio>
+          </Radio.Group>
+        </Form.Item>
         <Form.Item
           label="Image"
           name="image"
@@ -76,28 +88,12 @@ function AddNewExtraModal({
             <Button icon={<UploadOutlined />}>Upload</Button>
           </Upload>
         </Form.Item>
-
         <Form.Item
-          label="Price"
-          name="price"
-          rules={[{ required: true, message: "Please enter the price!" }]}
+          label="Type"
+          name="type"
+          rules={[{ required: true, message: "Please input the type!" }]}
         >
-          <InputNumber
-            prefix="$"
-            style={{ width: "100%" }}
-            placeholder="Enter Price"
-          />
-        </Form.Item>
-
-        <Form.Item
-          label="Status"
-          name="status"
-          rules={[{ required: true, message: "Please select status!" }]}
-        >
-          <Radio.Group>
-            <Radio value="Active">Active</Radio>
-            <Radio value="Inactive">Inactive</Radio>
-          </Radio.Group>
+          <Input.TextArea placeholder="Enter Type" />
         </Form.Item>
 
         <Form.Item>

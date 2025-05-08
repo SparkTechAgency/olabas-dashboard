@@ -31,8 +31,8 @@ const StepFive = () => {
         {clientType === 2 && (
           <Form.Item
             name="firstName"
-            label={<h3 className="text-xs font-semibold">First Name</h3>}
-            rules={[{ required: true, message: "Please input First Name!" }]}
+            label={<h3 className="text-xs font-semibold">Find Client</h3>}
+            rules={[{ required: true, message: "Please input Client!" }]}
             className="flex-1 mb-0"
           >
             <CustomSearch placeholder="Search by name, email, or Phone" />

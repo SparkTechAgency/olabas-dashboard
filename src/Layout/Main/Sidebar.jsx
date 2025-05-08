@@ -243,7 +243,8 @@ const Sidebar = ({ isCollapsed }) => {
             <p className="text-2xl text-smart font-semibold ">Dashboard</p>
           ) : (
             // <img src={logo} />
-            <img src={logo} className="mt-3" />
+            // <img src={logo} className="mt-3" />
+            <p className="text-2xl text-smart font-semibold "></p>
           )}
           {/* <img src={"qilocoLogo"} /> */}
         </div>
