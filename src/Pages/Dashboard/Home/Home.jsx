@@ -62,7 +62,7 @@ const Home = () => {
       <div className="w-full h-[330px] border  bg-white rounded-lg mt-4 relative flex flex-col justify-evenly">
         <TotalUserChart />
       </div>
-      <div className="w-full h-[260px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
+      <div className="w-full h-[330px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
         <RevenueAnalysis />
       </div>
     </div>

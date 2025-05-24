@@ -32,11 +32,11 @@ function TermsAndCondition() {
         "fontsize",
         "brush",
         "paragraph",
-        "|",
-        "image",
-        "table",
-        "link",
-        "|",
+        // "|",
+        // "image",
+        // "table",
+        // "link",
+        // "|",
         "left",
         "center",
         "right",
@@ -67,9 +67,11 @@ function TermsAndCondition() {
 
   return (
     <>
-      <div className="w-full">
-        <h1 className="text-[20px] font-medium py-5">Terms And Condition</h1>
-        <div className="w-5/5 bg-black">
+      <div className="w-full h-[fit] border rounded-lg bg-white px-4 py-5">
+        <h1 className="text-[20px] font-medium py-5 w-fit mx-auto">
+          Terms And Condition
+        </h1>
+        <div className="w-5/5  rounded-md">
           <JoditEditor
             className="my-5 bg-red-300"
             ref={editor}

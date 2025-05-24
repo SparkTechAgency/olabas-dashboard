@@ -17,7 +17,6 @@ import Category from "../Pages/Dashboard/Category/Category.jsx";
 import Announcement from "../Pages/Dashboard/Announcement/Announcement.jsx";
 import Logo from "../Pages/Dashboard/Logo/LogoList.jsx";
 import Notifications from "../Pages/Dashboard/Notification/Notifications.jsx";
-import CategoryFAQ from "../Pages/Dashboard/FAQ/CategoryFAQ.jsx";
 import Reservation from "../Pages/Dashboard/Reservation/Reservation.jsx";
 import ClientMangement from "../Pages/Dashboard/Client management/ClientMangement.jsx";
 import FleetManagement from "../Pages/Dashboard/FleetManagement/FleetManagement.jsx";
@@ -25,6 +24,7 @@ import DriverManagement from "../Pages/Dashboard/Driver Management/DriverManagem
 import Location from "../Pages/Dashboard/Location/Location.jsx";
 import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
 import Team from "../Pages/Dashboard/Team/team.jsx";
+import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
 
 const router = createBrowserRouter([
   {
@@ -81,7 +81,7 @@ const router = createBrowserRouter([
       },
       {
         path: "/faq",
-        element: <CategoryFAQ />,
+        element: <FaqCollapse />,
       },
 
       {

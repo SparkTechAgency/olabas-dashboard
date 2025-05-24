@@ -32,10 +32,10 @@ function PrivacyPolicy() {
         "fontsize",
         "brush",
         "paragraph",
-        "|",
-        "image",
-        "table",
-        "link",
+        // "|",
+        // "image",
+        // "table",
+        // "link",
         "|",
         "left",
         "center",
@@ -56,6 +56,10 @@ function PrivacyPolicy() {
       askBeforePasteFromWord: false,
       toolbarButtonSize: "small",
       readonly: false,
+      // height: 800,
+      // allowResizeX: false,
+      // allowResizeY: false,
+
       observer: { timeout: 100 },
     }),
     []
@@ -67,9 +71,11 @@ function PrivacyPolicy() {
 
   return (
     <>
-      <div className="w-full ">
-        <h1 className="text-[20px] font-medium py-5">Privacy Policy</h1>
-        <div className="w-5/5 bg-black">
+      <div className="w-full h-[fit] border rounded-lg bg-white px-4 py-5">
+        <h1 className="text-[20px] font-medium py-5 w-fit mx-auto">
+          Privacy Policy
+        </h1>
+        <div className="w-5/5  rounded-md">
           <JoditEditor
             className="my-5 bg-red-300"
             ref={editor}
