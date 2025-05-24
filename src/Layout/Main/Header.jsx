@@ -65,7 +65,7 @@ const Header = () => {
       >
         <div>
           <CgMenu
-            size={40}
+            size={25}
             onClick={toggleSidebar}
             className="cursor-pointer text-smart"
           />

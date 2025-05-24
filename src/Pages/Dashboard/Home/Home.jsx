@@ -73,7 +73,7 @@ const Home = () => {
       </div>
 
       {/* Revenue Analysis */}
-      <div className="w-full h-[330px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
+      <div className="w-full h-[340px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
         <RevenueAnalysis />
       </div>
     </div>
