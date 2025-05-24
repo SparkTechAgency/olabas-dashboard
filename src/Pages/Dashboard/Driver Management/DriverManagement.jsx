@@ -70,14 +70,21 @@ import GetPageName from "../../../components/common/GetPageName";
 import App from "./Table";
 import { GrFormAdd } from "react-icons/gr";
 import DriverInformationModal from "./DriverInformationModal";
-
+import { useSidebar } from "../../../Context/SidebarContext";
 // Main Page Component
 function DriverManagement() {
   const handleSearch = () => {};
   const handleDelete = () => {};
-
+  const { isCollapsed } = useSidebar();
+  console.log(isCollapsed);
   return (
-    <div className="sm:w-[85vw] h-40 driver-management-container ">
+    <div
+      className={`h-40 driver-management-container transition-all duration-300 ${
+        isCollapsed
+          ? "w-full sm:w-[94vw] md:w-[94vw] lg:w-[94vw]"
+          : "w-full sm:w-[100vw] md:w-[90vw] lg:w-[85vw]"
+      }`}
+    >
       <Header
         onSearch={handleSearch}
         pagename="Transactions"

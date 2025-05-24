@@ -96,10 +96,12 @@ const dataSource = Array.from({ length: 100 }).map((_, i) => ({
   age: 32,
   address: `London, Park Lane no. ${i}`,
 }));
+
 const App = () => {
   const { styles } = useStyle();
+
   return (
-    <div className="w-[90vw] bg-red-500">
+    <div className="w-full">
       <Table
         className={styles.customTable}
         columns={columns}
