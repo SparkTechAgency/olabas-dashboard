@@ -26,13 +26,7 @@ const columns = [
     key: "name",
     fixed: "left",
   },
-  {
-    title: "Age",
-    width: 100,
-    dataIndex: "age",
-    key: "age",
-    fixed: "left",
-  },
+
   {
     title: "Column 1",
     dataIndex: "address",
@@ -105,12 +99,14 @@ const dataSource = Array.from({ length: 100 }).map((_, i) => ({
 const App = () => {
   const { styles } = useStyle();
   return (
-    <Table
-      className={styles.customTable}
-      columns={columns}
-      dataSource={dataSource}
-      scroll={{ x: "max-content", y: 550 }}
-    />
+    <div className="w-[90vw] bg-red-500">
+      <Table
+        className={styles.customTable}
+        columns={columns}
+        dataSource={dataSource}
+        scroll={{ x: "max-content", y: 550 }}
+      />
+    </div>
   );
 };
 export default App;

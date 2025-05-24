@@ -9,7 +9,7 @@ import { SiAntdesign } from "react-icons/si";
 import { RxDashboard } from "react-icons/rx";
 import { PiMapPinAreaBold, PiWallet } from "react-icons/pi";
 import { FiLogOut } from "react-icons/fi";
-import { RiContactsBook3Line } from "react-icons/ri";
+import { RiContactsBook3Line, RiTeamFill } from "react-icons/ri";
 import {
   MdCategory,
   MdOutlineDateRange,
@@ -93,6 +93,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/location">Location</Link>
       ) : (
         <Link to="/location">Location</Link>
+      ),
+    },
+    {
+      key: "/team",
+      icon: <RiTeamFill size={25} />,
+      label: isCollapsed ? (
+        <Link to="/team">Team</Link>
+      ) : (
+        <Link to="/team">Team</Link>
       ),
     },
     {

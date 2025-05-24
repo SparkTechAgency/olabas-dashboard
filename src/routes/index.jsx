@@ -24,6 +24,7 @@ import FleetManagement from "../Pages/Dashboard/FleetManagement/FleetManagement.
 import DriverManagement from "../Pages/Dashboard/Driver Management/DriverManagement.jsx";
 import Location from "../Pages/Dashboard/Location/Location.jsx";
 import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
+import Team from "../Pages/Dashboard/Team/team.jsx";
 
 const router = createBrowserRouter([
   {
@@ -74,7 +75,10 @@ const router = createBrowserRouter([
         path: "/extra",
         element: <Extra />,
       },
-
+      {
+        path: "/team",
+        element: <Team />,
+      },
       {
         path: "/faq",
         element: <CategoryFAQ />,

@@ -1,20 +1,20 @@
 import {
   Button,
   Checkbox,
-  DatePicker,
   Form,
   Input,
   InputNumber,
   Modal,
   Radio,
   Select,
+  Upload,
 } from "antd";
-import React from "react";
 
 function AddNewModal({ isModalOpen, handleOk, handleCancel }) {
   const onChange = (checkedValues) => {
     console.log("checked = ", checkedValues);
   };
+
   const carType = [
     { label: "Large: Premium", value: "largePremium" },
     { label: "Large: Station wagon", value: "largeStationWagon" },
@@ -22,157 +22,232 @@ function AddNewModal({ isModalOpen, handleOk, handleCancel }) {
     { label: "Small: Economy", value: "smallEconomy" },
     { label: "Small: Mini", value: "smallMini" },
   ];
+
   const fuelType = [
     { label: "Diesel", value: "diesel" },
     { label: "Petrol", value: "petrol" },
     { label: "Electric", value: "electric" },
     { label: "Hybrid", value: "hybrid" },
   ];
-  const location = [
-    { value: "jack", label: "Jack" },
-    { value: "lucy", label: "Lucy" },
-    { value: "Yiminghe", label: "yiminghe" },
-    { value: "disabled", label: "Disabled", disabled: true },
+
+  const transmissionOptions = [
+    { value: "automatic", label: "Automatic" },
+    { value: "manual", label: "Manual" },
   ];
 
   return (
     <Modal
-      title="Basic Modal"
+      title="Add New Vehicle"
       open={isModalOpen}
       onOk={handleOk}
       onCancel={handleCancel}
+      centered
       footer={null}
-      width={800}
+      width={1000}
     >
       <Form layout="vertical">
-        <div>
-          <div>
-            <p className="text-xs font-semibold">Car Type</p>
-            <p>
-              Assign this particular vehicle to one or multiple vehicle types.
-            </p>
-          </div>
-          <div className="border-b">
-            <Form.Item className="w-full h-14 flex justify-between my-2">
-              <Checkbox.Group
-                options={carType}
-                defaultValue={["largePremium"]}
-                onChange={onChange}
-                className="w-[90%] h-14 flex items-center justify-start flex-wrap gap-2"
-              />
-            </Form.Item>
-          </div>
-        </div>
-        <div className="w-full flex justify-between items-center gap-4 py-1 border-b">
+        {/* Car Type Section */}
+        <div className="mb-6">
           <Form.Item
-            label={<p className="text-xs font-semibold">Make</p>}
-            name="make"
-            className="w-full"
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Car type
+              </span>
+            }
+            name="carType"
           >
-            <Input></Input>
-          </Form.Item>
-          <Form.Item
-            label={<p className="text-xs font-semibold">Model</p>}
-            name="mode"
-            className="w-full"
-          >
-            <Input></Input>
-          </Form.Item>
-          <Form.Item
-            label={<p className="text-xs font-semibold">Color</p>}
-            name="color"
-            className="w-full"
-          >
-            <Input></Input>
+            <Checkbox.Group
+              options={carType}
+              defaultValue={["largePremium"]}
+              onChange={onChange}
+              className="grid grid-cols-3 gap-2"
+            />
           </Form.Item>
         </div>
-        <div className="w-full flex justify-between items-center gap-4 py-1  border-b">
+
+        {/* Name, Model, Transmission Type Row */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <Form.Item
-            label={<p className="text-xs font-semibold">License Plate</p>}
+            label={
+              <span className="text-sm font-medium text-gray-700">Name</span>
+            }
+            name="name"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label={
+              <span className="text-sm font-medium text-gray-700">Model</span>
+            }
+            name="model"
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Transmission Type
+              </span>
+            }
+            name="transmissionType"
+          >
+            <Select
+              placeholder="Select transmission"
+              options={transmissionOptions}
+            />
+          </Form.Item>
+        </div>
+
+        {/* Short Description */}
+        <div className="mb-4">
+          <Form.Item
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Short Description
+              </span>
+            }
+            name="shortDescription"
+          >
+            <Input.TextArea rows={3} />
+          </Form.Item>
+        </div>
+
+        {/* License Plate and VIN Row */}
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <Form.Item
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                License Plate
+              </span>
+            }
             name="licensePlate"
-            className="w-full"
           >
-            <Input></Input>
+            <Input />
           </Form.Item>
           <Form.Item
-            label={<p className="text-xs font-semibold">VIN</p>}
+            label={
+              <span className="text-sm font-medium text-gray-700">VIN</span>
+            }
             name="vin"
-            className="w-full"
           >
-            <Input></Input>
+            <Input />
           </Form.Item>
         </div>
-        <div className="flex gap-4">
+
+        {/* Fuel Type Section */}
+        <div className="mb-4">
           <Form.Item
-            className="w-auto h-14 flex justify-between my-2 "
-            label={<p className="text-xs font-semibold">Fuel Type</p>}
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Fuel type
+              </span>
+            }
             name="fuelType"
           >
             <Radio.Group
               options={fuelType}
               onChange={onChange}
-              optionType="default"
-              className="w-full flex items-center justify-start flex-wrap gap-2"
+              className="grid grid-cols-4 gap-2"
             />
           </Form.Item>
-          <div className=" w-28 mt-3 ">
-            <p className="text-xs font-semibold">Tank Size</p>
-            <Input className="" addonAfter={<p>gallons</p>} />
-          </div>
         </div>
-        <div className="py-2">
-          <div className="w-full flex justify-between items-center gap-4  ">
-            <Form.Item
-              label={<p className="text-xs font-semibold">Locatioin</p>}
-              name="dailyRate"
-              className="w-full"
-            >
-              <Select
-                defaultValue="lucy"
-                className="w-full"
-                // onChange={handleChange}
-                options={location}
-              />
-            </Form.Item>
-            <Form.Item
-              label={<p className="text-xs font-semibold">Odometer Reading</p>}
-              name="vin"
-              className="w-full"
-            >
-              <Input addonAfter={<p>mile</p>}></Input>
-            </Form.Item>
-          </div>
-          <p className="-mt-3">
-            Manually select current vehicle location so that you can easily
-            track where each vehicle is at the moment.
-          </p>
-        </div>
-        <div className="w-full flex justify-between items-center gap-4 ">
+
+        {/* Number of Seats, Doors, Luggage Row */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <Form.Item
-            label={<p className="text-xs font-semibold">Manufacture Year</p>}
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Number of Seats
+              </span>
+            }
+            name="numberOfSeats"
           >
             <InputNumber
-              size="middle"
               min={1}
-              max={100000}
-              defaultValue={3}
+              max={50}
               className="w-full"
+              controls={{
+                upIcon: "▲",
+                downIcon: "▼",
+              }}
             />
           </Form.Item>
           <Form.Item
-            label={<p className="text-xs font-semibold">Date purchased</p>}
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Number of Door
+              </span>
+            }
+            name="numberOfDoors"
           >
-            <DatePicker></DatePicker>
+            <InputNumber
+              min={1}
+              max={10}
+              className="w-full"
+              controls={{
+                upIcon: "▲",
+                downIcon: "▼",
+              }}
+            />
           </Form.Item>
           <Form.Item
-            label={<p className="text-xs font-semibold">Mileage purchased</p>}
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Number of Luggage
+              </span>
+            }
+            name="numberOfLuggage"
           >
-            <Input addonAfter={<p>mile</p>} />
+            <InputNumber
+              min={0}
+              max={20}
+              className="w-full"
+              controls={{
+                upIcon: "▲",
+                downIcon: "▼",
+              }}
+            />
           </Form.Item>
         </div>
-        <div className="flex gap-4 justify-start">
-          <Button>Cancel</Button>
-          <Button className="bg-smart text-white">Save</Button>
+
+        {/* Vehicle Image and Daily Rate Row */}
+        <div className="grid grid-cols-2 gap-4 ">
+          <Form.Item
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Vehicle Image
+              </span>
+            }
+            name="vehicleImage"
+          >
+            <Upload
+              name="vehicleImage"
+              listType="text"
+              maxCount={1}
+              beforeUpload={() => false}
+            >
+              <Button>Choose File</Button>
+              <span className="ml-2 text-gray-500">No file chosen</span>
+            </Upload>
+          </Form.Item>
+          <Form.Item
+            label={
+              <span className="text-sm font-medium text-gray-700">
+                Daily Rate
+              </span>
+            }
+            name="dailyRate"
+          >
+            <Input addonBefore="₦" placeholder="0" />
+          </Form.Item>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-end">
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button className="bg-smart text-white" onClick={handleOk}>
+            Save
+          </Button>
         </div>
       </Form>
     </Modal>

@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
-import { Badge, Avatar, ConfigProvider, Flex, Dropdown, Popover } from "antd";
+import { Badge, Avatar, ConfigProvider, Flex, Popover } from "antd";
 import { useUser } from "../../provider/User";
 import { CgMenu } from "react-icons/cg";
-import { UserOutlined, DownOutlined } from "@ant-design/icons";
 import NotificationPopover from "../../Pages/Dashboard/Notification/NotificationPopover";
 import { RiSettings5Line, RiShutDownLine } from "react-icons/ri";
-const Header = ({ toggleSidebar }) => {
+import { useSidebar } from "../../Context/SidebarContext";
+
+const Header = () => {
   const { user } = useUser();
+  const { toggleSidebar } = useSidebar();
   const src = user?.image?.startsWith("https")
     ? user?.image
     : `https://your-image-source/${user?.image}`;
@@ -21,7 +23,6 @@ const Header = ({ toggleSidebar }) => {
 
   const userMenuContent = (
     <div>
-      {" "}
       <div className="mr-4 flex gap-2.5 font-semibold hover:text-black cursor-pointer">
         {`${user?.firstName} ${user?.lastName}`}
       </div>
@@ -42,6 +43,7 @@ const Header = ({ toggleSidebar }) => {
       </Link>
     </div>
   );
+
   return (
     <ConfigProvider
       theme={{
@@ -70,7 +72,6 @@ const Header = ({ toggleSidebar }) => {
         </div>
 
         <Flex align="center" gap={30} justify="flex-end" className="w-full">
-          {/* Notification Badge */}
           <Popover
             content={<NotificationPopover />}
             trigger="click"
@@ -89,9 +90,6 @@ const Header = ({ toggleSidebar }) => {
             </div>
           </Popover>
 
-          {/* User Profile */}
-
-          {/* Popover Menu */}
           <Popover
             content={userMenuContent}
             trigger="click"

@@ -2,7 +2,8 @@ import { Button, DatePicker, Form, Input, Modal, Select, Upload } from "antd";
 import React from "react";
 import ButtonEDU from "../../../components/common/ButtonEDU";
 
-function DriverInformationModal(isModalOpen, handleOk, handleCancel) {
+// FIXED: Added curly braces {} to destructure props properly
+function DriverInformationModal({ isModalOpen, handleOk, handleCancel }) {
   return (
     <Modal
       title="Driver Information"
@@ -30,7 +31,8 @@ function DriverInformationModal(isModalOpen, handleOk, handleCancel) {
           valuePropName="fileList"
           getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
         >
-          <p className="text-xs font-semibold">Full Name</p>
+          {/* FIXED: Changed label from "Full Name" to "Profile Picture" */}
+          <p className="text-xs font-semibold">Profile Picture</p>
           <div className="w-full h-8 border rounded-lg flex items-center justify-start">
             <Upload
               listType="text"
@@ -70,7 +72,9 @@ function DriverInformationModal(isModalOpen, handleOk, handleCancel) {
             <ButtonEDU actionType="cancel" onClick={handleCancel}>
               Cancel
             </ButtonEDU>
-            <ButtonEDU actionType="save">Save</ButtonEDU>
+            <ButtonEDU actionType="save" onClick={handleOk}>
+              Save
+            </ButtonEDU>
           </div>
         </Form.Item>
       </Form>
