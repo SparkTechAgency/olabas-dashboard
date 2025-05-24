@@ -1,11 +1,10 @@
-import React, { useState } from "react";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import { IoTrendingUp, IoTrendingDown } from "react-icons/io5";
-import CustomerServiceChart from "./TotalUserChart";
 import RevenueAnalysis from "./RevenueAnalysis";
 import TinyChart from "./TinyChart";
 import TotalUserChart from "./TotalUserChart";
+import PieChartAnalytics from "./PieChart";
 dayjs.extend(customParseFormat);
 
 const stats = [
@@ -51,6 +50,7 @@ export const Card = ({ item }) => {
 const Home = () => {
   return (
     <div className="">
+      {/* Stat Cards */}
       <div className="flex flex-col flex-wrap items-end gap-5 justify-between w-full bg-transparent rounded-md">
         <div className="flex items-center justify-between flex-wrap lg:flex-nowrap gap-10 w-full">
           {stats.map((item, index) => (
@@ -59,9 +59,20 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="w-full h-[330px] border  bg-white rounded-lg mt-4 relative flex flex-col justify-evenly">
-        <TotalUserChart />
+      {/* Bar + Pie Side by Side */}
+      <div className="flex flex-col lg:flex-row gap-4 mt-4">
+        {/* Bar Chart */}
+        <div className="w-full lg:w-[85%] h-[330px] border bg-white rounded-lg flex flex-col justify-evenly">
+          <TotalUserChart />
+        </div>
+
+        {/* Pie Chart */}
+        <div className="w-full lg:w-[15%] h-[330px] border bg-white rounded-lg flex flex-col justify-evenly">
+          <PieChartAnalytics />
+        </div>
       </div>
+
+      {/* Revenue Analysis */}
       <div className="w-full h-[330px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
         <RevenueAnalysis />
       </div>
