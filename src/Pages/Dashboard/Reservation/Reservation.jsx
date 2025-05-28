@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button } from "antd";
+import { Table, Button, Select } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
@@ -137,6 +137,18 @@ const columns = [
     title: "Price",
     dataIndex: "price",
     key: "price",
+  },
+  {
+    title: "Action",
+    dataIndex: "action",
+    key: "action",
+    render: (text, record) => (
+      <Select className="w-fit" placeholder="Assign Driver">
+        <Option>Driver 1</Option>
+        <Option>Driver 2</Option>
+        <Option>Driver 3</Option>
+      </Select>
+    ),
   },
   {
     title: "Status",
