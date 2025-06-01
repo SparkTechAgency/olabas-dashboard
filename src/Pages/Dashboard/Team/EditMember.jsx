@@ -1,25 +1,47 @@
-import React, { useState } from "react";
-import { Form, Input, Modal, Upload, Button, Radio, Select } from "antd";
+import React, { useState, useEffect } from "react";
+import { Form, Input, Modal, Upload, Button, Radio } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 
-function AddNewMember({ isModalOpen, handleOk, handleCancel }) {
+function EditMember({ isModalOpen, handleOk, handleCancel, editingRecord }) {
   const [form] = Form.useForm();
   const [selectedRole, setSelectedRole] = useState(null);
 
+  useEffect(() => {
+    if (editingRecord) {
+      setSelectedRole(editingRecord.role || null);
+      form.setFieldsValue({
+        ...editingRecord,
+        image: editingRecord.image
+          ? [
+              {
+                url: editingRecord.image,
+                name: "image.png",
+                uid: "-1",
+                status: "done",
+              },
+            ]
+          : [],
+      });
+    } else {
+      form.resetFields();
+      setSelectedRole(null);
+    }
+  }, [editingRecord, form]);
+
   const onFinish = (values) => {
-    // Get uploaded image file URL
     const file = values.image?.[0];
-    const imageUrl = file?.originFileObj
-      ? URL.createObjectURL(file.originFileObj)
-      : null;
+    const imageUrl =
+      file?.url ||
+      (file?.originFileObj ? URL.createObjectURL(file.originFileObj) : null);
 
     handleOk({
+      ...editingRecord,
       ...values,
       image: imageUrl,
-      status: "Active", // Default status on add
     });
+
     form.resetFields();
     setSelectedRole(null);
   };
@@ -32,7 +54,7 @@ function AddNewMember({ isModalOpen, handleOk, handleCancel }) {
 
   return (
     <Modal
-      title={<span className="text-lg font-semibold">Add New Team Member</span>}
+      title={<span className="text-lg font-semibold">Edit Team Member</span>}
       open={isModalOpen}
       footer={null}
       onCancel={onCancel}
@@ -100,7 +122,7 @@ function AddNewMember({ isModalOpen, handleOk, handleCancel }) {
             className="w-full text-white bg-[#00C853] hover:bg-[#00b34a] border-none"
             size="large"
           >
-            Add
+            Save
           </Button>
         </Form.Item>
       </Form>
@@ -108,4 +130,4 @@ function AddNewMember({ isModalOpen, handleOk, handleCancel }) {
   );
 }
 
-export default AddNewMember;
+export default EditMember;
