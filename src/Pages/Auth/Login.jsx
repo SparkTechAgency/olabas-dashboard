@@ -1,15 +1,35 @@
-import { Button, Checkbox, Form, Input } from "antd";
+import { Button, Checkbox, Form, Input, message } from "antd";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import FormItem from "../../components/common/FormItem";
+import { useLoginMutation } from "../../redux/apiSlices/authApi";
 // import Cookies from "js-cookie";
 
 const Login = () => {
   const navigate = useNavigate();
+  const [logIn] = useLoginMutation();
 
   const onFinish = async (values) => {
-    navigate("/");
-    // Cookies.set('token', token, { expires: 7 })
+    const { email, password } = values;
+
+    try {
+      const res = await logIn({
+        email: email.trim(),
+        password: password.trim(),
+      }).unwrap();
+
+      console.log(res);
+      if (res.success) {
+        localStorage.setItem("accessToken", res?.data);
+        navigate("/");
+        message.success("Log in Success");
+      } else {
+        message.error("Cannot log in");
+      }
+    } catch (err) {
+      console.error("Login Error:", err);
+      message.error(err || "Login failed");
+    }
   };
 
   return (

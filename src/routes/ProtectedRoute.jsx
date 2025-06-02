@@ -1,24 +1,41 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useProfileQuery } from '../redux/apiSlices/authSlice';
+import { Navigate, useLocation } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import { useProfileQuery } from "../redux/apiSlices/authApi";
 
 const PrivateRoute = ({ children }) => {
-    const location = useLocation();
-    const {data: profile, isLoading , isError, isFetching} = useProfileQuery(); 
+  const location = useLocation();
+  const token = localStorage.getItem("accessToken");
 
-    if (isLoading || isFetching) {
-        return <div>Loading...</div>;
+  // Redirect immediately if no token
+  if (!token) {
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
+
+  try {
+    // Decode and validate the token
+    const decodedToken = jwtDecode(token);
+
+    // Check if token is expired
+    const currentTime = Date.now() / 1000;
+    if (decodedToken.exp < currentTime) {
+      // Token is expired, remove it and redirect
+      localStorage.removeItem("accessToken");
+      return <Navigate to="/auth/login" state={{ from: location }} replace />;
     }
-    
-    if (isError) {
-        return <Navigate to="/auth/login" state={{ from: location }} />;
+
+    const { role } = decodedToken;
+
+    if (role === "ADMIN") {
+      return children;
+    } else {
+      // User doesn't have admin role, redirect to login
+      return <Navigate to="/auth/login" state={{ from: location }} replace />;
     }
-    
-    if (profile?.role && (profile?.role === "ADMIN" || profile?.role === "SUPER_ADMIN")) {
-        return children;
-    }
-    
-    return <Navigate to="/auth/login" state={{ from: location }} />;
+  } catch (error) {
+    // Invalid token, remove it and redirect
+    localStorage.removeItem("accessToken");
+    return <Navigate to="/auth/login" state={{ from: location }} replace />;
+  }
 };
 
 export default PrivateRoute;

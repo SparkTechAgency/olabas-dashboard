@@ -29,8 +29,8 @@ const Sidebar = ({ isCollapsed }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    // navigate("/auth/login");
+    localStorage.removeItem("accessToken");
+    navigate("/auth/login");
   };
 
   const menuItems = [

@@ -1,13 +1,44 @@
-import { Button, Form, Input, ConfigProvider } from "antd";
-import React from "react";
+import { Button, Form, Input, ConfigProvider, message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useResetPasswordMutation } from "../../redux/apiSlices/authApi";
 
 const ResetPassword = () => {
   const email = new URLSearchParams(location.search).get("email");
   const navigate = useNavigate();
+  const [resetPassword] = useResetPasswordMutation();
 
   const onFinish = async (values) => {
-    navigate(`/auth/login`);
+    const { newPassword, confirmPassword } = values;
+    const token = localStorage.getItem("resetToken");
+    console.log("resetToken", token);
+
+    if (!token) {
+      message.error(
+        "Reset token not found. Please try the reset process again."
+      );
+      return;
+    }
+
+    try {
+      console.log("Sending request with token:", token);
+      console.log("Password data:", { newPassword, confirmPassword });
+
+      const res = await resetPassword({
+        newPassword,
+        confirmPassword,
+        token: token,
+      }).unwrap();
+
+      if (res.success) {
+        message.success("Password reset successful");
+        localStorage.removeItem("resetToken");
+        navigate(`/auth/login`);
+      } else {
+        message.error("Password reset failed");
+      }
+    } catch (err) {
+      message.error(err?.data?.message || "Something went wrong");
+    }
   };
 
   return (
@@ -32,7 +63,7 @@ const ResetPassword = () => {
                 style={{
                   display: "block",
                 }}
-                htmlFor="email"
+                htmlFor="newPassword"
                 className="text-base font-normal text-black"
               >
                 New Password
@@ -43,11 +74,14 @@ const ResetPassword = () => {
                 required: true,
                 message: "Please input your new Password!",
               },
+              {
+                min: 8,
+                message: "Password must be at least 8 characters long!",
+              },
             ]}
             style={{ marginBottom: "16px" }}
           >
             <Input.Password
-              type="password"
               placeholder="Enter New password"
               style={{
                 border: "1px solid #E0E4EC",
@@ -66,7 +100,7 @@ const ResetPassword = () => {
                 style={{
                   display: "block",
                 }}
-                htmlFor="email"
+                htmlFor="confirmPassword"
                 className="text-base text-black font-normal"
               >
                 Confirm Password
@@ -86,14 +120,13 @@ const ResetPassword = () => {
                     return Promise.resolve();
                   }
                   return Promise.reject(
-                    new Error("The new password that you entered do not match!")
+                    new Error("The passwords do not match!")
                   );
                 },
               }),
             ]}
           >
             <Input.Password
-              type="password"
               placeholder="Enter Confirm password"
               style={{
                 border: "1px solid #E0E4EC",
@@ -102,13 +135,10 @@ const ResetPassword = () => {
                 borderRadius: "8px",
                 outline: "none",
               }}
-              className=""
             />
           </Form.Item>
 
           <Form.Item style={{ marginBottom: "16px" }}>
-            {" "}
-            {/* Same margin for button */}
             <Button
               htmlType="submit"
               style={{
@@ -116,7 +146,7 @@ const ResetPassword = () => {
               }}
               className="w-full bg-smart text-[18px] font-normal border-none text-white outline-none mt-4"
             >
-              Update
+              Update Password
             </Button>
           </Form.Item>
         </Form>

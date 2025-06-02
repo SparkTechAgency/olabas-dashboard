@@ -1,12 +1,12 @@
 import { api } from "../api/baseApi";
-
+const resetToken = localStorage.getItem("resetToken");
 const authSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     otpVerify: builder.mutation({
       query: (data) => {
         return {
           method: "POST",
-          url: "/auth/otp-verify",
+          url: "/auth/verify-email",
           body: data,
         };
       },
@@ -31,20 +31,24 @@ const authSlice = api.injectEndpoints({
       query: (data) => {
         return {
           method: "POST",
-          url: "/auth/forgot-password",
+          url: "/auth/forget-password",
           body: data,
         };
       },
     }),
     resetPassword: builder.mutation({
-      query: (value) => {
+      query: ({ newPassword, confirmPassword, token }) => {
         return {
-          method: "POST",
           url: "/auth/reset-password",
-          body: value,
+          method: "POST",
+          body: { newPassword, confirmPassword },
+          headers: {
+            Authorization: token,
+          },
         };
       },
     }),
+
     changePassword: builder.mutation({
       query: (data) => {
         return {

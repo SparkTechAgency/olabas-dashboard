@@ -25,12 +25,17 @@ import Location from "../Pages/Dashboard/Location/Location.jsx";
 import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
 import Team from "../Pages/Dashboard/Team/team.jsx";
 import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
+import PrivateRoute from "./ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    // path: "/",
 
-    element: <Main />,
+    element: (
+      <PrivateRoute>
+        <Main />,
+      </PrivateRoute>
+    ),
     children: [
       {
         path: "/",

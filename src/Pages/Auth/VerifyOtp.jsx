@@ -1,16 +1,37 @@
-import { Button, Form, Typography } from "antd";
+import { Button, Form, message, Typography } from "antd";
 import React, { useState } from "react";
 import OTPInput from "react-otp-input";
 import { useNavigate, useParams } from "react-router-dom";
+import { useOtpVerifyMutation } from "../../redux/apiSlices/authApi";
 const { Text } = Typography;
 
 const VerifyOtp = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState();
+  const [otpVerification] = useOtpVerifyMutation();
   const email = new URLSearchParams(location.search).get("email");
 
-  const onFinish = async (values) => {
-    navigate(`/auth/reset-password?email=${email}`);
+  const onFinish = async () => {
+    if (!otp || otp.length < 4) {
+      return message.warning("Please enter the complete 4-digit OTP");
+    }
+
+    try {
+      const res = await otpVerification({
+        email,
+        oneTimeCode: Number(otp),
+      }).unwrap();
+      if (res.success) {
+        message.success("OTP verification successful");
+        localStorage.setItem("resetToken", res?.data);
+        navigate(`/auth/reset-password?email=${email}`);
+      } else {
+        message.error("OTP verification failed");
+      }
+    } catch (err) {
+      console.error("OTP Verification Error:", err);
+      message.error(err?.data?.message || "Something went wrong");
+    }
   };
 
   const handleResendEmail = async () => {};
@@ -30,7 +51,7 @@ const VerifyOtp = () => {
           <OTPInput
             value={otp}
             onChange={setOtp}
-            numInputs={6}
+            numInputs={4}
             inputStyle={{
               height: 50,
               width: 50,
