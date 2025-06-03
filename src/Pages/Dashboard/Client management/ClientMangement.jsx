@@ -6,6 +6,8 @@ import GetPageName from "../../../components/common/GetPageName";
 import { LuDownload } from "react-icons/lu";
 import man from "../../../assets/man.png";
 import CustomSearch from "../../../components/common/CustomSearch";
+import { useGetClientQuery } from "../../../redux/apiSlices/clientMnanagement";
+import ClientInfoModal from "./clientInfoModal";
 
 // ✅ Correct Data matching columns
 const initialData = [
@@ -65,22 +67,19 @@ function ClientMangement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [data, setData] = useState(initialData);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const { data: clientData, isLoading, isError } = useGetClientQuery();
 
+  console.log("cient Data", clientData?.data?.result);
+  const clientList = clientData?.data?.result;
   const handleSearch = (value) => setSearchQuery(value);
 
-  const filteredData = data.filter(
-    ({ name, contact, phone, totalRentals, totalSpent, date }) => {
-      const lowerQuery = searchQuery.toLowerCase();
-      return (
-        name.toLowerCase().includes(lowerQuery) ||
-        contact.toLowerCase().includes(lowerQuery) ||
-        phone.toLowerCase().includes(lowerQuery) ||
-        totalRentals.toString().includes(lowerQuery) ||
-        totalSpent.toString().includes(lowerQuery) ||
-        date.includes(lowerQuery)
-      );
-    }
-  );
+  //view ClientInfo
+  const handleViewClient = (record) => {
+    setSelectedClient(record);
+    setShowInfoModal(true);
+  };
 
   const rowSelection = {
     selectedRowKeys,
@@ -95,13 +94,13 @@ function ClientMangement() {
   const columns = [
     {
       title: "Client",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "fullName",
+      key: "fullName",
     },
     {
       title: "Contact",
-      dataIndex: "contact",
-      key: "contact",
+      dataIndex: "email",
+      key: "email",
     },
     {
       title: "Phone",
@@ -110,13 +109,13 @@ function ClientMangement() {
     },
     {
       title: "Total Rentals",
-      dataIndex: "totalRentals",
-      key: "totalRentals",
+      dataIndex: "totalBookings",
+      key: "totalBookings",
     },
     {
       title: "Total Spent",
-      dataIndex: "totalSpent",
-      key: "totalSpent",
+      dataIndex: "totalSpend",
+      key: "totalSpend",
       sorter: (a, b) => a.totalSpent - b.totalSpent,
       render: (totalSpent) => (
         <p className="text-black font-medium">₦ {totalSpent}</p>
@@ -128,8 +127,7 @@ function ClientMangement() {
       key: "dateTime",
       render: (_, record) => (
         <div className="flex flex-col">
-          <span>{record.date}</span>
-          <span>{record.time}</span>
+          <span>{record.lastBooking.createdAt}</span>
         </div>
       ),
     },
@@ -138,7 +136,10 @@ function ClientMangement() {
       key: "action",
       render: (_, record) => (
         <div className="flex items-center gap-4">
-          <Button className="p-1 border-smart">
+          <Button
+            className="p-1 border-smart"
+            onClick={() => handleViewClient(record)}
+          >
             <AiOutlineEye size={20} className="text-black" />
           </Button>
         </div>
@@ -153,13 +154,12 @@ function ClientMangement() {
         pagename="Transactions"
         selectedRowKeys={selectedRowKeys}
         handleDelete={handleDelete}
-        filteredData={filteredData}
       />
 
       <Table
         columns={columns}
         rowSelection={rowSelection}
-        dataSource={filteredData}
+        dataSource={clientList}
         size="small"
         pagination={{
           defaultPageSize: 5,
@@ -168,6 +168,12 @@ function ClientMangement() {
           position: ["bottomRight"],
         }}
         showSorterTooltip={{ target: "sorter-icon" }}
+      />
+
+      <ClientInfoModal
+        open={showInfoModal}
+        onCancel={() => setShowInfoModal(false)}
+        record={selectedClient}
       />
     </>
   );
@@ -195,13 +201,6 @@ function Head({ onSearch, selectedRowKeys, handleDelete, filteredData }) {
               : "Delete Selected"}
           </Button>
         )}
-
-        <Button
-          icon={<LuDownload size={20} />}
-          className="bg-smart hover:bg-smart text-white border-none h-8"
-        >
-          Export
-        </Button>
       </div>
     </div>
   );

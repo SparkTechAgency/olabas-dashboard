@@ -1,3 +1,17 @@
+// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+// import { getBaseUrl } from "../../utils/baseUrl";
+
+// export const api = createApi({
+//   reducerPath: "api",
+//   baseQuery: fetchBaseQuery({
+//     baseUrl: getBaseUrl(),
+//   }),
+//   endpoints: () => ({}),
+//   tagTypes: [],
+// });
+
+// export const imageUrl = getBaseUrl();
+
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getBaseUrl } from "../../utils/baseUrl";
 
@@ -5,9 +19,16 @@ export const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: getBaseUrl(),
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      return headers;
+    },
   }),
   endpoints: () => ({}),
-  tagTypes: ["Category", "SubCategory"],
+  tagTypes: [],
 });
 
 export const imageUrl = getBaseUrl();
