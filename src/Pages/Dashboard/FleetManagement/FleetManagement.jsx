@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Table, Button } from "antd";
+import { useState, useEffect } from "react";
+import { Table, Button, Spin, Alert } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
 import { LuDownload } from "react-icons/lu";
@@ -9,68 +9,37 @@ import GetPageName from "../../../components/common/GetPageName";
 import CustomSearch from "../../../components/common/CustomSearch";
 import AddNewModal from "./AddNewModal";
 import VehicleInfoModal from "./VehicleInfoModal";
-
-// ✅ Initial vehicle data
-const initialData = [
-  {
-    key: 1,
-    licensePlate: "AB1 888C",
-    carModel: "Toyota Camry",
-    carType: "Sedan",
-    fuelType: "Gasoline",
-    dailyRate: "$50",
-    status: "Available",
-    lastMaintenanceDate: "2025-02-01",
-  },
-  {
-    key: 2,
-    licensePlate: "XY2 123Z",
-    carModel: "Honda Accord",
-    carType: "Sedan",
-    fuelType: "Hybrid",
-    dailyRate: "$60",
-    status: "Available",
-    lastMaintenanceDate: "2025-01-15",
-  },
-  {
-    key: 3,
-    licensePlate: "CD3 456E",
-    carModel: "Ford Explorer",
-    carType: "SUV",
-    fuelType: "Diesel",
-    dailyRate: "$80",
-    status: "Rented",
-    lastMaintenanceDate: "2025-03-05",
-  },
-  {
-    key: 4,
-    licensePlate: "EF4 789G",
-    carModel: "Chevrolet Tahoe",
-    carType: "SUV",
-    fuelType: "Gasoline",
-    dailyRate: "$90",
-    status: "Under Maintanence",
-    lastMaintenanceDate: "2025-02-20",
-  },
-  {
-    key: 5,
-    licensePlate: "GH5 012I",
-    carModel: "Tesla Model 3",
-    carType: "Sedan",
-    fuelType: "Electric",
-    dailyRate: "$100",
-    status: "Rented",
-    lastMaintenanceDate: "2025-03-10",
-  },
-];
+import { useGetFleetQuery } from "../../../redux/apiSlices/fleetManagement";
 
 function FleetManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [vehicleModalVisible, setVehicleModalVisible] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
+
+  const { data: fleetData, isLoading, isError, error } = useGetFleetQuery();
+
+  console.log(fleetData?.data?.result);
+  // Transform API data to match your table structure
+  useEffect(() => {
+    if (fleetData?.data?.result && Array.isArray(fleetData.data.result)) {
+      const transformedData = fleetData?.data.result.map((vehicle, index) => ({
+        key: vehicle.id || index + 1,
+        licensePlate: vehicle.licenseNumber || "N/A",
+        carModel: vehicle.model || "Unknown Model",
+        carType: vehicle.vehicleType || "Unknown Type",
+        fuelType: vehicle.fuelType || "Unknown Fuel",
+        dailyRate: vehicle.dailyRate ? `$${vehicle.dailyRate}` : "N/A",
+        status: vehicle.status || "Available", // You may need to map this based on your API
+        lastMaintenanceDate: vehicle.lastMaintenanceDate || "N/A",
+        // Store original data for modal
+        originalData: vehicle,
+      }));
+      setData(transformedData);
+    }
+  }, [fleetData]);
 
   const showModal = () => setIsModalOpen(true);
   const handleOk = () => setIsModalOpen(false);
@@ -78,20 +47,25 @@ function FleetManagement() {
   const handleSearch = (value) => setSearchQuery(value);
 
   const handleViewVehicle = (record) => {
+    console.log("sss", record);
     setSelectedVehicle({
-      vehicleId: `#VHC-${record.key.toString().padStart(4, "0")}`,
-      vehicleName: record.carModel,
+      vehicleId:
+        record.originalData?.id ||
+        `#VHC-${record.key.toString().padStart(4, "0")}`,
+      vehicleName: record.originalData?.name,
       vehicleType: record.carType,
-      vehicleModel: "2022",
+      vehicleModel: record.originalData?.model || "Unknown",
       engineType: record.fuelType,
       licensePlate: record.licensePlate,
-      engineNumber: "ABC123456",
+      engineNumber: record.originalData?.engineNumber || "N/A",
       fuelType: record.fuelType,
-      transmissionType: "Automatic",
-      numberOfSeats: "5",
-      numberOfDoors: "4",
-      numberOfLuggage: "2",
+      transmissionType: record.originalData?.transmissionType || "Automatic",
+      numberOfSeats: record.originalData?.noOfSeats || "N/A",
+      numberOfDoors: record.originalData?.noOfDoors || "N/A",
+      numberOfLuggage: record.originalData?.noOfSeats || "N/A",
       dailyRate: record.dailyRate,
+      brand: record.originalData?.brand || "Unknown Brand",
+      image: record.originalData?.image,
     });
     setVehicleModalVisible(true);
   };
@@ -160,11 +134,11 @@ function FleetManagement() {
       render: (text) => {
         const getStatusColor = (status) => {
           switch (status) {
-            case "Available":
+            case "AVAILABLE":
               return "bg-[#90BE6D]";
             case "Under Maintanence":
               return "bg-[#F2AF1E]";
-            case "Rented":
+            case "RENTED":
               return "bg-[#F37272]";
             default:
               return "bg-gray-400";
@@ -204,6 +178,31 @@ function FleetManagement() {
     },
   ];
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  // Error state
+  if (isError) {
+    return (
+      <div className="p-4">
+        <Alert
+          message="Error Loading Fleet Data"
+          description={
+            error?.message || "Failed to load vehicle data. Please try again."
+          }
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
+
   return (
     <>
       <FleetHeader
@@ -226,6 +225,7 @@ function FleetManagement() {
           position: ["bottomRight"],
         }}
         showSorterTooltip={{ target: "sorter-icon" }}
+        loading={isLoading}
       />
 
       <AddNewModal

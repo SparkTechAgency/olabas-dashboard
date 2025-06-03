@@ -1,77 +1,5 @@
-// import React from "react";
-// import { Modal, Descriptions, Typography } from "antd";
-
-// const { Title } = Typography;
-
-// const VehicleInfoModal = ({ visible, onCancel, vehicleData }) => {
-//   return (
-//     <Modal
-//       title={<Title level={4}>Vehicle Information</Title>}
-//       visible={visible}
-//       onCancel={onCancel}
-//       footer={null}
-//       width={800}
-//       centered
-//     >
-//       <Descriptions
-//         bordered
-//         column={{
-//           xxl: 2,
-//           xl: 2,
-//           lg: 2,
-//           md: 2,
-//           sm: 1,
-//           xs: 1,
-//         }}
-//       >
-//         <Descriptions.Item label="Vehicle ID">
-//           {vehicleData.vehicleId}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Vehicle Name">
-//           {vehicleData.vehicleName}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Vehicle Type">
-//           {vehicleData.vehicleType}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Vehicle Model">
-//           {vehicleData.vehicleModel}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Engine Type">
-//           {vehicleData.engineType}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="License Plate">
-//           {vehicleData.licensePlate}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Engine Number">
-//           {vehicleData.engineNumber}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Fuel Type">
-//           {vehicleData.fuelType}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Transmission Type">
-//           {vehicleData.transmissionType}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Number of Seats">
-//           {vehicleData.numberOfSeats}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Number of Doors">
-//           {vehicleData.numberOfDoors}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Number of Luggage">
-//           {vehicleData.numberOfLuggage}
-//         </Descriptions.Item>
-//         <Descriptions.Item label="Daily Rate">
-//           {vehicleData.dailyRate}
-//         </Descriptions.Item>
-//       </Descriptions>
-//     </Modal>
-//   );
-// };
-
-// export default VehicleInfoModal;
-
-import React from "react";
 import { Modal, Typography } from "antd";
+import { getImageUrl } from "../../../utils/baseUrl";
 
 const { Title, Text } = Typography;
 
@@ -96,7 +24,7 @@ const VehicleInfoModal = ({ visible, onCancel, vehicleData }) => {
           {/* Vehicle Image */}
           <div className="md:w-1/2">
             <img
-              src="https://images.unsplash.com/photo-1616627984619-9a15f603c82b" // Replace with actual image URL
+              src={`${getImageUrl()}${vehicleData.image}`}
               alt="Vehicle"
               className="rounded-md object-cover w-full h-full"
             />

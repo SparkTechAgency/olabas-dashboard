@@ -3,14 +3,18 @@ import { api } from "../api/baseApi";
 const fleetManagementSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     createFleet: builder.mutation({
-      query: (categoryData) => {
+      query: (data) => {
+        const accessToken = localStorage.getItem("accessToken");
         return {
-          url: "/subcategories/create-subcategory",
+          url: "/vehicle",
           method: "POST",
-          body: categoryData,
+          body: data,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         };
       },
-      invalidatesTags: ["SubCategory"],
+      invalidatesTags: ["Fleet"],
     }),
     updateFleet: builder.mutation({
       query: ({ id, updatedData }) => {
@@ -20,7 +24,7 @@ const fleetManagementSlice = api.injectEndpoints({
           body: updatedData,
         };
       },
-      invalidatesTags: ["SubCategory"],
+      invalidatesTags: ["Fleet"],
     }),
     deleteFleet: builder.mutation({
       query: (id) => {
@@ -29,7 +33,7 @@ const fleetManagementSlice = api.injectEndpoints({
           method: "DELETE",
         };
       },
-      invalidatesTags: ["SubCategory"],
+      invalidatesTags: ["Fleet"],
     }),
     getFleet: builder.query({
       query: () => {
