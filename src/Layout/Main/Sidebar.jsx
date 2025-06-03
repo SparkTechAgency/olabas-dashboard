@@ -113,15 +113,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/extra">Extra</Link>
       ),
     },
-    {
-      key: "/reported-issues",
-      icon: <MdOutlineReportProblem size={25} />,
-      label: isCollapsed ? (
-        <Link to="/reported-issues">Report</Link>
-      ) : (
-        <Link to="/reported-issues">Report</Link>
-      ),
-    },
+    // {
+    //   key: "/reported-issues",
+    //   icon: <MdOutlineReportProblem size={25} />,
+    //   label: isCollapsed ? (
+    //     <Link to="/reported-issues">Report</Link>
+    //   ) : (
+    //     <Link to="/reported-issues">Report</Link>
+    //   ),
+    // },
 
     {
       key: "subMenuSetting",
