@@ -1,5 +1,6 @@
 import { api } from "../api/baseApi";
 const resetToken = localStorage.getItem("resetToken");
+
 const authSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     otpVerify: builder.mutation({
@@ -51,17 +52,18 @@ const authSlice = api.injectEndpoints({
 
     changePassword: builder.mutation({
       query: (data) => {
+        const accessToken = localStorage.getItem("accessToken");
         return {
           method: "POST",
           url: "/auth/change-password",
           body: data,
           headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
+            Authorization: `Bearer ${accessToken}`, // Use the accessToken variable instead of calling localStorage again
           },
         };
       },
+      // Optional: Add invalidatesTags if you want to refetch related data after password change
+      invalidatesTags: ["User"], // Adjust based on your tag structure
     }),
 
     updateProfile: builder.mutation({

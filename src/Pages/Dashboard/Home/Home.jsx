@@ -5,31 +5,9 @@ import RevenueAnalysis from "./RevenueAnalysis";
 import TinyChart from "./TinyChart";
 import TotalUserChart from "./TotalUserChart";
 import PieChartAnalytics from "./PieChart";
+import { useDashboardQuery } from "../../../redux/apiSlices/homeApi";
+import { useEffect, useState } from "react";
 dayjs.extend(customParseFormat);
-
-const stats = [
-  {
-    label: "Total Reservations",
-    value: "3765",
-    percent: +2.6,
-    color: "#00a76f",
-    icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
-  },
-  {
-    label: "Active Users",
-    value: "3765",
-    percent: +2.6,
-    color: "#00b8d9",
-    icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
-  },
-  {
-    label: "Total Revenue",
-    value: "3765",
-    percent: +2.6,
-    color: "#18a0fb",
-    icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
-  },
-];
 
 export const Card = ({ item }) => {
   return (
@@ -48,6 +26,49 @@ export const Card = ({ item }) => {
 };
 
 const Home = () => {
+  const { data: overViewData, isLoading, isError } = useDashboardQuery();
+
+  console.log("dashboard", overViewData);
+
+  const [cardData, setCardData] = useState({
+    totalRevenue: 0,
+    totalReservations: 0,
+    activeCars: 0,
+  });
+
+  useEffect(() => {
+    if (overViewData !== undefined) {
+      setCardData({
+        totalRevenue: overViewData.totalRevenue,
+        totalReservations: overViewData.totalReservations,
+        activeCars: overViewData.activeCars,
+      });
+    }
+  }, [overViewData]);
+
+  const stats = [
+    {
+      label: "Total Reservations",
+      value: cardData.totalReservations,
+      percent: +2.6,
+      color: "#00a76f",
+      icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
+    },
+    {
+      label: "Active Cars",
+      value: cardData.activeCars,
+      percent: +2.6,
+      color: "#00b8d9",
+      icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
+    },
+    {
+      label: "Total Revenue",
+      value: cardData.totalRevenue,
+      percent: +2.6,
+      color: "#18a0fb",
+      icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
+    },
+  ];
   return (
     <div className="">
       {/* Stat Cards */}
@@ -63,18 +84,18 @@ const Home = () => {
       <div className="flex flex-col lg:flex-row gap-4 mt-4">
         {/* Bar Chart */}
         <div className="w-full lg:w-[85%] h-[330px] border bg-white rounded-lg flex flex-col justify-evenly">
-          <TotalUserChart />
+          <TotalUserChart overViewData={overViewData} />
         </div>
 
         {/* Pie Chart */}
         <div className="w-full lg:w-[15%] h-[330px] border bg-white rounded-lg flex flex-col justify-evenly">
-          <PieChartAnalytics />
+          <PieChartAnalytics overViewData={overViewData} />
         </div>
       </div>
 
       {/* Revenue Analysis */}
       <div className="w-full h-[340px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
-        <RevenueAnalysis />
+        <RevenueAnalysis overViewData={overViewData} />
       </div>
     </div>
   );

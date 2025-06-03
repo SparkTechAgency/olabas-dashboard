@@ -1,35 +1,42 @@
-import React from "react";
-import { Form, Input, Flex, ConfigProvider, message } from "antd";
+import { Form, Input, Flex, ConfigProvider, message, Button } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
-import ButtonEDU from "../../../components/common/ButtonEDU";
-
+import { useChangePasswordMutation } from "../../../redux/apiSlices/authApi";
+import { useNavigate } from "react-router-dom";
 function AdminPassword() {
+  const navigate = useNavigate();
   const [form] = Form.useForm();
+  const [changePassword, { isLoading }] = useChangePasswordMutation();
 
   const handleCancel = () => {
     form.resetFields();
     message.info("Password change cancelled.");
   };
 
-  const handleSave = async () => {
-    try {
-      const values = await form.validateFields();
-      const trimmedValues = {
-        currentPassword: values.currentPassword.trim(),
-        newPassword: values.newPassword.trim(),
-        confirmPassword: values.confirmPassword.trim(),
-      };
+  const onFinish = async (values) => {
+    console.log("Submitted values:", values);
 
-      console.log("Password Updated:", trimmedValues);
-      message.success("Password updated successfully!");
-      form.resetFields();
-    } catch (error) {
-      console.error("Validation failed:", error);
+    try {
+      const res = await changePassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      }).unwrap();
+      console.log(res);
+      if (res.success) {
+        form.resetFields();
+        message.success(res?.message || "Password updated successfully!");
+        navigate("/auth/login");
+      }
+    } catch (err) {
+      console.log("Change password error:", err);
+      message.error(
+        err?.data?.message || "Something went wrong while changing password."
+      );
     }
   };
 
   return (
-    <div className="w-full h-72 bg-white p-3 rounded-xl shadow-[0px_10px_100px_3px_rgba(0,_0,_0,_0.1)] overflow-hidden">
+    <div className="w-full min-h-80 bg-white p-3 rounded-xl shadow-[0px_10px_100px_3px_rgba(0,_0,_0,_0.1)] overflow-hidden">
       <h2 className="text-base font-semibold mb-2 text-center">
         Change Password
       </h2>
@@ -45,10 +52,10 @@ function AdminPassword() {
         <Form
           form={form}
           layout="vertical"
-          className="flex flex-col justify-between h-[calc(100%-1.75rem)]" // Adjusting for heading height
+          onFinish={onFinish}
+          className="flex flex-col h-[calc(100%-1.75rem)] "
         >
           <div className="flex flex-col gap-2 items-center">
-            {/* Current Password */}
             <Form.Item
               label="Current Password"
               name="currentPassword"
@@ -69,7 +76,6 @@ function AdminPassword() {
               />
             </Form.Item>
 
-            {/* New Password */}
             <Form.Item
               label="New Password"
               name="newPassword"
@@ -91,7 +97,6 @@ function AdminPassword() {
               />
             </Form.Item>
 
-            {/* Confirm New Password */}
             <Form.Item
               label="Confirm New Password"
               name="confirmPassword"
@@ -122,14 +127,15 @@ function AdminPassword() {
             </Form.Item>
           </div>
 
-          {/* Buttons */}
-          <Flex justify="flex-end" className="w-[80%] mx-auto gap-2 pt-2">
-            <ButtonEDU actionType="cancel" onClick={handleCancel}>
-              Cancel
-            </ButtonEDU>
-            <ButtonEDU actionType="save" onClick={handleSave}>
+          <Flex justify="flex-end" className="w-[80%] mx-auto gap-2 pt-2 mt-2">
+            <Button onClick={handleCancel}>Cancel</Button>
+            <Button
+              htmlType="submit"
+              loading={isLoading}
+              className="bg-smart text-white"
+            >
               Save
-            </ButtonEDU>
+            </Button>
           </Flex>
         </Form>
       </ConfigProvider>

@@ -1,21 +1,19 @@
 import { api } from "../api/baseApi";
 
 const homeSlice = api.injectEndpoints({
-    endpoints: (builder)=>({
-        summary: builder.query({
-            query: ()=> {
-                return{
-                    url: `/order`,
-                    method: "GET",
-                    headers:{
-                        Authorization: `Bearer ${JSON.parse(localStorage.getItem("token"))}`
-                    }
-                }
-            }
-        }),
-    })
-})
+  endpoints: (builder) => ({
+    dashboard: builder.query({
+      query: () => {
+        return {
+          url: `/dashboard`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        };
+      },
+    }),
+  }),
+});
 
-export const {
-    useSummaryQuery
-} = homeSlice;
+export const { useDashboardQuery } = homeSlice;

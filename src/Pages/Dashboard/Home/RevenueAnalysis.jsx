@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   AreaChart,
   Area,
@@ -11,31 +11,43 @@ import {
 
 import PickDate from "../../../components/common/PickDate";
 
-function generateRandomData() {
-  return [
-    { name: "Jan", pv: getRandomPv(), amt: 2400 },
-    { name: "Feb", pv: getRandomPv(), amt: 2210 },
-    { name: "Mar", pv: getRandomPv(), amt: 2290 },
-    { name: "Apr", pv: getRandomPv(), amt: 2000 },
-    { name: "May", pv: getRandomPv(), amt: 2181 },
-    { name: "Jun", pv: getRandomPv(), amt: 2500 },
-    { name: "Jul", pv: getRandomPv(), amt: 2100 },
-    { name: "Aug", pv: getRandomPv(), amt: 2600 },
-    { name: "Sep", pv: getRandomPv(), amt: 2700 },
-    { name: "Oct", pv: getRandomPv(), amt: 2800 },
-    { name: "Nov", pv: getRandomPv(), amt: 3000 },
-    { name: "Dec", pv: getRandomPv(), amt: 3200 },
-  ];
-}
+export default function RevenueAnalysis({ overViewData }) {
+  // console.log("Revenue Analytics Data:", overViewData?.revenueAnalyticsByMonth);
 
-function getRandomPv() {
-  return Math.floor(Math.random() * (10000 - 2000) + 2000);
-}
-
-const data = generateRandomData();
-
-export default function RevenueAnalysis() {
   const [isDateSelected, setIsDateSelected] = useState(false);
+
+  // Convert your data to the format needed by the chart
+  const chartData = useMemo(() => {
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    if (!overViewData?.revenueAnalyticsByMonth) {
+      return [];
+    }
+
+    return monthNames.map((month, index) => {
+      const monthKey = Object.keys(overViewData.revenueAnalyticsByMonth)[index];
+      const monthData = overViewData.revenueAnalyticsByMonth[monthKey] || 0;
+
+      return {
+        name: month,
+        pv: monthData,
+        amt: monthData,
+      };
+    });
+  }, [overViewData]);
 
   const onChange = (date, dateString) => {
     console.log(date, dateString);
@@ -52,7 +64,7 @@ export default function RevenueAnalysis() {
 
       <ResponsiveContainer width="100%" height={255}>
         <AreaChart
-          data={data}
+          data={chartData}
           margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
         >
           <defs>
@@ -68,10 +80,8 @@ export default function RevenueAnalysis() {
           />
           <XAxis dataKey="name" style={{ fontSize: "14px" }} />
           <YAxis hide={false} style={{ fontSize: "14px" }} />
-          {/* <Tooltip cursor={{ fill: "transparent" }} /> */}
           <Tooltip
             content={<CustomTooltip />}
-            // cursor={{ fill: "transparent" }}
             isAnimationActive={true}
             cursor={false}
           />
@@ -99,7 +109,10 @@ const CustomTooltip = ({ active, payload, label }) => {
         {/* Tooltip Content */}
         <div className="bg-white p-2 text-black text-[14px] rounded shadow-md ">
           {payload.map((pld, index) => (
-            <div key={index}>Total Revenue: {pld.value}K</div>
+            <div key={index}>
+              Total Revenue:{" $"}
+              <span className="text-smart font-bold">{pld.value}</span>
+            </div>
           ))}
         </div>
       </div>
