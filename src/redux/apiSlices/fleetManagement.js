@@ -18,19 +18,27 @@ const fleetManagementSlice = api.injectEndpoints({
     }),
     updateFleet: builder.mutation({
       query: ({ id, updatedData }) => {
+        const accessToken = localStorage.getItem("accessToken");
         return {
-          url: `/categories/${id}`,
+          url: `/vehicle/${id}`,
           method: "PATCH",
           body: updatedData,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         };
       },
       invalidatesTags: ["Fleet"],
     }),
     deleteFleet: builder.mutation({
       query: (id) => {
+        const accessToken = localStorage.getItem("accessToken");
         return {
-          url: `/categories/${id}`,
+          url: `/vehicle/${id}`,
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         };
       },
       invalidatesTags: ["Fleet"],

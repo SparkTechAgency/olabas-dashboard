@@ -1,53 +1,136 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Spin, Alert } from "antd";
+import { Table, Button, Spin, Alert, message } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
-
+import { FiEdit3 } from "react-icons/fi";
 import GetPageName from "../../../components/common/GetPageName";
 import CustomSearch from "../../../components/common/CustomSearch";
-import AddNewModal from "./AddNewModal";
+import VehicleModal from "./VehicleModal";
 import VehicleInfoModal from "./VehicleInfoModal";
-import { useGetFleetQuery } from "../../../redux/apiSlices/fleetManagement";
+import {
+  useDeleteFleetMutation,
+  useGetFleetQuery,
+} from "../../../redux/apiSlices/fleetManagement";
+import { IoTrashBinOutline } from "react-icons/io5";
+import DeleteModal from "../../../components/common/deleteModal";
 
 function FleetManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [data, setData] = useState([]);
+
+  // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
+  const [selectedVehicleForEdit, setSelectedVehicleForEdit] = useState(null);
+
+  // View modal states
   const [vehicleModalVisible, setVehicleModalVisible] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
 
-  const { data: fleetData, isLoading, isError, error } = useGetFleetQuery();
+  // Delete modal states
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [vehicleToDelete, setVehicleToDelete] = useState(null);
+  const [deleteFleet, { isLoading: isDeleting }] = useDeleteFleetMutation();
 
-  console.log(fleetData?.data?.result);
+  const {
+    data: fleetData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetFleetQuery();
+
   // Transform API data to match your table structure
   useEffect(() => {
     if (fleetData?.data?.result && Array.isArray(fleetData.data.result)) {
-      const transformedData = fleetData?.data.result.map((vehicle, index) => ({
+      const transformedData = fleetData.data.result.map((vehicle, index) => ({
         key: vehicle.id || index + 1,
         licensePlate: vehicle.licenseNumber || "N/A",
         carModel: vehicle.model || "Unknown Model",
         carType: vehicle.vehicleType || "Unknown Type",
         fuelType: vehicle.fuelType || "Unknown Fuel",
         dailyRate: vehicle.dailyRate ? `$${vehicle.dailyRate}` : "N/A",
-        status: vehicle.status || "Available", // You may need to map this based on your API
+        status: vehicle.status || "Available",
         lastMaintenanceDate: vehicle.lastMaintenanceDate || "N/A",
-        // Store original data for modal
         originalData: vehicle,
       }));
       setData(transformedData);
     }
   }, [fleetData]);
 
-  const showModal = () => setIsModalOpen(true);
-  const handleOk = () => setIsModalOpen(false);
-  const handleCancel = () => setIsModalOpen(false);
-  const handleSearch = (value) => setSearchQuery(value);
+  // Modal handlers for Add/Edit
+  const handleAddNew = () => {
+    setModalMode("add");
+    setSelectedVehicleForEdit(null);
+    setIsModalOpen(true);
+  };
 
+  const handleEdit = (record) => {
+    setModalMode("edit");
+    setSelectedVehicleForEdit(record.originalData);
+    setIsModalOpen(true);
+  };
+
+  const handleModalOk = () => {
+    setIsModalOpen(false);
+    setSelectedVehicleForEdit(null);
+    refetch();
+  };
+
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+    setSelectedVehicleForEdit(null);
+  };
+
+  // Delete Confirmation for single vehicle from row
+  const handleConfirmDelete = async () => {
+    if (vehicleToDelete?.originalData?.id) {
+      try {
+        const res = await deleteFleet(vehicleToDelete.originalData.id).unwrap();
+        refetch();
+        if (res.success) {
+          message.success("Fleet successfully deleted");
+        } else {
+          message.error("Failed to delete fleet");
+        }
+      } catch (err) {
+        message.err(err);
+        console.error("Failed to delete vehicle:", err);
+      }
+    }
+    setIsDeleteModalVisible(false);
+    setVehicleToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalVisible(false);
+    setVehicleToDelete(null);
+  };
+
+  // Delete multiple selected vehicles
+  const handleDelete = async () => {
+    try {
+      // For each selected vehicle key, find its ID and delete
+      await Promise.all(
+        selectedRowKeys.map(async (key) => {
+          const vehicle = data.find((item) => item.key === key);
+          if (vehicle?.originalData?.id) {
+            await deleteFleet(vehicle.originalData.id).unwrap();
+          }
+        })
+      );
+      setSelectedRowKeys([]);
+      refetch();
+    } catch (err) {
+      console.error("Failed to delete selected vehicles:", err);
+    }
+  };
+
+  // View modal handlers
   const handleViewVehicle = (record) => {
-    console.log("sss", record);
     setSelectedVehicle({
       vehicleId:
         record.originalData?.id ||
@@ -62,13 +145,15 @@ function FleetManagement() {
       transmissionType: record.originalData?.transmissionType || "Automatic",
       numberOfSeats: record.originalData?.noOfSeats || "N/A",
       numberOfDoors: record.originalData?.noOfDoors || "N/A",
-      numberOfLuggage: record.originalData?.noOfSeats || "N/A",
+      numberOfLuggage: record.originalData?.noOfLuggages || "N/A",
       dailyRate: record.dailyRate,
       brand: record.originalData?.brand || "Unknown Brand",
       image: record.originalData?.image,
     });
     setVehicleModalVisible(true);
   };
+
+  const handleSearch = (value) => setSearchQuery(value);
 
   const filteredData = data.filter(
     ({
@@ -94,11 +179,6 @@ function FleetManagement() {
   const rowSelection = {
     selectedRowKeys,
     onChange: setSelectedRowKeys,
-  };
-
-  const handleDelete = () => {
-    setData(data.filter((item) => !selectedRowKeys.includes(item.key)));
-    setSelectedRowKeys([]);
   };
 
   const columns = [
@@ -133,10 +213,10 @@ function FleetManagement() {
       key: "status",
       render: (text) => {
         const getStatusColor = (status) => {
-          switch (status) {
+          switch (status.toUpperCase()) {
             case "AVAILABLE":
               return "bg-[#90BE6D]";
-            case "Under Maintanence":
+            case "UNDER MAINTENANCE":
               return "bg-[#F2AF1E]";
             case "RENTED":
               return "bg-[#F37272]";
@@ -170,15 +250,34 @@ function FleetManagement() {
           <Button
             className="p-1 border-smart"
             onClick={() => handleViewVehicle(record)}
+            title="View Details"
           >
             <AiOutlineEye size={20} className="text-black" />
+          </Button>
+
+          <Button
+            className="p-1 border-smart"
+            onClick={() => handleEdit(record)}
+            title="Edit Vehicle"
+          >
+            <FiEdit3 size={20} className="text-black" />
+          </Button>
+
+          <Button
+            className="p-1 border-smart"
+            onClick={() => {
+              setVehicleToDelete(record);
+              setIsDeleteModalVisible(true);
+            }}
+            title="Delete Vehicle"
+          >
+            <IoTrashBinOutline size={20} className="text-black" />
           </Button>
         </div>
       ),
     },
   ];
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -187,7 +286,6 @@ function FleetManagement() {
     );
   }
 
-  // Error state
   if (isError) {
     return (
       <div className="p-4">
@@ -210,7 +308,7 @@ function FleetManagement() {
         selectedRowKeys={selectedRowKeys}
         handleDelete={handleDelete}
         filteredData={filteredData}
-        showModal={showModal}
+        showModal={handleAddNew}
       />
 
       <Table
@@ -225,19 +323,28 @@ function FleetManagement() {
           position: ["bottomRight"],
         }}
         showSorterTooltip={{ target: "sorter-icon" }}
-        loading={isLoading}
+        loading={isLoading || isDeleting}
       />
 
-      <AddNewModal
+      <VehicleModal
         isModalOpen={isModalOpen}
-        handleOk={handleOk}
-        handleCancel={handleCancel}
+        handleOk={handleModalOk}
+        handleCancel={handleModalCancel}
+        mode={modalMode}
+        vehicleData={selectedVehicleForEdit}
       />
 
       <VehicleInfoModal
         visible={vehicleModalVisible}
         onCancel={() => setVehicleModalVisible(false)}
         vehicleData={selectedVehicle}
+      />
+
+      <DeleteModal
+        name={vehicleToDelete?.licensePlate}
+        onCancel={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        visible={isDeleteModalVisible}
       />
     </>
   );
