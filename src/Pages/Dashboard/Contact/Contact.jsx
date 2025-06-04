@@ -1,22 +1,39 @@
-import React, { useState } from "react";
-import { Modal, Form, Input, Button, Flex } from "antd";
+import { useEffect, useState } from "react";
+import { Modal, Form, Input, Button, Flex, message } from "antd";
 import { LiaPhoneVolumeSolid } from "react-icons/lia";
 import { PiMapPinAreaLight } from "react-icons/pi";
 import { CiMail } from "react-icons/ci";
 import ButtonEDU from "../../../components/common/ButtonEDU";
+import {
+  useGetContactQuery,
+  useUpdateContactMutation,
+} from "../../../redux/apiSlices/contact";
 
 const Contact = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [contactInfo, setContactInfo] = useState({
-    phone: "(+62) 8896-2220 | (021) 111 444 90",
-    email: "demo@gmail.com",
-    location: "Jl. Merdeka Raya No.73B, Kuta, Badung, Bali",
+  const [form] = Form.useForm();
+
+  const { data: getContact, isSuccess } = useGetContactQuery();
+  const [updateContact, { isLoading: isUpdating }] = useUpdateContactMutation();
+
+  const contactInfo = getContact?.data;
+
+  // Local state to edit form
+  const [editedContact, setEditedContact] = useState({
+    phone: "",
+    email: "",
+    location: "",
   });
 
-  const [editedContact, setEditedContact] = useState({ ...contactInfo });
+  // Populate editedContact when data is loaded
+  useEffect(() => {
+    if (contactInfo) {
+      setEditedContact(contactInfo);
+      form.setFieldsValue(contactInfo);
+    }
+  }, [contactInfo, form]);
 
   const showModal = () => {
-    setEditedContact({ ...contactInfo }); // Reset edits to original contact info
     setIsModalOpen(true);
   };
 
@@ -24,26 +41,14 @@ const Contact = () => {
     setIsModalOpen(false);
   };
 
-  const handleUpdate = () => {
-    // Trim everything after the domain part (e.g., ".com", ".org")
-    const trimmedEmail = editedContact.email.replace(
-      /(\.com|\.org|\.net|\.edu)(.*)$/,
-      "$1"
-    );
-
-    // Update the contact info with the trimmed email
-    setContactInfo({ ...editedContact, email: trimmedEmail }); // Update the main contact info
-    setIsModalOpen(false);
-  };
-
-  const handleChange = (key, value) => {
-    setEditedContact((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const validateEmail = (email) => {
-    // Basic email validation regex
-    const regex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    return regex.test(email);
+  const handleUpdate = async (values) => {
+    try {
+      await updateContact({ updatedData: values }).unwrap();
+      message.success("Contact info updated successfully");
+      setIsModalOpen(false);
+    } catch (err) {
+      message.error("Failed to update contact info");
+    }
   };
 
   const contactFields = [
@@ -56,22 +61,22 @@ const Contact = () => {
     <div className="py-5">
       <h1 className="text-[20px] font-medium mb-5">Contact</h1>
       <Flex vertical justify="center" gap={30} className="w-full">
-        <div className="flex items-center justify-normal bg-white p-12 w-4/5 gap-4 rounded-xl ">
+        <div className="flex items-center justify-normal bg-white p-12 w-4/5 gap-4 rounded-xl">
           {[
             {
               icon: <LiaPhoneVolumeSolid size={50} />,
               title: "Phone",
-              details: contactInfo.phone,
+              details: contactInfo?.phone || "-",
             },
             {
               icon: <CiMail size={50} />,
               title: "Email",
-              details: contactInfo.email,
+              details: contactInfo?.email || "-",
             },
             {
               icon: <PiMapPinAreaLight size={50} />,
               title: "Location",
-              details: contactInfo.location,
+              details: contactInfo?.location || "-",
             },
           ].map((item, index) => (
             <Flex
@@ -110,12 +115,13 @@ const Contact = () => {
         <div className="py-5">
           <Form
             layout="vertical"
+            form={form}
             onFinish={handleUpdate}
             initialValues={editedContact}
           >
-            {contactFields.map((field, i) => (
+            {contactFields.map((field) => (
               <Form.Item
-                key={i}
+                key={field.key}
                 label={field.label}
                 name={field.key}
                 rules={[
@@ -125,8 +131,7 @@ const Contact = () => {
                   },
                   field.key === "email" && {
                     pattern: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                    message:
-                      "Please enter a valid email address (e.g. test@example.com)",
+                    message: "Please enter a valid email address",
                   },
                 ].filter(Boolean)}
               >
@@ -134,8 +139,6 @@ const Contact = () => {
                   type={field.type}
                   placeholder={`Enter your ${field.label.toLowerCase()}`}
                   className="h-12 rounded-xl"
-                  value={editedContact[field.key]}
-                  onChange={(e) => handleChange(field.key, e.target.value)}
                 />
               </Form.Item>
             ))}
@@ -144,7 +147,11 @@ const Contact = () => {
               <ButtonEDU actionType="cancel" onClick={handleCancel}>
                 Cancel
               </ButtonEDU>
-              <ButtonEDU actionType="update" htmlType="submit">
+              <ButtonEDU
+                actionType="update"
+                htmlType="submit"
+                loading={isUpdating}
+              >
                 Update
               </ButtonEDU>
             </div>
