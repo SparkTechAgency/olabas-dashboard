@@ -45,7 +45,10 @@ function AddNewMember({ isModalOpen, handleOk, handleCancel }) {
           name="role"
           rules={[{ required: true, message: "Please select a role" }]}
         >
-          <Radio.Group onChange={(e) => setSelectedRole(e.target.value)}>
+          <Radio.Group
+            onChange={(e) => setSelectedRole(e.target.value)}
+            defaultValue="authority"
+          >
             <Radio value="authority">Authority</Radio>
             <Radio value="member">Member</Radio>
           </Radio.Group>

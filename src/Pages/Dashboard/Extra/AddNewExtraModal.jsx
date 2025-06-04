@@ -1,6 +1,8 @@
-import React, { useEffect } from "react";
+// import React, { useEffect } from "react";
 import { Button, Form, Input, InputNumber, Modal, Radio, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import { FaMoneyBillAlt } from "react-icons/fa";
+import { useEffect } from "react";
 
 function AddNewExtraModal({
   isModalOpen,
@@ -11,20 +13,30 @@ function AddNewExtraModal({
 }) {
   const [form] = Form.useForm();
 
+  console.log("editing", editingRecord);
+
   // Load data into form for editing
   useEffect(() => {
     if (editingRecord) {
-      form.setFieldsValue(editingRecord);
+      // When editing, we need to extract the numeric value from the cost string (e.g., "$25" -> 25)
+      const formValues = {
+        ...editingRecord,
+        cost: editingRecord.cost
+          ? parseFloat(editingRecord.cost.replace("$", ""))
+          : undefined,
+      };
+      form.setFieldsValue(formValues);
     } else {
       form.resetFields();
     }
   }, [editingRecord, form]);
 
   const handleFinish = (values) => {
+    console.log("Submitted values:", values); // check cost here
     onSubmit({
       ...editingRecord,
       ...values,
-      key: editingRecord?.key || Date.now(), // For new entries
+      key: editingRecord?.key || Date.now(),
     });
     form.resetFields();
     handleOk();
@@ -50,14 +62,16 @@ function AddNewExtraModal({
           <Input placeholder="Enter Name" />
         </Form.Item>
         <Form.Item
-          label="Price"
-          name="price"
-          rules={[{ required: true, message: "Please enter the price!" }]}
+          label="Cost"
+          name="cost"
+          rules={[{ required: true, message: "Please enter the cost!" }]}
         >
           <InputNumber
-            prefix="$"
             style={{ width: "100%" }}
-            placeholder="Enter Price"
+            placeholder="Enter Cost"
+            formatter={(value) => (value ? `${value}` : "")} // no $ added
+            parser={(value) => value.replace(/\$\s?|(,*)/g, "")} // strips $ if pasted
+            prefix={<FaMoneyBillAlt style={{ color: "#999" }} />}
           />
         </Form.Item>
         <Form.Item
@@ -89,11 +103,11 @@ function AddNewExtraModal({
           </Upload>
         </Form.Item>
         <Form.Item
-          label="Type"
-          name="type"
-          rules={[{ required: true, message: "Please input the type!" }]}
+          label="Description"
+          name="description"
+          rules={[{ required: true, message: "Please input the description!" }]}
         >
-          <Input.TextArea placeholder="Enter Type" />
+          <Input.TextArea placeholder="Enter Description" />
         </Form.Item>
 
         <Form.Item>

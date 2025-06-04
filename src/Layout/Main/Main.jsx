@@ -14,7 +14,7 @@ const Main = () => {
       {/* Main Content */}
       <div className="flex flex-col flex-1 h-screen">
         <Header />
-        <div className="flex-1 p-4 bg-slate-100 sm:overflow-clip h-screen overflow-scroll">
+        <div className="flex-1 p-4  bg-slate-100 sm:overflow-clip h-screen overflow-scroll">
           <Outlet />
         </div>
       </div>
