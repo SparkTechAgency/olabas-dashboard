@@ -1,32 +1,24 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FaRegBell } from "react-icons/fa6";
 import { Badge, Avatar, ConfigProvider, Flex, Popover } from "antd";
-import { useUser } from "../../provider/User";
+
 import { CgMenu } from "react-icons/cg";
 import NotificationPopover from "../../Pages/Dashboard/Notification/NotificationPopover";
 import { RiSettings5Line, RiShutDownLine } from "react-icons/ri";
 import { useSidebar } from "../../Context/SidebarContext";
-
+import { useProfileQuery } from "../../redux/apiSlices/authApi";
+import { getImageUrl } from "../../utils/baseUrl";
 const Header = () => {
-  const { user } = useUser();
   const { toggleSidebar } = useSidebar();
-  const src = user?.image?.startsWith("https")
-    ? user?.image
-    : `https://your-image-source/${user?.image}`;
-  const [selectedCountry, setSelectedCountry] = useState("USA");
 
-  const handleCountryChange = (value) => {
-    setSelectedCountry(value);
-    console.log("Selected Language:", value);
-  };
+  const { data: userprofile } = useProfileQuery();
 
   const userMenuContent = (
     <div>
       <div className="mr-4 flex gap-2.5 font-semibold hover:text-black cursor-pointer">
-        {`${user?.firstName} ${user?.lastName}`}
+        {userprofile?.data?.name}
       </div>
-      <p>Super Admin</p>
+      <p>{userprofile?.data?.role}</p>
       <Link
         to="/settings"
         className="flex items-center gap-2 py-1 mt-1  text-black hover:text-smart"
@@ -100,7 +92,7 @@ const Header = () => {
               shape="square"
               size={60}
               className="rounded cursor-pointer"
-              src={src}
+              src={`${getImageUrl()}${userprofile?.data?.image}`}
             />
           </Popover>
         </Flex>

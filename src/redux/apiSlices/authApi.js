@@ -69,14 +69,9 @@ const authSlice = api.injectEndpoints({
     updateProfile: builder.mutation({
       query: (data) => {
         return {
-          method: "POST",
-          url: "/auth/update-profile",
+          method: "PATCH",
+          url: "/user/profile",
           body: data,
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
         };
       },
     }),
@@ -85,16 +80,8 @@ const authSlice = api.injectEndpoints({
       query: () => {
         return {
           method: "GET",
-          url: "/auth/get-profile",
-          headers: {
-            Authorization: `Bearer ${JSON.parse(
-              localStorage.getItem("token")
-            )}`,
-          },
+          url: "/user/profile",
         };
-      },
-      transformResponse: ({ user }) => {
-        return user;
       },
     }),
   }),
