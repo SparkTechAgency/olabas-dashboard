@@ -5,6 +5,7 @@ import App from "../Driver Schedule/Table";
 import { GrFormAdd } from "react-icons/gr";
 import DriverInformationModal from "./DriverInformationModal";
 import { useSidebar } from "../../../Context/SidebarContext";
+import DriverInfo from "./driverTable";
 
 function DriverManagement() {
   const handleSearch = () => {};
@@ -24,6 +25,7 @@ function DriverManagement() {
         pagename="Transactions"
         handleDelete={handleDelete}
       />
+      <DriverInfo />
     </div>
   );
 }
