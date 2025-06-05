@@ -6,10 +6,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { SiAntdesign } from "react-icons/si";
 
-import { RxDashboard } from "react-icons/rx";
+import { RxDashboard, RxLapTimer } from "react-icons/rx";
 import { PiMapPinAreaBold, PiWallet } from "react-icons/pi";
 import { FiLogOut } from "react-icons/fi";
-import { RiContactsBook3Line, RiTeamFill } from "react-icons/ri";
+import {
+  RiContactsBook3Line,
+  RiTeamFill,
+  RiUserSettingsFill,
+} from "react-icons/ri";
 import {
   MdCategory,
   MdOutlineDateRange,
@@ -58,14 +62,39 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/client-management">Client Management</Link>
       ),
     },
+    // {
+    //   key: "/driver-management",
+    //   icon: <FaUserNurse size={23} />,
+    //   label: isCollapsed ? (
+    //     <Link to="/driver-management">Driver Management</Link>
+    //   ) : (
+    //     <Link to="/driver-management">Driver Management</Link>
+    //   ),
+    // },
     {
-      key: "/driver-management",
-      icon: <FaUserNurse size={23} />,
-      label: isCollapsed ? (
-        <Link to="/driver-management">Driver Management</Link>
-      ) : (
-        <Link to="/driver-management">Driver Management</Link>
-      ),
+      key: "subMenuSetting-3",
+      icon: <FaUserNurse size={`${isCollapsed ? 25 : 25}`} />,
+      label: "Driver Management",
+      children: [
+        {
+          key: "/driver-management",
+          icon: <RiUserSettingsFill size={23} />,
+          label: isCollapsed ? (
+            <Link to="/driver-management">Driver Management</Link>
+          ) : (
+            <Link to="/driver-management">Driver Management</Link>
+          ),
+        },
+        {
+          key: "/driver-schedule",
+          icon: <RxLapTimer size={23} />,
+          label: isCollapsed ? (
+            <Link to="/driver-schedule">Driver Schedule</Link>
+          ) : (
+            <Link to="/driver-schedule">Driver Schedule</Link>
+          ),
+        },
+      ],
     },
     {
       key: "/fleet-management",

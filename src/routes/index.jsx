@@ -26,6 +26,7 @@ import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
 import Team from "../Pages/Dashboard/Team/team.jsx";
 import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
 import PrivateRoute from "./ProtectedRoute.jsx";
+import DriverSchedule from "../Pages/Dashboard/Driver Schedule/DriverSchedule.jsx";
 
 const router = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const router = createBrowserRouter([
       {
         path: "/driver-management",
         element: <DriverManagement />,
+      },
+      {
+        path: "/driver-schedule",
+        element: <DriverSchedule />,
       },
       // {
       //   path: "/announcement",

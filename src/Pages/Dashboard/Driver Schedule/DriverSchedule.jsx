@@ -1,12 +1,8 @@
-import { useState } from "react";
-import { Button } from "antd";
 import GetPageName from "../../../components/common/GetPageName";
-import App from "../Driver Schedule/Table";
-import { GrFormAdd } from "react-icons/gr";
-import DriverInformationModal from "./DriverInformationModal";
 import { useSidebar } from "../../../Context/SidebarContext";
+import App from "./Table";
 
-function DriverManagement() {
+function DriverSchedule() {
   const handleSearch = () => {};
   const handleDelete = () => {};
   const { isCollapsed } = useSidebar();
@@ -24,30 +20,15 @@ function DriverManagement() {
         pagename="Transactions"
         handleDelete={handleDelete}
       />
+      <App />
     </div>
   );
 }
 
-export default DriverManagement;
+export default DriverSchedule;
 
 // Header Component
 const Header = ({ pagename }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-
-  const handleOk = () => {
-    console.log("Modal OK clicked");
-    setModalOpen(false);
-  };
-
-  const handleCancel = () => {
-    console.log("Modal Cancel clicked");
-    setModalOpen(false);
-  };
-
-  const closeModal = () => {
-    setModalOpen(false);
-  };
-
   return (
     <div className="flex flex-col justify-between items-start py-5">
       <h1 className="text-[20px] font-medium">{GetPageName() || pagename}</h1>
@@ -60,26 +41,6 @@ const Header = ({ pagename }) => {
             Completed
           </button>
         </div>
-        <Button
-          icon={<GrFormAdd size={25} />}
-          className="bg-smart hover:bg-smart text-white border-none h-8 flex items-center"
-          onClick={() => {
-            console.log("Add Driver clicked"); // Debug log
-            setModalOpen(true);
-          }}
-        >
-          Add Driver
-        </Button>
-
-        <DriverInformationModal
-          isModalOpen={modalOpen}
-          handleOk={handleOk}
-          handleCancel={handleCancel}
-          open={modalOpen}
-          onOk={handleOk}
-          onCancel={handleCancel}
-          onClose={closeModal}
-        />
       </div>
     </div>
   );

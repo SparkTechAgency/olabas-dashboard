@@ -1,6 +1,13 @@
 import { Button, Form, Modal } from "antd";
-import React, { useState } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  nextStep,
+  previousStep,
+  resetForm,
+  calculateTotals,
+} from "../../../redux/features/ReservationSlice";
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
@@ -9,17 +16,42 @@ import StepFive from "./StepFive";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 
 function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
-  const [step, setStep] = useState(1);
-  const [direction, setDirection] = useState(1); // 1 for forward, -1 for backward
+  const dispatch = useDispatch();
+
+  // Get current step and form data from Redux store (at component level)
+  const currentStep = useSelector((state) => state.carRental.currentStep);
+  const formData = useSelector((state) => state.carRental);
+  const [direction, setDirection] = React.useState(1);
 
   const handleNextStep = () => {
     setDirection(1);
-    setStep((prevStep) => prevStep + 1);
+    // Calculate totals before moving to next step
+    dispatch(calculateTotals());
+    dispatch(nextStep());
   };
 
   const handlePrevStep = () => {
     setDirection(-1);
-    setStep((prevStep) => prevStep - 1);
+    dispatch(previousStep());
+  };
+
+  const handleSave = () => {
+    // Calculate final totals
+    dispatch(calculateTotals());
+
+    // Use formData from component-level selector
+    console.log("Final form data:", formData);
+
+    // Call parent handleOk if needed
+    if (handleOk) {
+      handleOk(formData);
+    }
+  };
+
+  const handleModalCancel = () => {
+    // Reset form when modal is closed
+    dispatch(resetForm());
+    handleCancel();
   };
 
   // Animation variants
@@ -46,18 +78,18 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
 
   return (
     <Modal
-      title={getModalTitle({ step })}
+      title={getModalTitle({ step: currentStep })}
       width={900}
       open={isModalOpen}
       onOk={handleOk}
       footer={null}
-      onCancel={handleCancel}
+      onCancel={handleModalCancel}
     >
       <div className="w-full mt-6 overflow-hidden">
         <Form layout="vertical" initialValues={{ remember: true }}>
           <AnimatePresence custom={direction} mode="wait">
             <motion.div
-              key={step}
+              key={currentStep}
               custom={direction}
               variants={variants}
               initial="enter"
@@ -65,13 +97,13 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
               exit="exit"
               transition={transition}
             >
-              {getFormStep({ step })}
+              {getFormStep({ step: currentStep })}
             </motion.div>
           </AnimatePresence>
         </Form>
 
         <div className="w-full flex items-center mt-4">
-          {step > 1 && (
+          {currentStep > 1 && (
             <Button
               className="text-sm text-gray-500 h-8"
               onClick={handlePrevStep}
@@ -81,7 +113,7 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
             </Button>
           )}
           <div className="ml-auto">
-            {step < 5 && (
+            {currentStep < 5 && (
               <Button
                 className="text-sm text-gray-500 h-8"
                 onClick={handleNextStep}
@@ -91,10 +123,10 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
                 Next
               </Button>
             )}
-            {step === 5 && (
+            {currentStep === 5 && (
               <Button
                 className="text-sm bg-smart text-white border-none h-8"
-                // onClick={handleSave}  // you can add save handler here
+                onClick={handleSave}
               >
                 Save
               </Button>

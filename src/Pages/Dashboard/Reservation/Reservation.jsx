@@ -1,19 +1,27 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Table, Button, Select } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
+import dayjs from "dayjs";
 import CustomSearch from "../../../components/common/CustomSearch";
 import GetPageName from "../../../components/common/GetPageName";
 import ReservationAddModal from "./ReservationAddModal";
+import { useGetReservationQuery } from "../../../redux/apiSlices/reservation";
+
+const { Option } = Select;
 
 function Reservation() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [userData] = useState(data);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { data: reservationData, isLoading } = useGetReservationQuery();
+  console.log("reservationData", reservationData?.data?.result);
+
   const showModal = () => {
     setIsModalOpen(true);
   };
+
   const handleOk = () => {
     setIsModalOpen(false);
   };
@@ -27,6 +35,34 @@ function Reservation() {
     console.log("Search value:", value);
     // Search handling here if needed
   };
+
+  // Format API data to match table structure
+  const formatReservationData = (data) => {
+    if (!Array.isArray(data)) return [];
+
+    return data.map((item, index) => ({
+      key: item._id || index,
+      pickupTime: dayjs(item.pickupTime).format("DD/MM/YYYY, h:mm A"),
+      pickupLocation: item.pickupLocation?.location || "N/A",
+      returnTime: dayjs(item.returnTime).format("DD/MM/YYYY, h:mm A"),
+      returnLocation: item.returnLocation?.location || "N/A",
+      carSize: item.vehicle?.name || "N/A",
+      carNumberPlate: "N/A", // Not available in API response
+      carModel: "N/A", // Not available in API response
+      client:
+        `${item.clientId?.firstName || ""} ${
+          item.clientId?.lastName || ""
+        }`.trim() || "N/A",
+      clientPhone: item.clientId?.email || "N/A", // Using email as phone not available
+      price: `₦${item.amount || 0}`,
+      status: item.status || "NOT CONFIRMED",
+    }));
+  };
+
+  // Use only API data
+  const displayData = formatReservationData(
+    reservationData?.data?.result || []
+  );
 
   return (
     <>
@@ -61,7 +97,8 @@ function Reservation() {
       <Table
         rowSelection={rowSelection}
         columns={columns}
-        dataSource={userData}
+        dataSource={displayData}
+        loading={isLoading}
         rowClassName={() => "text-black"}
         size="small"
         pagination={{
@@ -92,8 +129,8 @@ const columns = [
     key: "pickUp",
     render: (text, record) => (
       <div className="flex flex-col">
-        <span>{record.pickupTime}</span>
-        <span>{record.pickupLocation}</span>
+        <span className="font-medium">{record.pickupTime}</span>
+        <span className="text-gray-600 text-sm">{record.pickupLocation}</span>
       </div>
     ),
   },
@@ -103,8 +140,8 @@ const columns = [
     key: "return",
     render: (text, record) => (
       <div className="flex flex-col">
-        <span>{record.returnTime}</span>
-        <span>{record.returnLocation}</span>
+        <span className="font-medium">{record.returnTime}</span>
+        <span className="text-gray-600 text-sm">{record.returnLocation}</span>
       </div>
     ),
   },
@@ -114,9 +151,12 @@ const columns = [
     key: "car",
     render: (text, record) => (
       <div className="flex flex-col">
-        <span>{record.carSize}</span>
-        <div className="flex">
-          <span>{record.carNumberPlate}, </span>
+        <span className="font-medium">{record.carSize}</span>
+        <div className="flex text-gray-600 text-sm">
+          <span>{record.carNumberPlate}</span>
+          {record.carNumberPlate !== "N/A" && record.carModel !== "N/A" && (
+            <span>, </span>
+          )}
           <span>{record.carModel}</span>
         </div>
       </div>
@@ -128,8 +168,8 @@ const columns = [
     key: "client",
     render: (text, record) => (
       <div className="flex flex-col">
-        <span>{text}</span>
-        <span>{record.clientPhone}</span>
+        <span className="font-medium">{text}</span>
+        <span className="text-gray-600 text-sm">{record.clientPhone}</span>
       </div>
     ),
   },
@@ -137,6 +177,9 @@ const columns = [
     title: "Price",
     dataIndex: "price",
     key: "price",
+    render: (text) => (
+      <span className="font-medium text-green-600">{text}</span>
+    ),
   },
   {
     title: "Action",
@@ -144,9 +187,9 @@ const columns = [
     key: "action",
     render: (text, record) => (
       <Select className="w-fit" placeholder="Assign Driver">
-        <Option>Driver 1</Option>
-        <Option>Driver 2</Option>
-        <Option>Driver 3</Option>
+        <Option value="driver1">Driver 1</Option>
+        <Option value="driver2">Driver 2</Option>
+        <Option value="driver3">Driver 3</Option>
       </Select>
     ),
   },
@@ -156,15 +199,19 @@ const columns = [
     key: "status",
     render: (text) => {
       const getStatusColor = (status) => {
-        switch (status) {
-          case "Confirmed":
+        const statusLower = status?.toLowerCase();
+        switch (statusLower) {
+          case "confirmed":
             return "bg-[#5AC5B6]";
-          case "Not Confirmed":
+          case "not confirmed":
             return "bg-[#F9C74F]";
-          case "Canceled":
+          case "canceled":
+          case "cancelled":
             return "bg-[#F37272]";
-          default:
+          case "completed":
             return "bg-[#90BE6D]";
+          default:
+            return "bg-[#F9C74F]";
         }
       };
       return (
@@ -179,78 +226,5 @@ const columns = [
         </div>
       );
     },
-  },
-];
-
-const data = [
-  {
-    key: 1,
-    pickupTime: "2/12/2025, 9:00 am",
-    pickupLocation: "Hogarth Road, London",
-    returnTime: "2/12/2025, 9:00 am",
-    returnLocation: "Hogarth Road, London",
-    carSize: "Small: Economy",
-    carNumberPlate: "OA124431",
-    carModel: "Opel Astra",
-    client: "Kennedy Okoth",
-    clientPhone: "+12345058104",
-    price: "₦10,000",
-    status: "Confirmed",
-  },
-  {
-    key: 2,
-    pickupTime: "2/12/2025, 9:00 am",
-    pickupLocation: "Hogarth Road, London",
-    returnTime: "2/12/2025, 9:00 am",
-    returnLocation: "Hogarth Road, London",
-    carSize: "Small: Economy",
-    carNumberPlate: "OA124431",
-    carModel: "Opel Astra",
-    client: "Kennedy Okoth",
-    clientPhone: "+12345058104",
-    price: "₦10,000",
-    status: "Not Confirmed",
-  },
-  {
-    key: 3,
-    pickupTime: "2/12/2025, 9:00 am",
-    pickupLocation: "Hogarth Road, London",
-    returnTime: "2/12/2025, 9:00 am",
-    returnLocation: "Hogarth Road, London",
-    carSize: "Small: Economy",
-    carNumberPlate: "OA124431",
-    carModel: "Opel Astra",
-    client: "Kennedy Okoth",
-    clientPhone: "+12345058104",
-    price: "₦10,000",
-    status: "Canceled",
-  },
-  {
-    key: 4,
-    pickupTime: "2/12/2025, 9:00 am",
-    pickupLocation: "Hogarth Road, London",
-    returnTime: "2/12/2025, 9:00 am",
-    returnLocation: "Hogarth Road, London",
-    carSize: "Small: Economy",
-    carNumberPlate: "OA124431",
-    carModel: "Opel Astra",
-    client: "Kennedy Okoth",
-    clientPhone: "+12345058104",
-    price: "₦10,000",
-    status: "Completed",
-  },
-  {
-    key: 5,
-    pickupTime: "2/12/2025, 9:00 am",
-    pickupLocation: "Hogarth Road, London",
-    returnTime: "2/12/2025, 9:00 am",
-    returnLocation: "Hogarth Road, London",
-    carSize: "Small: Economy",
-    carNumberPlate: "OA124431",
-    carModel: "Opel Astra",
-    client: "Kennedy Okoth",
-    clientPhone: "+12345058104",
-    price: "₦10,000",
-    status: "Completed",
   },
 ];
