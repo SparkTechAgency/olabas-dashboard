@@ -47,10 +47,10 @@ const router = createBrowserRouter([
         element: <Transaction />,
       },
 
-      {
-        path: "/reported-issues",
-        element: <Report />,
-      },
+      // {
+      //   path: "/reported-issues",
+      //   element: <Report />,
+      // },
 
       {
         path: "/reservation",
@@ -68,10 +68,10 @@ const router = createBrowserRouter([
         path: "/driver-management",
         element: <DriverManagement />,
       },
-      {
-        path: "/announcement",
-        element: <Announcement />,
-      },
+      // {
+      //   path: "/announcement",
+      //   element: <Announcement />,
+      // },
       {
         path: "/location",
         element: <Location />,
@@ -89,10 +89,10 @@ const router = createBrowserRouter([
         element: <FaqCollapse />,
       },
 
-      {
-        path: "/logo",
-        element: <Logo />,
-      },
+      // {
+      //   path: "/logo",
+      //   element: <Logo />,
+      // },
       {
         path: "/contact",
         element: <Contact />,

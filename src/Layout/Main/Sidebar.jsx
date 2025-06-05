@@ -159,15 +159,15 @@ const Sidebar = ({ isCollapsed }) => {
             </Link>
           ),
         },
-        {
-          key: "/announcement",
-          icon: <GrAnnounce size={25} />,
-          label: isCollapsed ? (
-            <Link to="/announcement">Announcement</Link>
-          ) : (
-            <Link to="/announcement">Announcement</Link>
-          ),
-        },
+        // {
+        //   key: "/announcement",
+        //   icon: <GrAnnounce size={25} />,
+        //   label: isCollapsed ? (
+        //     <Link to="/announcement">Announcement</Link>
+        //   ) : (
+        //     <Link to="/announcement">Announcement</Link>
+        //   ),
+        // },
         // {
         //   key: "/category-list",
         //   icon: <TbCategory2 size={24} />,
@@ -177,15 +177,15 @@ const Sidebar = ({ isCollapsed }) => {
         //     </Link>
         //   ),
         // },
-        {
-          key: "/logo",
-          icon: <SiAntdesign size={24} />,
-          label: (
-            <Link to="/logo" className="text-white hover:text-white">
-              Logo
-            </Link>
-          ),
-        },
+        // {
+        //   key: "/logo",
+        //   icon: <SiAntdesign size={24} />,
+        //   label: (
+        //     <Link to="/logo" className="text-white hover:text-white">
+        //       Logo
+        //     </Link>
+        //   ),
+        // },
         {
           key: "/contact",
           icon: <RiContactsBook3Line size={24} />,
