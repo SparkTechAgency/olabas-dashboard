@@ -303,7 +303,7 @@ function VehicleModal({
                   Current Image:
                 </label>
                 <img
-                  src={`${getImageUrl()}${vehicleData.image}`}
+                  src={`${getImageUrl}${vehicleData.image}`}
                   alt="Current vehicle"
                   className="w-16 h-16 object-cover rounded border"
                 />

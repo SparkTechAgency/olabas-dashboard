@@ -90,7 +90,7 @@
 // export default StepOne;
 
 import React from "react";
-import { Form, Input, DatePicker } from "antd";
+import { Form, Input, DatePicker, Select } from "antd";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
 import {
@@ -99,6 +99,8 @@ import {
   setPickupLocation,
   setReturnLocation,
 } from "../../../redux/features/ReservationSlice";
+
+const { Option } = Select;
 
 const StepOne = () => {
   const dispatch = useDispatch();
@@ -109,26 +111,42 @@ const StepOne = () => {
 
   // Convert string to moment object for DatePicker
   const getDateValue = (dateString) => {
-    return dateString ? moment(dateString, "MM/DD/YYYY hh:mm a") : null;
+    return dateString ? moment(dateString) : null;
   };
 
-  // Handle date/time changes
-  const handlePickupDateChange = (date, dateString) => {
-    dispatch(setPickupDateTime(dateString));
+  // Handle date/time changes - store as ISO string
+  const handlePickupDateChange = (date) => {
+    if (date) {
+      dispatch(setPickupDateTime(date.toISOString()));
+    } else {
+      dispatch(setPickupDateTime(""));
+    }
   };
 
-  const handleReturnDateChange = (date, dateString) => {
-    dispatch(setReturnDateTime(dateString));
+  const handleReturnDateChange = (date) => {
+    if (date) {
+      dispatch(setReturnDateTime(date.toISOString()));
+    } else {
+      dispatch(setReturnDateTime(""));
+    }
   };
 
-  // Handle location changes
-  const handlePickupLocationChange = (e) => {
-    dispatch(setPickupLocation(e.target.value));
+  // Handle location changes - store location ID
+  const handlePickupLocationChange = (value) => {
+    dispatch(setPickupLocation(value));
   };
 
-  const handleReturnLocationChange = (e) => {
-    dispatch(setReturnLocation(e.target.value));
+  const handleReturnLocationChange = (value) => {
+    dispatch(setReturnLocation(value));
   };
+
+  // Mock location data - replace with actual API data
+  const locations = [
+    { id: "6836f98ad89cc068ae80cbe5", name: "Hogarth Road, London" },
+    { id: "6836f98ad89cc068ae80cbe6", name: "Market St., Oxford" },
+    { id: "6836f98ad89cc068ae80cbe7", name: "Dhaka Airport" },
+    { id: "6836f98ad89cc068ae80cbe8", name: "City Center, Dhaka" },
+  ];
 
   return (
     <Form
@@ -160,6 +178,7 @@ const StepOne = () => {
             value={getDateValue(pickupDateTime)}
             onChange={handlePickupDateChange}
             className="w-full h-8"
+            showNow={false}
           />
         </Form.Item>
 
@@ -181,6 +200,7 @@ const StepOne = () => {
             value={getDateValue(returnDateTime)}
             onChange={handleReturnDateChange}
             className="w-full h-8"
+            showNow={false}
           />
         </Form.Item>
       </div>
@@ -191,16 +211,22 @@ const StepOne = () => {
           label="Pick-up Location"
           name="pickupLocation"
           rules={[
-            { required: true, message: "Please input the pick-up location!" },
+            { required: true, message: "Please select the pick-up location!" },
           ]}
           className="w-1/2"
         >
-          <Input
-            placeholder="Hogarth Road, London"
+          <Select
+            placeholder="Select pick-up location"
             value={pickupLocation}
             onChange={handlePickupLocationChange}
             className="h-8"
-          />
+          >
+            {locations.map((location) => (
+              <Option key={location.id} value={location.id}>
+                {location.name}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
 
         {/* Return Location */}
@@ -208,16 +234,22 @@ const StepOne = () => {
           label="Return Location"
           name="returnLocation"
           rules={[
-            { required: true, message: "Please input the return location!" },
+            { required: true, message: "Please select the return location!" },
           ]}
           className="w-1/2"
         >
-          <Input
-            placeholder="Market St., Oxford"
+          <Select
+            placeholder="Select return location"
             value={returnLocation}
             onChange={handleReturnLocationChange}
-            className="w-full h-8"
-          />
+            className="h-8"
+          >
+            {locations.map((location) => (
+              <Option key={location.id} value={location.id}>
+                {location.name}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
       </div>
     </Form>

@@ -1,13 +1,11 @@
 import { Button, Checkbox, Form, Input, message } from "antd";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import FormItem from "../../components/common/FormItem";
 import { useLoginMutation } from "../../redux/apiSlices/authApi";
-// import Cookies from "js-cookie";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [logIn] = useLoginMutation();
+  const [logIn, { isLoading }] = useLoginMutation();
 
   const onFinish = async (values) => {
     const { email, password } = values;
@@ -17,18 +15,14 @@ const Login = () => {
         email: email.trim(),
         password: password.trim(),
       }).unwrap();
-
-      console.log(res);
       if (res.success) {
-        localStorage.setItem("accessToken", res?.data);
-        navigate("/");
-        message.success("Log in Success");
-      } else {
-        message.error("Cannot log in");
+        localStorage.setItem("accessToken", res.data);
+        // Force a full page reload to ensure all state is cleared
+        window.location.href = "/";
       }
     } catch (err) {
       console.error("Login Error:", err);
-      message.error(err || "Login failed");
+      message.error(err?.data?.message || err?.message || "Login failed");
     }
   };
 
@@ -44,15 +38,10 @@ const Login = () => {
           label={
             <p className="text-black font-normal text-base">Enter Your Email</p>
           }
-          rules={[
-            {
-              required: true,
-              message: `Please Enter your email`,
-            },
-          ]}
+          rules={[{ required: true, message: "Please Enter your email" }]}
         >
           <Input
-            placeholder={`Enter Your email`}
+            placeholder="Enter Your email"
             style={{
               height: 45,
               border: "1px solid #d9d9d9",
@@ -65,15 +54,9 @@ const Login = () => {
         <Form.Item
           name="password"
           label={<p className="text-black font-normal text-base">Password</p>}
-          rules={[
-            {
-              required: true,
-              message: "Please input your Password!",
-            },
-          ]}
+          rules={[{ required: true, message: "Please input your Password!" }]}
         >
           <Input.Password
-            type="password"
             placeholder="Enter your password"
             style={{
               height: 45,
@@ -92,7 +75,6 @@ const Login = () => {
           >
             <Checkbox>Remember me</Checkbox>
           </Form.Item>
-
           <a
             className="login-form-forgot text-smart/80 hover:text-smart font-semibold"
             href="/auth/forgot-password"
@@ -102,22 +84,21 @@ const Login = () => {
         </div>
 
         <Form.Item style={{ marginBottom: 0 }}>
-          <button
+          <Button
             htmlType="submit"
-            type="submit"
+            type="primary"
+            loading={isLoading}
             style={{
               width: "100%",
               height: 47,
-              color: "white",
               fontWeight: "400px",
               fontSize: "18px",
-
               marginTop: 20,
             }}
             className="flex items-center justify-center bg-smart hover:bg-smart/90 rounded-lg text-base"
           >
-            {/* {isLoading? < Spinner/> : "Sign in"} */} Sign in
-          </button>
+            Sign in
+          </Button>
         </Form.Item>
       </Form>
     </div>

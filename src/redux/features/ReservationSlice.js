@@ -1,5 +1,296 @@
+// import { createSlice } from "@reduxjs/toolkit";
+
+// // Keep initial data as fallback, but it will be replaced by API data
+// const initialExtras = [
+//   {
+//     includeStatus: false,
+//     name: "Extra driver",
+//     qty: 1,
+//     price: 20,
+//     total: 0,
+//   },
+//   {
+//     includeStatus: false,
+//     name: "Child seat",
+//     qty: 1,
+//     price: 0,
+//     total: 0,
+//   },
+//   {
+//     includeStatus: true,
+//     name: "GPS Navigation",
+//     qty: 1,
+//     price: 50,
+//     total: 50,
+//   },
+//   {
+//     includeStatus: false,
+//     name: "Refuel Service",
+//     qty: 1,
+//     price: 25,
+//     total: 0,
+//   },
+// ];
+
+// const initialProtection = [
+//   {
+//     includeStatus: false,
+//     name: "Default protection",
+//     qty: 1,
+//     price: 20,
+//     total: 0,
+//   },
+//   {
+//     includeStatus: true,
+//     name: "Collision Damage Waiver",
+//     qty: 1,
+//     price: 0,
+//     total: 0,
+//   },
+//   {
+//     includeStatus: true,
+//     name: "Theft Protection",
+//     qty: 1,
+//     price: 0,
+//     total: 0,
+//   },
+// ];
+
+// const initialState = {
+//   currentStep: 1,
+
+//   // Step 1: Date/Time & Location
+//   pickupDateTime: "03/30/2025 12:00 am",
+//   returnDateTime: "03/30/2025 12:00 am",
+//   pickupLocation: "Hogarth Road, London",
+//   returnLocation: "Market St., Oxford",
+
+//   // Step 2: Vehicle Selection
+//   selectedCarSize: "Large: Premium",
+//   selectedVehicle: "Vehicle 2",
+//   vehiclePrice: 840.0,
+
+//   // Step 3: Add Extras
+//   extras: initialExtras,
+//   extrasInitialized: false, // Flag to track if extras have been loaded from API
+
+//   // Step 4: Add Protection
+//   protection: initialProtection,
+
+//   // Step 5: Client Details
+//   clientDetails: {
+//     isNewClient: true,
+//     firstName: "",
+//     lastName: "",
+//     email: "",
+//     returnLocation: "",
+//     searchQuery: "",
+//   },
+
+//   // Totals
+//   subtotal: 0,
+//   total: 0,
+// };
+
+// const carRentalSlice = createSlice({
+//   name: "carRental",
+//   initialState,
+//   reducers: {
+//     // Navigation
+//     setCurrentStep: (state, action) => {
+//       state.currentStep = action.payload;
+//     },
+//     nextStep: (state) => {
+//       if (state.currentStep < 5) {
+//         state.currentStep += 1;
+//       }
+//     },
+//     previousStep: (state) => {
+//       if (state.currentStep > 1) {
+//         state.currentStep -= 1;
+//       }
+//     },
+
+//     // Step 1: Date/Time & Location
+//     setPickupDateTime: (state, action) => {
+//       state.pickupDateTime = action.payload;
+//     },
+//     setReturnDateTime: (state, action) => {
+//       state.returnDateTime = action.payload;
+//     },
+//     setPickupLocation: (state, action) => {
+//       state.pickupLocation = action.payload;
+//     },
+//     setReturnLocation: (state, action) => {
+//       state.returnLocation = action.payload;
+//     },
+
+//     // Step 2: Vehicle Selection
+//     setSelectedCarSize: (state, action) => {
+//       state.selectedCarSize = action.payload;
+//     },
+//     setSelectedVehicle: (state, action) => {
+//       state.selectedVehicle = action.payload;
+//     },
+//     setVehiclePrice: (state, action) => {
+//       state.vehiclePrice = action.payload;
+//     },
+
+//     // Step 3: Extras - NEW ACTION to initialize from API
+//     initializeExtras: (state, action) => {
+//       const apiExtras = action.payload;
+//       state.extras = apiExtras.map((item) => ({
+//         _id: item._id,
+//         includeStatus: false, // Default to not included
+//         name: item.name,
+//         description: item.description,
+//         image: item.image,
+//         qty: 1, // Default quantity
+//         price: item.cost || 0, // Use cost from API, default to 0 if not present
+//         total: 0, // Default total
+//         status: item.status,
+//         createdAt: item.createdAt,
+//         updatedAt: item.updatedAt,
+//       }));
+//       state.extrasInitialized = true;
+//     },
+
+//     // Step 3: Extras
+//     updateExtra: (state, action) => {
+//       const { index, field, value } = action.payload;
+//       if (state.extras[index]) {
+//         state.extras[index][field] = value;
+//         // Recalculate total for this extra
+//         if (field === "includeStatus" || field === "qty" || field === "price") {
+//           state.extras[index].total = state.extras[index].includeStatus
+//             ? state.extras[index].qty * state.extras[index].price
+//             : 0;
+//         }
+//       }
+//     },
+//     toggleExtraInclude: (state, action) => {
+//       const index = action.payload;
+//       if (state.extras[index]) {
+//         state.extras[index].includeStatus = !state.extras[index].includeStatus;
+//         state.extras[index].total = state.extras[index].includeStatus
+//           ? state.extras[index].qty * state.extras[index].price
+//           : 0;
+//       }
+//     },
+
+//     // NEW ACTION: Add single extra (useful for dynamic additions)
+//     addExtra: (state, action) => {
+//       const newExtra = {
+//         _id: action.payload._id,
+//         includeStatus: false,
+//         name: action.payload.name,
+//         description: action.payload.description,
+//         image: action.payload.image,
+//         qty: 1,
+//         price: action.payload.cost || 0,
+//         total: 0,
+//         status: action.payload.status,
+//         createdAt: action.payload.createdAt,
+//         updatedAt: action.payload.updatedAt,
+//       };
+//       state.extras.push(newExtra);
+//     },
+
+//     // NEW ACTION: Remove extra by ID
+//     removeExtra: (state, action) => {
+//       const extraId = action.payload;
+//       state.extras = state.extras.filter((extra) => extra._id !== extraId);
+//     },
+
+//     // Step 4: Protection
+//     updateProtection: (state, action) => {
+//       const { index, field, value } = action.payload;
+//       if (state.protection[index]) {
+//         state.protection[index][field] = value;
+//         // Recalculate total for this protection
+//         if (field === "includeStatus" || field === "qty" || field === "price") {
+//           state.protection[index].total = state.protection[index].includeStatus
+//             ? state.protection[index].qty * state.protection[index].price
+//             : 0;
+//         }
+//       }
+//     },
+//     toggleProtectionInclude: (state, action) => {
+//       const index = action.payload;
+//       if (state.protection[index]) {
+//         state.protection[index].includeStatus =
+//           !state.protection[index].includeStatus;
+//         state.protection[index].total = state.protection[index].includeStatus
+//           ? state.protection[index].qty * state.protection[index].price
+//           : 0;
+//       }
+//     },
+
+//     // Step 5: Client Details
+//     setClientType: (state, action) => {
+//       state.clientDetails.isNewClient = action.payload;
+//     },
+//     updateClientDetails: (state, action) => {
+//       state.clientDetails = { ...state.clientDetails, ...action.payload };
+//     },
+
+//     // Calculate totals
+//     calculateTotals: (state) => {
+//       const extrasTotal = state.extras.reduce(
+//         (sum, extra) => sum + (extra.total || 0),
+//         0
+//       );
+//       const protectionTotal = state.protection.reduce(
+//         (sum, protection) => sum + (protection.total || 0),
+//         0
+//       );
+//       state.subtotal = state.vehiclePrice + extrasTotal + protectionTotal;
+//       state.total = state.subtotal;
+//     },
+
+//     // Reset form
+//     resetForm: (state) => {
+//       return { ...initialState, extrasInitialized: false };
+//     },
+
+//     // Reset only extras (useful when refetching API data)
+//     resetExtras: (state) => {
+//       state.extras = [];
+//       state.extrasInitialized = false;
+//     },
+//   },
+// });
+
+// export const {
+//   setCurrentStep,
+//   nextStep,
+//   previousStep,
+//   setPickupDateTime,
+//   setReturnDateTime,
+//   setPickupLocation,
+//   setReturnLocation,
+//   setSelectedCarSize,
+//   setSelectedVehicle,
+//   setVehiclePrice,
+//   initializeExtras, // NEW
+//   updateExtra,
+//   toggleExtraInclude,
+//   addExtra, // NEW
+//   removeExtra, // NEW
+//   updateProtection,
+//   toggleProtectionInclude,
+//   setClientType,
+//   updateClientDetails,
+//   calculateTotals,
+//   resetForm,
+//   resetExtras, // NEW
+// } = carRentalSlice.actions;
+
+// export default carRentalSlice.reducer;
+
 import { createSlice } from "@reduxjs/toolkit";
 
+// Keep initial data as fallback, but it will be replaced by API data
 const initialExtras = [
   {
     includeStatus: false,
@@ -71,6 +362,8 @@ const initialState = {
 
   // Step 3: Add Extras
   extras: initialExtras,
+  extrasInitialized: false, // Flag to track if extras have been loaded from API
+  selectedExtraIds: [], // NEW: Array to track selected extra service IDs
 
   // Step 4: Add Protection
   protection: initialProtection,
@@ -134,7 +427,27 @@ const carRentalSlice = createSlice({
       state.vehiclePrice = action.payload;
     },
 
-    // Step 3: Extras
+    // Step 3: Extras - UPDATED ACTION to initialize from API
+    initializeExtras: (state, action) => {
+      const apiExtras = action.payload;
+      state.extras = apiExtras.map((item) => ({
+        _id: item._id,
+        includeStatus: false, // Default to not included
+        name: item.name,
+        description: item.description,
+        image: item.image,
+        qty: 1, // Default quantity
+        price: item.cost || 0, // Use cost from API, default to 0 if not present
+        total: 0, // Default total
+        status: item.status,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }));
+      state.extrasInitialized = true;
+      state.selectedExtraIds = []; // Reset selected IDs when initializing
+    },
+
+    // Step 3: Extras - UPDATED ACTION
     updateExtra: (state, action) => {
       const { index, field, value } = action.payload;
       if (state.extras[index]) {
@@ -147,14 +460,118 @@ const carRentalSlice = createSlice({
         }
       }
     },
+
+    // UPDATED ACTION: Track IDs when toggling extras
     toggleExtraInclude: (state, action) => {
       const index = action.payload;
       if (state.extras[index]) {
-        state.extras[index].includeStatus = !state.extras[index].includeStatus;
-        state.extras[index].total = state.extras[index].includeStatus
-          ? state.extras[index].qty * state.extras[index].price
-          : 0;
+        const extra = state.extras[index];
+        const wasIncluded = extra.includeStatus;
+
+        extra.includeStatus = !wasIncluded;
+        extra.total = extra.includeStatus ? extra.qty * extra.price : 0;
+
+        // Update selectedExtraIds array
+        const extraId = extra._id;
+        if (extra.includeStatus && extraId) {
+          // Add ID if not already present
+          if (!state.selectedExtraIds.includes(extraId)) {
+            state.selectedExtraIds.push(extraId);
+          }
+        } else if (!extra.includeStatus && extraId) {
+          // Remove ID if present
+          state.selectedExtraIds = state.selectedExtraIds.filter(
+            (id) => id !== extraId
+          );
+        }
       }
+    },
+
+    // NEW ACTION: Set selected extra IDs directly
+    setSelectedExtraIds: (state, action) => {
+      state.selectedExtraIds = action.payload;
+      // Update includeStatus based on selected IDs
+      state.extras.forEach((extra, index) => {
+        const wasSelected = extra.includeStatus;
+        extra.includeStatus = state.selectedExtraIds.includes(extra._id);
+
+        // Recalculate total if status changed
+        if (wasSelected !== extra.includeStatus) {
+          extra.total = extra.includeStatus ? extra.qty * extra.price : 0;
+        }
+      });
+    },
+
+    // NEW ACTION: Add single extra ID
+    addSelectedExtraId: (state, action) => {
+      const extraId = action.payload;
+      if (!state.selectedExtraIds.includes(extraId)) {
+        state.selectedExtraIds.push(extraId);
+
+        // Update the corresponding extra's includeStatus
+        const extraIndex = state.extras.findIndex(
+          (extra) => extra._id === extraId
+        );
+        if (extraIndex !== -1) {
+          state.extras[extraIndex].includeStatus = true;
+          state.extras[extraIndex].total =
+            state.extras[extraIndex].qty * state.extras[extraIndex].price;
+        }
+      }
+    },
+
+    // NEW ACTION: Remove single extra ID
+    removeSelectedExtraId: (state, action) => {
+      const extraId = action.payload;
+      state.selectedExtraIds = state.selectedExtraIds.filter(
+        (id) => id !== extraId
+      );
+
+      // Update the corresponding extra's includeStatus
+      const extraIndex = state.extras.findIndex(
+        (extra) => extra._id === extraId
+      );
+      if (extraIndex !== -1) {
+        state.extras[extraIndex].includeStatus = false;
+        state.extras[extraIndex].total = 0;
+      }
+    },
+
+    // NEW ACTION: Clear all selected extras
+    clearSelectedExtras: (state) => {
+      state.selectedExtraIds = [];
+      state.extras.forEach((extra) => {
+        extra.includeStatus = false;
+        extra.total = 0;
+      });
+    },
+
+    // UPDATED ACTION: Add single extra with ID tracking
+    addExtra: (state, action) => {
+      const newExtra = {
+        _id: action.payload._id,
+        includeStatus: false,
+        name: action.payload.name,
+        description: action.payload.description,
+        image: action.payload.image,
+        qty: 1,
+        price: action.payload.cost || 0,
+        total: 0,
+        status: action.payload.status,
+        createdAt: action.payload.createdAt,
+        updatedAt: action.payload.updatedAt,
+      };
+      state.extras.push(newExtra);
+    },
+
+    // UPDATED ACTION: Remove extra by ID and clean up selectedExtraIds
+    removeExtra: (state, action) => {
+      const extraId = action.payload;
+      state.extras = state.extras.filter((extra) => extra._id !== extraId);
+      // Also remove from selectedExtraIds if present
+      state.selectedExtraIds = state.selectedExtraIds.filter(
+        (id) => id !== extraId
+      );
     },
 
     // Step 4: Protection
@@ -192,11 +609,11 @@ const carRentalSlice = createSlice({
     // Calculate totals
     calculateTotals: (state) => {
       const extrasTotal = state.extras.reduce(
-        (sum, extra) => sum + extra.total,
+        (sum, extra) => sum + (extra.total || 0),
         0
       );
       const protectionTotal = state.protection.reduce(
-        (sum, protection) => sum + protection.total,
+        (sum, protection) => sum + (protection.total || 0),
         0
       );
       state.subtotal = state.vehiclePrice + extrasTotal + protectionTotal;
@@ -205,7 +622,18 @@ const carRentalSlice = createSlice({
 
     // Reset form
     resetForm: (state) => {
-      return initialState;
+      return {
+        ...initialState,
+        extrasInitialized: false,
+        selectedExtraIds: [],
+      };
+    },
+
+    // Reset only extras (useful when refetching API data)
+    resetExtras: (state) => {
+      state.extras = [];
+      state.extrasInitialized = false;
+      state.selectedExtraIds = []; // Also reset selected IDs
     },
   },
 });
@@ -221,14 +649,22 @@ export const {
   setSelectedCarSize,
   setSelectedVehicle,
   setVehiclePrice,
+  initializeExtras,
   updateExtra,
   toggleExtraInclude,
+  setSelectedExtraIds, // NEW
+  addSelectedExtraId, // NEW
+  removeSelectedExtraId, // NEW
+  clearSelectedExtras, // NEW
+  addExtra,
+  removeExtra,
   updateProtection,
   toggleProtectionInclude,
   setClientType,
   updateClientDetails,
   calculateTotals,
   resetForm,
+  resetExtras,
 } = carRentalSlice.actions;
 
 export default carRentalSlice.reducer;

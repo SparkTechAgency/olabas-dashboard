@@ -434,7 +434,7 @@ function Extra() {
       render: (image) =>
         image ? (
           <img
-            src={`${getImageUrl()}${image}`}
+            src={`${getImageUrl}${image}`}
             alt="extra"
             className="w-12 h-12 object-cover rounded"
           />

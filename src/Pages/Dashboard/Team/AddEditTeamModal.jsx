@@ -129,7 +129,7 @@ function AddEditTeamMember({
           uid: "-1",
           name: "Current Image",
           status: "done",
-          url: `${getImageUrl()}${editData.image}`, // Assuming editData.image contains the image URL
+          url: `${getImageUrl}${editData.image}`, // Assuming editData.image contains the image URL
         },
       ];
     }

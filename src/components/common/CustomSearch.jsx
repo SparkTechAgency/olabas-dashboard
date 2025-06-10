@@ -4,11 +4,14 @@ import { SearchOutlined } from "@ant-design/icons";
 const CustomSearch = ({ onSearch, placeholder }) => {
   const [searchValue, setSearchValue] = useState("");
 
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    onSearch(value); // Call parent onSearch immediately on input change
+  };
+
   const handleSearch = () => {
-    if (searchValue.trim() !== "") {
-      onSearch(searchValue); // call parent onSearch
-      setSearchValue(""); // reset input
-    }
+    onSearch(searchValue); // Call parent onSearch with current value
   };
 
   const handleKeyDown = (e) => {
@@ -18,14 +21,14 @@ const CustomSearch = ({ onSearch, placeholder }) => {
   };
 
   return (
-    <div className="flex h-8 border border-gray-300  rounded-md overflow-hidden">
+    <div className="flex h-8 border border-gray-300 rounded-md overflow-hidden">
       <input
         type="text"
         value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
+        onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="flex-1 h-full px-3 text-xs focus:outline-none focus:ring-1 focus:ring-smart "
+        className="flex-1 h-full px-3 text-xs focus:outline-none focus:ring-1 focus:ring-smart"
       />
       <button
         onClick={handleSearch}

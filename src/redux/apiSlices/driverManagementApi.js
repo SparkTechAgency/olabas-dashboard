@@ -1,18 +1,19 @@
+// Updated API Slice (driverManagementApi.js)
 import { api } from "../api/baseApi";
 
 const driverSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     createDriver: builder.mutation({
       query: (data) => ({
-        url: "/extra-service",
+        url: "/user/driver",
         method: "POST",
-        body: data,
+        body: data, // FormData will be sent as-is
       }),
       invalidatesTags: ["DRIVER"],
     }),
     updateDriver: builder.mutation({
       query: ({ id, updatedData }) => ({
-        url: `/extra-service/${id}`,
+        url: `/user/driver/${id}`,
         method: "PATCH",
         body: updatedData,
       }),
@@ -20,7 +21,7 @@ const driverSlice = api.injectEndpoints({
     }),
     deleteDriver: builder.mutation({
       query: (id) => ({
-        url: `/extra-service/${id}`,
+        url: `/user/driver/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["DRIVER"],
@@ -32,7 +33,20 @@ const driverSlice = api.injectEndpoints({
       }),
       providesTags: ["DRIVER"],
     }),
+    getParticularDriver: builder.query({
+      query: (id) => ({
+        url: `/user/driver/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["DRIVER"],
+    }),
   }),
 });
 
-export const { useGetDriverQuery } = driverSlice;
+export const {
+  useGetDriverQuery,
+  useCreateDriverMutation,
+  useUpdateDriverMutation,
+  useDeleteDriverMutation,
+  useGetParticularDriverQuery,
+} = driverSlice;

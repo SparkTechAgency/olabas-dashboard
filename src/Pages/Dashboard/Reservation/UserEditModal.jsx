@@ -4,8 +4,6 @@ import { UploadOutlined } from "@ant-design/icons";
 
 const UserEditModal = ({ isModalOpen, handleCancel, providerData, onSave }) => {
   const [form] = Form.useForm();
-
-  // Populate form with provider data when modal opens
   useEffect(() => {
     if (providerData) {
       form.setFieldsValue(providerData);

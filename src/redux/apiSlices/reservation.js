@@ -2,38 +2,23 @@ import { api } from "../api/baseApi";
 
 const reservationSlice = api.injectEndpoints({
   endpoints: (builder) => ({
-    createReservation: builder.mutation({
-      query: (data) => ({
-        url: "/extra-service",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["RESERVATION"],
-    }),
-    updateReservation: builder.mutation({
-      query: ({ id, updatedData }) => ({
-        url: `/extra-service/${id}`,
-        method: "PATCH",
-        body: updatedData,
-      }),
-      invalidatesTags: ["RESERVATION"],
-    }),
     assignDreiver: builder.mutation({
       query: ({ driverId, rID }) => ({
         url: `/booking/assign-driver/${rID}`,
         method: "PATCH",
-        body: { driverId }, // must be an object
+        body: { driverId: driverId },
       }),
       invalidatesTags: ["RESERVATION"],
     }),
 
     deleteReservation: builder.mutation({
       query: (id) => ({
-        url: `/extra-service/${id}`,
+        url: `/booking/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["RESERVATION"],
     }),
+
     getReservation: builder.query({
       query: () => ({
         url: `/booking`,
@@ -41,8 +26,21 @@ const reservationSlice = api.injectEndpoints({
       }),
       providesTags: ["RESERVATION"],
     }),
+
+    createReservation: builder.mutation({
+      query: (data) => ({
+        url: `/booking`,
+        method: "POST",
+        body: data,
+      }),
+      providesTags: ["RESERVATION"],
+    }),
   }),
 });
 
-export const { useGetReservationQuery, useAssignDreiverMutation } =
-  reservationSlice;
+export const {
+  useAssignDreiverMutation,
+  useDeleteReservationMutation,
+  useGetReservationQuery,
+  useCreateReservationMutation,
+} = reservationSlice;

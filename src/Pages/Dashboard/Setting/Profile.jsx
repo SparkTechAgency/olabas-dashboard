@@ -299,7 +299,7 @@ function Profile() {
             uploadedImage
               ? URL.createObjectURL(uploadedImage)
               : userProfile?.data?.image
-              ? `${getImageUrl()}${userProfile?.data?.image}`
+              ? `${getImageUrl}${userProfile?.data?.image}`
               : man
           }
           width={120}

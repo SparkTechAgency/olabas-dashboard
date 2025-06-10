@@ -436,7 +436,7 @@ function Team() {
       render: (image) =>
         image ? (
           <img
-            src={`${getImageUrl()}${image}`}
+            src={`${getImageUrl}${image}`}
             alt="Team"
             className="w-12 h-12 object-cover rounded"
           />

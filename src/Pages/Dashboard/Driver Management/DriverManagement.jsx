@@ -1,17 +1,30 @@
+// DriverManagement.jsx
 import { useState } from "react";
-import { Button } from "antd";
+import { Button, message } from "antd";
 import GetPageName from "../../../components/common/GetPageName";
-import App from "../Driver Schedule/Table";
 import { GrFormAdd } from "react-icons/gr";
 import DriverInformationModal from "./DriverInformationModal";
 import { useSidebar } from "../../../Context/SidebarContext";
-import DriverInfo from "./driverTable";
+import DriverTable from "./driverTable";
+import {
+  useCreateDriverMutation,
+  useDeleteDriverMutation,
+  useGetDriverQuery,
+} from "../../../redux/apiSlices/driverManagementApi";
 
 function DriverManagement() {
   const handleSearch = () => {};
   const handleDelete = () => {};
   const { isCollapsed } = useSidebar();
-  console.log(isCollapsed);
+
+  const [createDriver, { isLoading: createDriverLoading }] =
+    useCreateDriverMutation();
+  const [deleteDriver, { isLoading: deleteDriverLoading }] =
+    useDeleteDriverMutation();
+  const { data, isLoading, refetch } = useGetDriverQuery();
+
+  console.log(data?.data);
+
   return (
     <div
       className={`h-40 driver-management-container transition-all duration-300 ${
@@ -22,10 +35,13 @@ function DriverManagement() {
     >
       <Header
         onSearch={handleSearch}
-        pagename="Transactions"
+        pagename="Driver Management"
         handleDelete={handleDelete}
+        createDriver={createDriver}
+        createDriverLoading={createDriverLoading}
+        refetch={refetch}
       />
-      <DriverInfo />
+      <DriverTable />
     </div>
   );
 }
@@ -33,28 +49,32 @@ function DriverManagement() {
 export default DriverManagement;
 
 // Header Component
-const Header = ({ pagename }) => {
+const Header = ({ pagename, createDriver, createDriverLoading, refetch }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
-  const handleOk = () => {
-    console.log("Modal OK clicked");
-    setModalOpen(false);
+  const handleCreateDriver = async (formData) => {
+    try {
+      const result = await createDriver(formData).unwrap();
+      message.success("Driver created successfully!");
+      setModalOpen(false);
+      refetch(); // Refresh the driver list
+      return result;
+    } catch (error) {
+      console.error("Error creating driver:", error);
+      message.error(error?.data?.message || "Failed to create driver");
+      throw error;
+    }
   };
 
   const handleCancel = () => {
-    console.log("Modal Cancel clicked");
-    setModalOpen(false);
-  };
-
-  const closeModal = () => {
     setModalOpen(false);
   };
 
   return (
     <div className="flex flex-col justify-between items-start py-5">
       <h1 className="text-[20px] font-medium">{GetPageName() || pagename}</h1>
-      <div className="w-full flex  items-center justify-between  mt-5">
-        <div className=" flex gap-3">
+      <div className="w-full flex items-center justify-between mt-5">
+        <div className="flex gap-3">
           <button className="bg-[#ED5565] text-white hover:bg-[#ED5565]/80 text-xs px-2 h-7 rounded">
             Booked
           </button>
@@ -65,22 +85,17 @@ const Header = ({ pagename }) => {
         <Button
           icon={<GrFormAdd size={25} />}
           className="bg-smart hover:bg-smart text-white border-none h-8 flex items-center"
-          onClick={() => {
-            console.log("Add Driver clicked"); // Debug log
-            setModalOpen(true);
-          }}
+          onClick={() => setModalOpen(true)}
+          loading={createDriverLoading}
         >
           Add Driver
         </Button>
 
         <DriverInformationModal
           isModalOpen={modalOpen}
-          handleOk={handleOk}
-          handleCancel={handleCancel}
-          open={modalOpen}
-          onOk={handleOk}
+          onSubmit={handleCreateDriver}
           onCancel={handleCancel}
-          onClose={closeModal}
+          loading={createDriverLoading}
         />
       </div>
     </div>

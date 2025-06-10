@@ -1,81 +1,39 @@
-import React, { useState } from "react";
-import { Table, Avatar, ConfigProvider, Input, Button } from "antd";
+import React, { useState, useMemo } from "react";
+import { Table, Button, message } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
 import GetPageName from "../../../components/common/GetPageName";
-import { LuDownload } from "react-icons/lu";
-import man from "../../../assets/man.png";
 import CustomSearch from "../../../components/common/CustomSearch";
 import { useGetClientQuery } from "../../../redux/apiSlices/clientMnanagement";
 import ClientInfoModal from "./clientInfoModal";
 
-// ✅ Correct Data matching columns
-const initialData = [
-  {
-    key: 1,
-    name: "John Lennon",
-    contact: "john@example.com",
-    phone: "+1 234 567 890",
-    totalRentals: 5,
-    totalSpent: 10000,
-    date: "2/12/2025",
-    time: "12:00 PM",
-  },
-  {
-    key: 2,
-    name: "Paul McCartney",
-    contact: "paul@example.com",
-    phone: "+1 987 654 321",
-    totalRentals: 8,
-    totalSpent: 15000,
-    date: "2/12/2025",
-    time: "12:00 PM",
-  },
-  {
-    key: 3,
-    name: "George Harrison",
-    contact: "george@example.com",
-    phone: "+1 555 123 456",
-    totalRentals: 3,
-    totalSpent: 7000,
-    date: "2/12/2025",
-    time: "12:00 PM",
-  },
-  {
-    key: 4,
-    name: "Ringo Starr",
-    contact: "ringo@example.com",
-    phone: "+1 444 666 777",
-    totalRentals: 6,
-    totalSpent: 12000,
-    date: "2/12/2025",
-    time: "12:00 PM",
-  },
-  {
-    key: 5,
-    name: "Yoko Ono",
-    contact: "yoko@example.com",
-    phone: "+1 333 222 111",
-    totalRentals: 2,
-    totalSpent: 4000,
-    date: "2/12/2025",
-    time: "12:00 PM",
-  },
-];
-
 function ClientMangement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [data, setData] = useState(initialData);
   const [selectedClient, setSelectedClient] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const { data: clientData, isLoading, isError } = useGetClientQuery();
 
-  console.log("cient Data", clientData?.data?.result);
-  const clientList = clientData?.data?.result;
-  const handleSearch = (value) => setSearchQuery(value);
+  const filteredClients = useMemo(() => {
+    if (!clientData?.data?.result) return [];
 
-  //view ClientInfo
+    if (!searchQuery.trim()) return clientData.data.result;
+
+    return clientData.data.result.filter((client) => {
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        client.fullName?.toLowerCase().includes(searchLower) ||
+        client.email?.toLowerCase().includes(searchLower) ||
+        client.phone?.toString().includes(searchQuery) ||
+        client.totalSpend?.toString().includes(searchQuery)
+      );
+    });
+  }, [clientData, searchQuery]);
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+  };
+
   const handleViewClient = (record) => {
     setSelectedClient(record);
     setShowInfoModal(true);
@@ -87,7 +45,9 @@ function ClientMangement() {
   };
 
   const handleDelete = () => {
-    setData(data.filter((item) => !selectedRowKeys.includes(item.key)));
+    message.warning(
+      "Delete functionality needs to be implemented with your API"
+    );
     setSelectedRowKeys([]);
   };
 
@@ -116,9 +76,9 @@ function ClientMangement() {
       title: "Total Spent",
       dataIndex: "totalSpend",
       key: "totalSpend",
-      sorter: (a, b) => a.totalSpent - b.totalSpent,
-      render: (totalSpent) => (
-        <p className="text-black font-medium">₦ {totalSpent}</p>
+      sorter: (a, b) => a.totalSpend - b.totalSpend,
+      render: (totalSpend) => (
+        <p className="text-black font-medium">₦ {totalSpend || 0}</p>
       ),
     },
     {
@@ -127,7 +87,7 @@ function ClientMangement() {
       key: "dateTime",
       render: (_, record) => (
         <div className="flex flex-col">
-          <span>{record.lastBooking.createdAt}</span>
+          <span>{record.lastBooking?.createdAt || "N/A"}</span>
         </div>
       ),
     },
@@ -151,16 +111,19 @@ function ClientMangement() {
     <>
       <Head
         onSearch={handleSearch}
-        pagename="Transactions"
+        pagename="Client Management"
         selectedRowKeys={selectedRowKeys}
         handleDelete={handleDelete}
+        filteredData={filteredClients}
       />
 
       <Table
         columns={columns}
         rowSelection={rowSelection}
-        dataSource={clientList}
+        dataSource={filteredClients}
+        loading={isLoading}
         size="small"
+        rowKey={(record) => record._id || record.id} // Use appropriate unique identifier
         pagination={{
           defaultPageSize: 5,
           showSizeChanger: false,
@@ -181,24 +144,26 @@ function ClientMangement() {
 
 export default ClientMangement;
 
-// ✅ Head Component
+// Head Component
 function Head({ onSearch, selectedRowKeys, handleDelete, filteredData }) {
   return (
     <div className="flex justify-between items-center py-5">
-      <h1 className="text-[20px] font-medium">{GetPageName()}</h1>
+      <h1 className="text-[20px] font-medium">Client Management</h1>
 
       <div className="flex gap-3 items-center">
-        <CustomSearch onSearch={onSearch} placeholder="search..." />
+        <CustomSearch
+          onSearch={onSearch}
+          placeholder="Search by name, email, phone..."
+        />
 
-        {selectedRowKeys.length > 1 && (
+        {selectedRowKeys.length > 0 && (
           <Button
             onClick={handleDelete}
             icon={<DeleteOutlined />}
             className="bg-smart text-white border-none h-8"
+            disabled={selectedRowKeys.length === 0}
           >
-            {selectedRowKeys.length === filteredData.length
-              ? "Delete All"
-              : "Delete Selected"}
+            {`Delete (${selectedRowKeys.length})`}
           </Button>
         )}
       </div>

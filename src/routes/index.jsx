@@ -25,79 +25,97 @@ import Location from "../Pages/Dashboard/Location/Location.jsx";
 import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
 import Team from "../Pages/Dashboard/Team/team.jsx";
 import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
-import PrivateRoute from "./ProtectedRoute.jsx";
 import DriverSchedule from "../Pages/Dashboard/Driver Schedule/DriverSchedule.jsx";
+import ProtectedRoute from "./ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
-    // path: "/",
-
-    element: (
-      <PrivateRoute>
-        <Main />,
-      </PrivateRoute>
-    ),
+    element: <Main />,
     children: [
       {
         path: "/",
-        element: <Home />,
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
       },
-
       {
         path: "/transaction",
-        element: <Transaction />,
+        element: (
+          <ProtectedRoute>
+            <Transaction />
+          </ProtectedRoute>
+        ),
       },
-
-      // {
-      //   path: "/reported-issues",
-      //   element: <Report />,
-      // },
-
       {
         path: "/reservation",
-        element: <Reservation />,
+        element: (
+          <ProtectedRoute>
+            <Reservation />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/client-management",
-        element: <ClientMangement />,
+        element: (
+          <ProtectedRoute>
+            <ClientMangement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/fleet-management",
-        element: <FleetManagement />,
+        element: (
+          <ProtectedRoute>
+            <FleetManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/driver-management",
-        element: <DriverManagement />,
+        element: (
+          <ProtectedRoute>
+            <DriverManagement />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/driver-schedule",
-        element: <DriverSchedule />,
+        element: (
+          <ProtectedRoute>
+            <DriverSchedule />{" "}
+          </ProtectedRoute>
+        ),
       },
-      // {
-      //   path: "/announcement",
-      //   element: <Announcement />,
-      // },
       {
         path: "/location",
-        element: <Location />,
+        element: (
+          <ProtectedRoute>
+            <Location />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/extra",
-        element: <Extra />,
+        element: (
+          <ProtectedRoute>
+            <Extra />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/team",
-        element: <Team />,
+        element: (
+          <ProtectedRoute>
+            <Team />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/faq",
         element: <FaqCollapse />,
       },
-
-      // {
-      //   path: "/logo",
-      //   element: <Logo />,
-      // },
       {
         path: "/contact",
         element: <Contact />,
@@ -114,12 +132,10 @@ const router = createBrowserRouter([
         path: "/terms-and-conditions",
         element: <TermsAndCondition />,
       },
-
       {
         path: "/notification",
         element: <Notifications />,
       },
-
       {
         path: "/settings",
         element: <Setting />,

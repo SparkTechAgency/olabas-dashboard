@@ -24,7 +24,7 @@ const VehicleInfoModal = ({ visible, onCancel, vehicleData }) => {
           {/* Vehicle Image */}
           <div className="md:w-1/2">
             <img
-              src={`${getImageUrl()}${vehicleData.image}`}
+              src={`${getImageUrl}${vehicleData.image}`}
               alt="Vehicle"
               className="rounded-md object-cover w-full h-full"
             />

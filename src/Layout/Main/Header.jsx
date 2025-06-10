@@ -8,10 +8,13 @@ import { RiSettings5Line, RiShutDownLine } from "react-icons/ri";
 import { useSidebar } from "../../Context/SidebarContext";
 import { useProfileQuery } from "../../redux/apiSlices/authApi";
 import { getImageUrl } from "../../utils/baseUrl";
+
 const Header = () => {
   const { toggleSidebar } = useSidebar();
 
   const { data: userprofile } = useProfileQuery();
+
+  console.log(userprofile?.data?.image);
 
   const userMenuContent = (
     <div>
@@ -92,7 +95,11 @@ const Header = () => {
               shape="square"
               size={60}
               className="rounded cursor-pointer"
-              src={`${getImageUrl()}${userprofile?.data?.image}`}
+              src={
+                userprofile?.data?.image?.startsWith("http")
+                  ? userprofile.data.image
+                  : `${getImageUrl}${userprofile?.data?.image}`
+              }
             />
           </Popover>
         </Flex>
