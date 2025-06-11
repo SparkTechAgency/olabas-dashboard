@@ -26,21 +26,92 @@ function AddEditTeamMember({
   // Effect to populate form when editing
   useEffect(() => {
     if (isEdit && editData) {
+      // Convert teamRole to lowercase for the form
+      const roleValue = editData.teamRole
+        ? editData.teamRole.toLowerCase()
+        : "authority";
+
       form.setFieldsValue({
         name: editData.name,
         designation: editData.designation,
-        teamRole: editData.teamRole,
+        teamRole: roleValue, // Use lowercase value for form
         description: editData.teamDescription || editData.description,
       });
-      // Fix: Use editData.teamRole instead of undefined teamRole
-      setSelectedRole(editData?.teamRole);
+      // Set the local state for role
+      setSelectedRole(roleValue);
     } else {
       // Reset form for add mode
       form.resetFields();
-      form.setFieldsValue({ teamRole: "authority" }); // Fix: Use teamRole instead of role
+      form.setFieldsValue({ teamRole: "authority" });
       setSelectedRole("authority");
     }
   }, [isEdit, editData, form]);
+
+  // const onFinish = async (values) => {
+  //   setLoading(true);
+
+  //   try {
+  //     const formData = new FormData();
+
+  //     // Prepare the data object
+  //     const data = {
+  //       name: values.name,
+  //       designation: values.designation,
+  //       teamRole: values.teamRole.toUpperCase(), // Convert to uppercase and use teamRole
+  //       teamDescription: values.description || "",
+  //     };
+
+  //     // Append the JSON string under the 'data' key
+  //     formData.append("data", JSON.stringify(data));
+
+  //     // Handle file upload
+  //     const fileList = values.image;
+  //     if (fileList && fileList.length > 0) {
+  //       // Check if it's a new file upload or existing file
+  //       const file = fileList[0];
+  //       if (file.originFileObj) {
+  //         // New file upload
+  //         formData.append("image", file.originFileObj);
+  //       }
+  //     }
+
+  //     let res;
+  //     if (isEdit) {
+  //       // Update existing team member
+  //       res = await updateTeam({ id: editData.id, data: formData }).unwrap();
+  //     } else {
+  //       // Create new team member
+  //       res = await createTeam(formData).unwrap();
+  //     }
+
+  //     if (res.success) {
+  //       message.success(
+  //         isEdit
+  //           ? "Team member updated successfully"
+  //           : "Team member added successfully"
+  //       );
+  //       form.resetFields();
+  //       setSelectedRole("authority");
+  //       handleOk(); // Close modal and refresh data
+  //     } else {
+  //       message.error(
+  //         isEdit ? "Failed to update team member" : "Failed to add team member"
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.error(
+  //       isEdit
+  //         ? "Failed to update team member:"
+  //         : "Failed to create team member:",
+  //       error
+  //     );
+  //     message.error(
+  //       isEdit ? "Failed to update team member" : "Failed to add team member"
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -48,34 +119,38 @@ function AddEditTeamMember({
     try {
       const formData = new FormData();
 
-      // Prepare the data object
       const data = {
         name: values.name,
         designation: values.designation,
-        teamRole: values.teamRole.toUpperCase(), // Convert to uppercase and use teamRole
+        teamRole: values.teamRole.toUpperCase(),
         teamDescription: values.description || "",
       };
 
-      // Append the JSON string under the 'data' key
       formData.append("data", JSON.stringify(data));
 
-      // Handle file upload
       const fileList = values.image;
       if (fileList && fileList.length > 0) {
-        // Check if it's a new file upload or existing file
         const file = fileList[0];
         if (file.originFileObj) {
-          // New file upload
           formData.append("image", file.originFileObj);
+        }
+      }
+
+      // 🔍 Log formData if editing
+      if (isEdit) {
+        console.log("FormData being sent (edit mode):");
+        for (let pair of formData.entries()) {
+          console.log(`${pair[0]}:`, pair[1]);
         }
       }
 
       let res;
       if (isEdit) {
-        // Update existing team member
-        res = await updateTeam({ id: editData.id, data: formData }).unwrap();
+        res = await updateTeam({
+          id: editData.id,
+          updatedData: formData,
+        }).unwrap();
       } else {
-        // Create new team member
         res = await createTeam(formData).unwrap();
       }
 
@@ -87,7 +162,7 @@ function AddEditTeamMember({
         );
         form.resetFields();
         setSelectedRole("authority");
-        handleOk(); // Close modal and refresh data
+        handleOk();
       } else {
         message.error(
           isEdit ? "Failed to update team member" : "Failed to add team member"
@@ -154,7 +229,12 @@ function AddEditTeamMember({
         layout="vertical"
         onFinish={onFinish}
         className="pt-2"
-        initialValues={{ teamRole: "authority" }} // Fix: Use teamRole instead of role
+        initialValues={{ teamRole: "authority" }}
+        // preserve={false} // Add this to ensure form doesn't preserve old values
+        onValuesChange={(changedValues, allValues) => {
+          // Optional: Log to debug what's changing
+          console.log("Form values changed:", changedValues, allValues);
+        }}
       >
         <Form.Item
           label="Role"
