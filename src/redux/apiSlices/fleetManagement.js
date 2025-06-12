@@ -18,6 +18,14 @@ const fleetManagementSlice = api.injectEndpoints({
       }),
       invalidatesTags: ["Fleet"],
     }),
+    updateFleetStatus: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/vehicle/${id}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Fleet"],
+    }),
     deleteFleet: builder.mutation({
       query: (id) => ({
         url: `/vehicle/${id}`,
@@ -40,6 +48,7 @@ export const {
   useCreateFleetMutation,
   useDeleteFleetMutation,
   useUpdateFleetMutation,
+  useUpdateFleetStatusMutation,
   useGetFleetQuery,
   useGetFleetByIdQuery,
 } = fleetManagementSlice;
