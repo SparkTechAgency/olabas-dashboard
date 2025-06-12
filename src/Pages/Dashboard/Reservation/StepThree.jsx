@@ -1,119 +1,3 @@
-// import { useEffect } from "react";
-// import { useSelector, useDispatch } from "react-redux";
-// import { Table, InputNumber, Switch } from "antd";
-// import { BiDollar } from "react-icons/bi";
-// import {
-//   updateExtra,
-//   toggleExtraInclude,
-//   calculateTotals,
-// } from "../../../redux/features/ReservationSlice";
-// import { useGetExtraQuery } from "../../../redux/apiSlices/extra";
-
-// const StepThree = () => {
-//   const { data: extraData } = useGetExtraQuery();
-//   console.log("extraDataF3", extraData?.data?.result);
-
-//   const dispatch = useDispatch();
-//   const { extras } = useSelector((state) => state.carRental);
-
-//   const handleSwitchChange = (checked, index) => {
-//     dispatch(toggleExtraInclude(index));
-//   };
-
-//   const handleQtyChange = (value, index) => {
-//     dispatch(updateExtra({ index, field: "qty", value }));
-//   };
-
-//   const handlePriceChange = (value, index) => {
-//     dispatch(updateExtra({ index, field: "price", value }));
-//   };
-
-//   // Calculate totals whenever extras change
-//   useEffect(() => {
-//     dispatch(calculateTotals());
-//   }, [extras, dispatch]);
-
-//   const columns = [
-//     {
-//       title: "Include",
-//       dataIndex: "includeStatus",
-//       key: "includeStatus",
-//       render: (text, record, index) => (
-//         <Switch
-//           checked={record.includeStatus}
-//           onChange={(checked) => handleSwitchChange(checked, index)}
-//           checkedChildren="YES"
-//           unCheckedChildren="NO"
-//           className="custom-switch"
-//         />
-//       ),
-//     },
-//     {
-//       title: "Name",
-//       dataIndex: "name",
-//       key: "name",
-//     },
-//     {
-//       title: "Qty",
-//       dataIndex: "qty",
-//       key: "qty",
-//       render: (text, record, index) => (
-//         <InputNumber
-//           min={1}
-//           value={record.qty}
-//           onChange={(value) => handleQtyChange(value, index)}
-//           disabled={!record.includeStatus}
-//         />
-//       ),
-//     },
-//     {
-//       title: "Price",
-//       dataIndex: "price",
-//       key: "price",
-//       render: (text, record, index) => (
-//         <div className="flex items-center gap-4">
-//           {record.price === 0 ? (
-//             <div className="flex items-center gap-2">
-//               <span className="text-green-600 font-medium">Free</span>
-//             </div>
-//           ) : (
-//             <InputNumber
-//               addonBefore={<BiDollar />}
-//               min={0}
-//               value={record.price}
-//               onChange={(value) => handlePriceChange(value, index)}
-//               className="w-24"
-//               disabled={!record.includeStatus}
-//             />
-//           )}
-//           <p>One Time</p>
-//         </div>
-//       ),
-//     },
-//     {
-//       title: "Total",
-//       dataIndex: "total",
-//       key: "total",
-//       width: 120,
-//       align: "right",
-//       render: (text) => `$${(text || 0).toFixed(2)}`,
-//     },
-//   ];
-
-//   return (
-//     <div className="my-4">
-//       <Table
-//         columns={columns}
-//         dataSource={extras}
-//         pagination={false}
-//         rowKey={(record, index) => index}
-//       />
-//     </div>
-//   );
-// };
-
-// export default StepThree;
-
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Table, InputNumber, Switch, Spin, Alert } from "antd";
@@ -123,11 +7,14 @@ import {
   updateExtra,
   toggleExtraInclude,
   calculateTotals,
-} from "../../../redux/features/ReservationSlice";
+  setSelectedExtraIds,
+} from "../../../redux/features/ReservationSlice"; // Adjust path as needed
 import { useGetExtraQuery } from "../../../redux/apiSlices/extra";
 
-const StepThree = () => {
+const StepThree = ({ isClicked, setIsClicked }) => {
   const { data: extraData, isLoading, error } = useGetExtraQuery();
+  console.log("Extra Data:", extraData); // Debug: Log the fetched extra data
+
   const dispatch = useDispatch();
   const {
     extras,
@@ -135,34 +22,84 @@ const StepThree = () => {
     selectedExtraIds, // Access the selected IDs from Redux
   } = useSelector((state) => state.carRental);
 
+  // Function to save extra services to Redux
+  const saveExtraServicesToRedux = () => {
+    // Filter only the selected extras and create the array of IDs
+    const selectedIds = extras
+      .filter((extra) => extra.includeStatus)
+      .map((extra) => extra._id)
+      .filter(Boolean); // Remove any undefined/null IDs
+
+    // Update the selectedExtraIds in Redux
+    dispatch(setSelectedExtraIds(selectedIds));
+
+    // Recalculate totals
+    dispatch(calculateTotals());
+
+    console.log("Extra services data saved to Redux:", {
+      selectedExtraIds: selectedIds,
+      selectedExtras: extras.filter((extra) => extra.includeStatus),
+    });
+
+    // Set isClicked to false after saving
+    setIsClicked(false);
+  };
+
   // Initialize extras from API data when component mounts or data changes
   useEffect(() => {
-    if (extraData?.data?.result?.status === "ACTIVE" && !extrasInitialized) {
-      dispatch(initializeExtras(extraData.data.result));
+    if (extraData?.data?.result && !extrasInitialized) {
+      // Check if the data has the expected structure
+      if (Array.isArray(extraData.data.result)) {
+        dispatch(initializeExtras(extraData.data.result));
+      } else if (
+        extraData.data.result.status === "ACTIVE" &&
+        Array.isArray(extraData.data.result.items)
+      ) {
+        // If the API returns an object with items array
+        dispatch(initializeExtras(extraData.data.result.items));
+      } else {
+        console.warn(
+          "Unexpected API response structure:",
+          extraData.data.result
+        );
+      }
     }
   }, [extraData, extrasInitialized, dispatch]);
 
   const handleSwitchChange = (checked, index) => {
     dispatch(toggleExtraInclude(index));
+    // Recalculate totals after toggle
+    dispatch(calculateTotals());
   };
 
   const handleQtyChange = (value, index) => {
     dispatch(updateExtra({ index, field: "qty", value: value || 1 }));
+    // Recalculate totals after quantity change
+    dispatch(calculateTotals());
   };
 
   const handlePriceChange = (value, index) => {
     dispatch(updateExtra({ index, field: "price", value: value || 0 }));
-  };
-
-  // Calculate totals whenever extras change
-  useEffect(() => {
+    // Recalculate totals after price change
     dispatch(calculateTotals());
-  }, [extras, dispatch]);
+  };
 
   // Debug: Log selected IDs whenever they change
   useEffect(() => {
-    console.log("Selected Extra IDs:", selectedExtraIds);
+    console.log("Selected Extra IDs from Redux:", selectedExtraIds);
   }, [selectedExtraIds]);
+
+  // Save to Redux when isClicked is true
+  useEffect(() => {
+    console.log("Current extras in Redux:", extras);
+    if (isClicked && extras && extras.length > 0) {
+      saveExtraServicesToRedux();
+    } else if (isClicked) {
+      // Handle case where no extras are available but save was requested
+      console.log("No extras available to save");
+      setIsClicked(false);
+    }
+  }, [isClicked, extras]);
 
   // Show loading state
   if (isLoading) {
@@ -350,9 +287,52 @@ const StepThree = () => {
         {/* Debug Info - Selected IDs */}
         {selectedExtraIds.length > 0 && (
           <div className="mt-2 text-xs text-gray-500">
-            <strong>Selected IDs:</strong> {selectedExtraIds.join(", ")}
+            <strong>Selected IDs (Redux):</strong> {selectedExtraIds.join(", ")}
           </div>
         )}
+      </div>
+
+      {/* Debug info - Selected extras in Redux */}
+      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+        <h4 className="font-semibold text-blue-800 mb-2">
+          Selected Extra Services (Redux State):
+        </h4>
+        {extras.filter((extra) => extra.includeStatus).length > 0 ? (
+          <div className="space-y-1">
+            {extras
+              .filter((extra) => extra.includeStatus)
+              .map((extra, index) => (
+                <div key={extra._id} className="text-sm text-blue-700">
+                  <strong>Service {index + 1}:</strong> ID: {extra._id}, Name:{" "}
+                  {extra.name}, Qty: {extra.qty}, Price: ${extra.price}
+                </div>
+              ))}
+          </div>
+        ) : (
+          <p className="text-sm text-blue-600">No extra services selected</p>
+        )}
+      </div>
+
+      {/* Redux Store Debug Info */}
+      <div className="mt-4 p-4 bg-green-50 rounded-lg">
+        <h4 className="font-semibold text-green-800 mb-2">
+          Redux State Debug:
+        </h4>
+        <div className="text-xs text-green-700">
+          <p>
+            <strong>Extras Initialized:</strong>{" "}
+            {extrasInitialized ? "Yes" : "No"}
+          </p>
+          <p>
+            <strong>Total Extras:</strong> {extras.length}
+          </p>
+          <p>
+            <strong>Selected Extra IDs:</strong> [{selectedExtraIds.join(", ")}]
+          </p>
+          <p>
+            <strong>Selected Count:</strong> {selectedExtrasCount}
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -8,7 +8,6 @@ import {
   Radio,
   Select,
   Upload,
-  Popconfirm,
 } from "antd";
 import {
   useCreateFleetMutation,
@@ -16,7 +15,6 @@ import {
   useDeleteFleetMutation,
 } from "../../../redux/apiSlices/fleetManagement";
 import { useEffect } from "react";
-import { DeleteOutlined } from "@ant-design/icons";
 import { getImageUrl } from "../../../utils/baseUrl";
 
 function VehicleModal({
@@ -33,7 +31,7 @@ function VehicleModal({
 
   const carType = [
     { label: "Large: Premium", value: "LARGE PREMIUM" },
-    { label: "Large: Station wagon", value: "LARGE_STATION WAGON" },
+    { label: "Large: Station wagon", value: "LARGE STATION WAGON" },
     { label: "Medium: Low emission", value: "MEDIUM LOW EMISSION" },
     { label: "Small: Economy", value: "SMALL ECONOMY" },
     { label: "Small: Mini", value: "SMALL MINI" },

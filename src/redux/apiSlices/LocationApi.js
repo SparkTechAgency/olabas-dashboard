@@ -15,6 +15,15 @@ const LocationAPi = api.injectEndpoints({
         };
       },
     }),
+    getAllLocation: builder.query({
+      query: (data) => {
+        return {
+          url: `/location`,
+          method: "GET",
+          body: data,
+        };
+      },
+    }),
 
     getSearchLocation: builder.query({
       query: (search) => {
@@ -66,5 +75,5 @@ const LocationAPi = api.injectEndpoints({
   }),
 });
 
-export const { useCreateLocationMutation, useGetSearchLocationQuery } =
+export const { useCreateLocationMutation, useGetSearchLocationQuery,useGetAllLocationQuery } =
   LocationAPi;
