@@ -805,7 +805,7 @@ function FleetManagement() {
                     damping: 25,
                     duration: 0.2,
                   }}
-                  className="bg-gray-300 rounded-full h-3 w-3 hover:bg-sky-500 transition-colors duration-150 ease-in-out cursor-pointer"
+                  className="bg-gray-300 rounded-full h-3 w-3 hover:bg-sky-500 transition-colors duration-150 ease-in-out cursor-pointer  z-10"
                   onClick={() => handleEditPanelToggle(vehicleId)}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
@@ -840,7 +840,7 @@ function FleetManagement() {
                     damping: 30,
                     duration: 0.3,
                   }}
-                  className="flex gap-1.5 items-center justify-center border rounded-full p-1 bg-white shadow-lg   ml-2 z-10"
+                  className="flex gap-1.5 items-center justify-center border rounded-full p-1 bg-white shadow-lg  ml-2 z-10"
                 >
                   {availableOptions.map((option, index) => (
                     <motion.div

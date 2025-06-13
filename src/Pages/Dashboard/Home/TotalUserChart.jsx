@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,47 +9,58 @@ import {
   CartesianGrid,
 } from "recharts";
 import PickDate from "../../../components/common/PickDate";
+import { useTotalUserChartQuery } from "../../../redux/apiSlices/homeApi";
 
-function TotalUserChart({ overViewData }) {
-  // console.log("totalUser", overViewData?.totalBookingsByMonth);
+function TotalUserChart() {
+  // Use state to manage the year, initialize with current year
+  const [year, setYear] = useState(new Date().getFullYear());
+
+  const {
+    data: totalUserData,
+    isLoading,
+    isError,
+  } = useTotalUserChartQuery(year);
+
+  console.log("Total User Data:", totalUserData);
+  console.log("Selected Year:", year);
 
   // Convert your data to the format needed by the chart
   const chartData = useMemo(() => {
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+    const monthMapping = [
+      { name: "Jan", key: "jan" },
+      { name: "Feb", key: "feb" },
+      { name: "Mar", key: "mar" },
+      { name: "Apr", key: "apr" },
+      { name: "May", key: "may" },
+      { name: "Jun", key: "jun" },
+      { name: "Jul", key: "jul" },
+      { name: "Aug", key: "aug" },
+      { name: "Sep", key: "sep" },
+      { name: "Oct", key: "oct" },
+      { name: "Nov", key: "nov" },
+      { name: "Dec", key: "dec" },
     ];
 
-    if (!overViewData?.totalBookingsByMonth) {
+    if (!totalUserData?.totalBookingsByMonth) {
       return [];
     }
 
-    return monthNames.map((month, index) => {
-      const monthKey = Object.keys(overViewData.totalBookingsByMonth)[index];
-      const monthData = overViewData.totalBookingsByMonth[monthKey] || 0;
-
+    return monthMapping.map(({ name, key }) => {
+      const monthData = totalUserData.totalBookingsByMonth[key] || 0;
       return {
-        month,
+        month: name,
         Customer: monthData,
       };
     });
-  }, [overViewData]);
+  }, [totalUserData]);
+
+  console.log("Chart Data:", chartData); // Add this to debug
 
   return (
     <>
       <div className="flex items-center justify-between px-6 mt-5 relative">
         <h1 className="text-2xl font-semibold">Total User Chart</h1>
-        <PickDate />
+        <PickDate setYear={setYear} />
       </div>
 
       <div className="w-full h-full py-1">

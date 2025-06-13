@@ -412,7 +412,8 @@ import {
   useDeleteDriverMutation,
 } from "../../../redux/apiSlices/driverManagementApi";
 import { getBaseUrl } from "../../../utils/baseUrl";
-
+import { FaCar } from "react-icons/fa";
+import { GiCarWheel } from "react-icons/gi";
 const useStyle = createStyles(({ css, token }) => {
   const { antCls } = token;
   return {
@@ -600,17 +601,23 @@ const DriverTable = () => {
       dataIndex: "driverCurrentStatus",
       key: "driverCurrentStatus",
       render: (status) => (
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-medium ${
-            status === "IDLE"
-              ? "bg-green-100 text-green-800"
-              : status === "BUSY"
-              ? "bg-red-100 text-red-800"
-              : "bg-gray-100 text-gray-800"
-          }`}
-        >
-          {status || "IDLE"}
-        </span>
+        <div className="flex items-center gap-2.5">
+          <span
+            className={`px-2 py-1 rounded-full text-xs font-medium  ${
+              status === "IDLE"
+                ? "bg-green-100 text-green-800"
+                : status === "ON RIDE"
+                ? "bg-red-100 text-red-800"
+                : "bg-gray-100 text-blue-800"
+            }`}
+          >
+            {status || "IDLE"}
+          </span>
+          {status === "ON RIDE" && (
+            // <FaCar className="text-red-500 animate-ping" />
+            <div className="bg-red-500 w-2 h-2 rounded-full animate-ping"></div>
+          )}
+        </div>
       ),
     },
     {

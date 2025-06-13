@@ -13,7 +13,33 @@ const homeSlice = api.injectEndpoints({
         };
       },
     }),
+    totalUserChart: builder.query({
+      query: (year) => {
+        return {
+          url: `/dashboard/booking/${year}`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        };
+      },
+    }),
+    totalRevenueChart: builder.query({
+      query: (year) => {
+        return {
+          url: `/dashboard/revenue/${year}`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const { useDashboardQuery } = homeSlice;
+export const {
+  useDashboardQuery,
+  useTotalRevenueChartQuery,
+  useTotalUserChartQuery,
+} = homeSlice;

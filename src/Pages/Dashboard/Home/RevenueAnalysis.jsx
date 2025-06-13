@@ -10,44 +10,51 @@ import {
 } from "recharts";
 
 import PickDate from "../../../components/common/PickDate";
+import { useTotalRevenueChartQuery } from "../../../redux/apiSlices/homeApi";
 
-export default function RevenueAnalysis({ overViewData }) {
-  // console.log("Revenue Analytics Data:", overViewData?.revenueAnalyticsByMonth);
-
+export default function RevenueAnalysis() {
+  const [year, setYear] = useState(new Date().getFullYear());
   const [isDateSelected, setIsDateSelected] = useState(false);
+
+  const {
+    data: revenueData,
+    isLoading,
+    isError,
+  } = useTotalRevenueChartQuery(year);
+  console.log("Revenue Data:", revenueData);
 
   // Convert your data to the format needed by the chart
   const chartData = useMemo(() => {
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+    const monthMapping = [
+      { name: "Jan", key: "jan" },
+      { name: "Feb", key: "feb" },
+      { name: "Mar", key: "mar" },
+      { name: "Apr", key: "apr" },
+      { name: "May", key: "may" },
+      { name: "Jun", key: "jun" },
+      { name: "Jul", key: "jul" },
+      { name: "Aug", key: "aug" },
+      { name: "Sep", key: "sep" },
+      { name: "Oct", key: "oct" },
+      { name: "Nov", key: "nov" },
+      { name: "Dec", key: "dec" },
     ];
 
-    if (!overViewData?.revenueAnalyticsByMonth) {
+    if (!revenueData?.revenueAnalyticsByMonth) {
       return [];
     }
 
-    return monthNames.map((month, index) => {
-      const monthKey = Object.keys(overViewData.revenueAnalyticsByMonth)[index];
-      const monthData = overViewData.revenueAnalyticsByMonth[monthKey] || 0;
-
+    return monthMapping.map(({ name, key }) => {
+      const monthData = revenueData.revenueAnalyticsByMonth[key] || 0;
       return {
-        name: month,
+        name: name,
         pv: monthData,
         amt: monthData,
       };
     });
-  }, [overViewData]);
+  }, [revenueData]);
+
+  console.log("Chart Data:", chartData); // Add this to debug
 
   const onChange = (date, dateString) => {
     console.log(date, dateString);
@@ -59,7 +66,7 @@ export default function RevenueAnalysis({ overViewData }) {
       <div className="flex items-center justify-between px-6 my-5 relative">
         <h1 className="text-2xl font-semibold">Revenue Analytics</h1>
 
-        <PickDate />
+        <PickDate setYear={setYear} />
       </div>
 
       <ResponsiveContainer width="100%" height={255}>

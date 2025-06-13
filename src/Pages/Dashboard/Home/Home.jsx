@@ -26,6 +26,7 @@ export const Card = ({ item }) => {
 };
 
 const Home = () => {
+  const [year, setYear] = useState(dayjs().format("YYYY"));
   const { data: overViewData, isLoading, isError } = useDashboardQuery();
 
   console.log("dashboard", overViewData);
@@ -84,7 +85,7 @@ const Home = () => {
       <div className="flex flex-col lg:flex-row gap-4 mt-4">
         {/* Bar Chart */}
         <div className="w-full lg:w-[85%] h-[330px] border bg-white rounded-lg flex flex-col justify-evenly">
-          <TotalUserChart overViewData={overViewData} />
+          <TotalUserChart overViewData={overViewData} setYear={setYear} />
         </div>
 
         {/* Pie Chart */}
@@ -95,7 +96,7 @@ const Home = () => {
 
       {/* Revenue Analysis */}
       <div className="w-full h-[340px] border mt-4 flex items-center justify-between bg-transparent rounded-lg">
-        <RevenueAnalysis overViewData={overViewData} />
+        <RevenueAnalysis overViewData={overViewData} setYear={setYear} />
       </div>
     </div>
   );
