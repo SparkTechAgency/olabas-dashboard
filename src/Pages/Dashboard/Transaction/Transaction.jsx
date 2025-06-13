@@ -69,6 +69,7 @@ export default function TransactionList() {
           pagination={{
             current: page,
             pageSize: limit,
+            size: "small",
             total: meta.total,
             showSizeChanger: false,
           }}
