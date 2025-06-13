@@ -106,6 +106,7 @@ function FleetManagement() {
     if (fleetData?.data?.result && Array.isArray(fleetData.data.result)) {
       const transformedData = fleetData.data.result.map((vehicle, index) => ({
         key: vehicle.id || index + 1,
+        name: vehicle.name || `Vehicle ${index + 1}`,
         licensePlate: vehicle.licenseNumber || "N/A",
         carModel: vehicle.model || "Unknown Model",
         carType: vehicle.vehicleType || "Unknown Type",
@@ -258,6 +259,11 @@ function FleetManagement() {
   };
 
   const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
     {
       title: "License Plate",
       dataIndex: "licensePlate",
