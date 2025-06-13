@@ -470,12 +470,6 @@ function FleetManagement() {
         rowSelection={rowSelection}
         dataSource={filteredData}
         size="default"
-        // pagination={{
-        //   defaultPageSize: 5,
-        //   showSizeChanger: false,
-        //   showQuickJumper: true,
-        //   position: ["bottomRight"],
-        // }}
         onChange={handleTableChange}
         pagination={{
           current: page,

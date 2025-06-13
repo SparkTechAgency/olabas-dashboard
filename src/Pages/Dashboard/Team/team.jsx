@@ -20,8 +20,20 @@ function Team() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
 
-  const { data: teamData, isError, isLoading } = useGetTeamQuery();
+  const {
+    data: teamData,
+    isError,
+    isLoading,
+  } = useGetTeamQuery({ page, limit, status: filter.toLowerCase() });
+
+  // Handle pagination change
+  const handleTableChange = (pagination) => {
+    setPage(pagination.current);
+    setLimit(pagination.pageSize);
+  };
 
   const [deleteTeam] = useDeleteTeamMutation();
 
@@ -108,12 +120,6 @@ function Team() {
     teamDescription: item.teamDescription,
     status: item.status === "active" ? "Active" : "Inactive",
   }));
-
-  // Filter data by status
-  const filteredData =
-    filter === "All"
-      ? transformedData || []
-      : (transformedData || []).filter((item) => item.status === filter);
 
   // Helper for status badge color
   const getStatusColor = (status) => {
@@ -262,14 +268,21 @@ function Team() {
 
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={transformedData || []}
         rowSelection={rowSelection}
         size="small"
+        onChange={handleTableChange}
         pagination={{
-          defaultPageSize: 5,
-          showSizeChanger: false,
-          showQuickJumper: true,
+          current: page,
+          pageSize: limit,
+          total: teamData?.data?.meta?.total || 0,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           position: ["bottomRight"],
+          size: "small",
+          showSizeChanger: true,
+          showQuickJumper: true,
+          pageSizeOptions: ["1", "5", "10", "20", "50"],
         }}
         rowKey="key"
       />

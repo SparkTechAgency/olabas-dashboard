@@ -26,8 +26,8 @@ const teamSlice = api.injectEndpoints({
       invalidatesTags: ["Team"],
     }),
     getTeam: builder.query({
-      query: () => ({
-        url: `/user/team-member`,
+      query: ({ page, limit, status }) => ({
+        url: `/user/team-member?page=${page}&limit=${limit}&status=${status}`,
         method: "GET",
       }),
       providesTags: ["Team"],
