@@ -26,8 +26,8 @@ const extraSlice = api.injectEndpoints({
       invalidatesTags: ["Extra"],
     }),
     getExtra: builder.query({
-      query: () => ({
-        url: `/extra-service`,
+      query: ({ page, limit, status }) => ({
+        url: `/extra-service?page=${page}&limit=${limit}&status=${status}`,
         method: "GET",
       }),
       providesTags: ["Extra"],
