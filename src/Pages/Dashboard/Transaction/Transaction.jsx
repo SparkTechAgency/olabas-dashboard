@@ -53,7 +53,7 @@ export default function TransactionList() {
 
   return (
     <div>
-      <h2>Transactions</h2>
+      <h1 className="text-[20px] font-medium mb-5">Transactions</h1>
 
       {error && (
         <Alert message="Error loading transactions" type="error" showIcon />

@@ -60,23 +60,23 @@ const initialState = {
   currentStep: 1,
 
   // Step 1: Date/Time & Location
-  pickupDateTime: "03/30/2025 12:00 am",
-  returnDateTime: "03/30/2025 12:00 am",
-  pickupLocation: "Hogarth Road, London",
-  returnLocation: "Market St., Oxford",
+  pickupDateTime: "",
+  returnDateTime: "",
+  pickupLocation: "",
+  returnLocation: "",
 
   // Step 2: Vehicle Selection - UPDATED STRUCTURE
   selectedCarSize: "Large: Premium",
   vehicle: {
-    vehicleId: "683e9d30752d883af38b4c30",
-    vehicleType: "LARGE PREMIUM",
+    vehicleId: "",
+    vehicleType: "",
     rate: 840.0,
   },
   // Keep legacy fields for backward compatibility
-  vehiclePrice: 840.0,
-  vehicleId: "683e9d30752d883af38b4c30",
-  vehicleType: "Large: Premium",
-  rate: 840.0,
+  // vehiclePrice: 840.0,
+  // vehicleId: "",
+  // vehicleType: "Large: Premium",
+  // rate: 840.0,
 
   // Step 3: Add Extras
   extras: initialExtras,

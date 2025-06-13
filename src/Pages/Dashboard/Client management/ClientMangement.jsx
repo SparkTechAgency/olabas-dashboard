@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState } from "react";
 import { Table, Button, message } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
@@ -12,26 +12,30 @@ function ClientMangement() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectedClient, setSelectedClient] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
-  const { data: clientData, isLoading, isError } = useGetClientQuery();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
 
-  const filteredClients = useMemo(() => {
-    if (!clientData?.data?.result) return [];
+  const {
+    data: clientData,
+    isLoading,
+    isError,
+  } = useGetClientQuery({ page, limit, searchTerm: searchQuery });
 
-    if (!searchQuery.trim()) return clientData.data.result;
+  // Handle pagination change
+  const handleTableChange = (pagination) => {
+    setPage(pagination.current);
+    setLimit(pagination.pageSize);
+  };
 
-    return clientData.data.result.filter((client) => {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        client.fullName?.toLowerCase().includes(searchLower) ||
-        client.email?.toLowerCase().includes(searchLower) ||
-        client.phone?.toString().includes(searchQuery) ||
-        client.totalSpend?.toString().includes(searchQuery)
-      );
-    });
-  }, [clientData, searchQuery]);
+  // Remove client-side filtering since backend handles search
+  const clientList = clientData?.data?.result || [];
 
   const handleSearch = (value) => {
     setSearchQuery(value);
+    // Reset pagination when searching
+    setPage(1);
+    // Clear selected rows when searching
+    setSelectedRowKeys([]);
   };
 
   const handleViewClient = (record) => {
@@ -114,21 +118,28 @@ function ClientMangement() {
         pagename="Client Management"
         selectedRowKeys={selectedRowKeys}
         handleDelete={handleDelete}
-        filteredData={filteredClients}
+        filteredData={clientList} // Use server-filtered data
       />
 
       <Table
         columns={columns}
         rowSelection={rowSelection}
-        dataSource={filteredClients}
+        dataSource={clientList} // Use server-filtered data
         loading={isLoading}
         size="small"
-        rowKey={(record) => record._id || record.id} // Use appropriate unique identifier
+        onChange={handleTableChange}
+        rowKey={(record) => record._id || record.id}
         pagination={{
-          defaultPageSize: 5,
-          showSizeChanger: false,
-          showQuickJumper: true,
+          current: page,
+          pageSize: limit,
+          total: clientData?.data?.meta?.total || 0,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
           position: ["bottomRight"],
+          size: "small",
+          showSizeChanger: true,
+          showQuickJumper: true,
+          pageSizeOptions: ["1", "5", "10", "20", "50"],
         }}
         showSorterTooltip={{ target: "sorter-icon" }}
       />

@@ -21,7 +21,11 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
     (state) => state.carRental
   );
 
-  const { data: vehicleData, isLoading } = useGetFleetQuery();
+  const { data: vehicleData, isLoading } = useGetFleetQuery({
+    page: null,
+    limit: null,
+  });
+  console.log("Vehicle Data:", vehicleData);
 
   const data = [
     {
