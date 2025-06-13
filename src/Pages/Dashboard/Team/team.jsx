@@ -184,12 +184,12 @@ function Team() {
         <div className="flex items-center gap-4">
           <Button
             onClick={() => handleEdit(record)}
-            className="p-1 border-smart"
+            className="p-1 border-2 border-smart rounded-full "
           >
             <FiEdit3 size={20} className="text-black" />
           </Button>
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-2 border-smart rounded-full"
             onClick={() => handleDeleteSingle(record._id)}
           >
             <RiDeleteBin6Line size={20} className="text-black" />

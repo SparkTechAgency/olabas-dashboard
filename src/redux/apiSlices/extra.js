@@ -27,7 +27,9 @@ const extraSlice = api.injectEndpoints({
     }),
     getExtra: builder.query({
       query: ({ page, limit, status }) => ({
-        url: `/extra-service?page=${page}&limit=${limit}&status=${status}`,
+        url: `/extra-service?page=${page}&limit=${limit}${
+          status && status !== "ALL" ? `&status=${status}` : ""
+        }`,
         method: "GET",
       }),
       providesTags: ["Extra"],

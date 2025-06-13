@@ -183,13 +183,13 @@ function Extra() {
       render: (_, record) => (
         <div className="flex items-center gap-4">
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-smart border-2 rounded-full"
             onClick={() => handleEdit(record)}
           >
             <FiEdit3 size={20} className="text-black" />
           </Button>
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-smart border-2 rounded-full"
             onClick={() => handleDelete(record.key)}
           >
             <RiDeleteBin6Line size={20} className="text-black" />
