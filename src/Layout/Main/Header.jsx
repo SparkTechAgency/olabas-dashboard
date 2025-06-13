@@ -8,13 +8,31 @@ import { RiSettings5Line, RiShutDownLine } from "react-icons/ri";
 import { useSidebar } from "../../Context/SidebarContext";
 import { useProfileQuery } from "../../redux/apiSlices/authApi";
 import { getImageUrl } from "../../utils/baseUrl";
-
+import { useDispatch } from "react-redux";
 const Header = () => {
   const { toggleSidebar } = useSidebar();
 
   const { data: userprofile } = useProfileQuery();
 
   console.log(userprofile?.data?.image);
+
+  const dispatch = useDispatch();
+
+  (() => {
+    // Dispatch action to set profile data in Redux store
+    if (userprofile?.data) {
+      dispatch({
+        type: "profile/setProfile",
+        payload: {
+          name: userprofile.data?.name,
+          email: userprofile.data?.email,
+          phone: userprofile.data?.phone,
+          role: userprofile.data?.role,
+          image: userprofile.data?.image,
+        },
+      });
+    }
+  })();
 
   const userMenuContent = (
     <div>

@@ -470,3 +470,14 @@ p {
 .ant-upload-wrapper .ant-upload-list .ant-upload-list-item {
   margin-top: 0px;
 }
+
+.ant-picker-cell-selected .ant-picker-cell-inner {
+  background-color: #04bf61 !important;
+  color: white !important;
+}
+
+.ant-btn-primary {
+  background-color: #04bf61 !important;
+  border-color: #04bf61 !important;
+  color: white !important;
+}

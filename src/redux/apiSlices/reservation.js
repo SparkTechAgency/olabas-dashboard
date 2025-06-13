@@ -20,8 +20,8 @@ const reservationSlice = api.injectEndpoints({
     }),
 
     getReservation: builder.query({
-      query: () => ({
-        url: `/booking`,
+      query: ({ page, limit }) => ({
+        url: `/booking?page=${page}&limit=${limit}`,
         method: "GET",
       }),
       providesTags: ["RESERVATION"],

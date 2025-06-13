@@ -33,6 +33,11 @@ function AntdConfig({ children }) {
           //   borderRadius: "3px",
           //   itemActiveBg: "#18a0fb",
           // },
+
+          token: {
+            colorPrimary: "#04bf61 !important",
+            colorPrimaryHover: "#04bf61cc",
+          },
         },
       }}
     >

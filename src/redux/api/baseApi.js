@@ -1,17 +1,3 @@
-// import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import { getBaseUrl } from "../../utils/baseUrl";
-
-// export const api = createApi({
-//   reducerPath: "api",
-//   baseQuery: fetchBaseQuery({
-//     baseUrl: getBaseUrl(),
-//   }),
-//   endpoints: () => ({}),
-//   tagTypes: [],
-// });
-
-// export const imageUrl = getBaseUrl();
-
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { getBaseUrl } from "../../utils/baseUrl";
 
@@ -28,7 +14,7 @@ export const api = createApi({
     },
   }),
   endpoints: () => ({}),
-  tagTypes: [],
+  tagTypes: ["RESERVATION", "DRIVER", "VEHICLE", "USER", "PAYMENT"],
 });
 
 export const imageUrl = getBaseUrl();

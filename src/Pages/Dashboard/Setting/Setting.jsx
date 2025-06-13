@@ -4,9 +4,17 @@ import AdminList from "./AdminList";
 import AdminPassword from "./AdminPassword";
 import Profile from "./Profile";
 import { AnimatePresence, motion } from "framer-motion";
+import { useSelector } from "react-redux";
 
 function Setting() {
   const [selected, setSelected] = useState("Admin");
+
+  const profile = useSelector((state) => state.profile);
+  console.log("Profile Data:", profile?.role);
+
+  // const optionMaker = ()=>{
+
+  // }
 
   const handleSegmentChange = (value) => {
     setSelected(value);
