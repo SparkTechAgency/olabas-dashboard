@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ConfigProvider, Segmented } from "antd";
 import AdminList from "./AdminList";
 import AdminPassword from "./AdminPassword";
@@ -7,14 +7,30 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useSelector } from "react-redux";
 
 function Setting() {
-  const [selected, setSelected] = useState("Admin");
-
   const profile = useSelector((state) => state.profile);
+  const [selected, setSelected] = useState("");
+
   console.log("Profile Data:", profile?.role);
 
-  // const optionMaker = ()=>{
+  const optionMaker = () => {
+    const options = [];
+    if (profile?.role === "SUPER ADMIN") {
+      options.push("Admin");
+    }
+    options.push("Password", "Profile");
+    return options;
+  };
 
-  // }
+  // Set initial selected value based on available options
+  useEffect(() => {
+    const availableOptions = optionMaker();
+    if (availableOptions.length > 0 && !selected) {
+      setSelected(availableOptions[0]);
+    } else if (selected === "Admin" && profile?.role !== "SUPER ADMIN") {
+      // If user was on Admin tab but role changed, switch to first available option
+      setSelected(availableOptions[0]);
+    }
+  }, [profile?.role, selected]);
 
   const handleSegmentChange = (value) => {
     setSelected(value);
@@ -24,7 +40,8 @@ function Setting() {
   const renderContent = () => {
     switch (selected) {
       case "Admin":
-        return <AdminList />;
+        // Strict check: Only render AdminList if user is SUPER ADMIN
+        return profile?.role === "SUPER ADMIN" ? <AdminList /> : null;
       case "Password":
         return <AdminPassword />;
       case "Profile":
@@ -33,6 +50,13 @@ function Setting() {
         return null;
     }
   };
+
+  const availableOptions = optionMaker();
+
+  // Don't render if no options available or profile not loaded
+  if (!profile || availableOptions.length === 0) {
+    return null;
+  }
 
   return (
     <ConfigProvider
@@ -52,7 +76,7 @@ function Setting() {
       <div className="py-8 font-medium w-1/2">
         <div className="w-full">
           <Segmented
-            options={["Admin", "Password", "Profile"]}
+            options={availableOptions}
             value={selected}
             onChange={handleSegmentChange}
             block
