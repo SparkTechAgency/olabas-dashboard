@@ -31,7 +31,7 @@ const AdminModal = ({ isOpen, onClose, onSubmit, selectedAdmin, mode }) => {
 
     const adminData = {
       ...values,
-      email: cleanEmail,
+      email: cleanEmail.trim(),
     };
 
     onSubmit(adminData);
