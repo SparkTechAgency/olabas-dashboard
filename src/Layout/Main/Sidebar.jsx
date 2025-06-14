@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { SiAntdesign } from "react-icons/si";
-
+import { TiThList } from "react-icons/ti";
 import { RxDashboard, RxLapTimer } from "react-icons/rx";
 import { PiMapPinAreaBold, PiWallet } from "react-icons/pi";
 import { FiLogOut } from "react-icons/fi";
@@ -140,6 +140,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/extra">Extra</Link>
       ) : (
         <Link to="/extra">Extra</Link>
+      ),
+    },
+    {
+      key: "/contact-list",
+      icon: <TiThList size={25} />,
+      label: isCollapsed ? (
+        <Link to="/contact-list">Contact List</Link>
+      ) : (
+        <Link to="/contact-list">Contact List</Link>
       ),
     },
     // {

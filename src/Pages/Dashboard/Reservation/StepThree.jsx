@@ -12,7 +12,11 @@ import {
 import { useGetExtraQuery } from "../../../redux/apiSlices/extra";
 
 const StepThree = ({ isClicked, setIsClicked }) => {
-  const { data: extraData, isLoading, error } = useGetExtraQuery();
+  const {
+    data: extraData,
+    isLoading,
+    error,
+  } = useGetExtraQuery({ page: null, limit: null });
   console.log("Extra Data:", extraData); // Debug: Log the fetched extra data
 
   const dispatch = useDispatch();

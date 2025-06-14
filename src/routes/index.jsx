@@ -27,6 +27,7 @@ import Team from "../Pages/Dashboard/Team/team.jsx";
 import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
 import DriverSchedule from "../Pages/Dashboard/Driver Schedule/DriverSchedule.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
+import ContactList from "../Pages/Dashboard/ContactList/contactList.jsx";
 
 const router = createBrowserRouter([
   {
@@ -109,6 +110,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Team />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/contact-list",
+        element: (
+          <ProtectedRoute>
+            <ContactList />
           </ProtectedRoute>
         ),
       },

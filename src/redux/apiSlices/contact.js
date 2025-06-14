@@ -18,7 +18,19 @@ const conactSlice = api.injectEndpoints({
       }),
       providesTags: ["Contact"],
     }),
+
+    getContactList: builder.query({
+      query: ({ page, limit }) => ({
+        url: `/contact?page=${page}&limit=${limit}`,
+        method: "GET",
+      }),
+      providesTags: ["Contact"],
+    }),
   }),
 });
 
-export const { useUpdateContactMutation, useGetContactQuery } = conactSlice;
+export const {
+  useUpdateContactMutation,
+  useGetContactQuery,
+  useGetContactListQuery,
+} = conactSlice;
