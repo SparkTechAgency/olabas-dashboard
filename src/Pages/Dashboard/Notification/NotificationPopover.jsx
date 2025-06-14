@@ -4,29 +4,9 @@ import { Spin, Tag, Button, ConfigProvider } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { MdOutlineMarkEmailRead, MdCancel } from "react-icons/md";
 import moment from "moment";
-
 import EmptyNotification from "../../../assets/EmptyNotification.png";
 
-const NotificationPopover = ({ onNotificationRead }) => {
-  const [notifications, setNotifications] = useState([
-    {
-      _id: "1",
-      title: "Order Confirmed",
-      message: "Your order #12345 has been confirmed.",
-      type: "ORDER",
-      createdAt: new Date(Date.now() - 1000 * 60 * 10), // 10 min ago
-      read: false,
-    },
-    {
-      _id: "2",
-      title: "Message from Admin",
-      message: "Please verify your profile information.",
-      type: "MESSAGE",
-      createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hrs ago
-      read: true,
-    },
-  ]);
-
+const NotificationPopover = ({ onRead, notifications = [] }) => {
   const [loading, setLoading] = useState(false);
 
   const formatTime = (timestamp) =>
@@ -41,20 +21,23 @@ const NotificationPopover = ({ onNotificationRead }) => {
     }
   };
 
-  const markAsRead = async (id) => {
-    setNotifications((prev) =>
-      prev.map((item) => (item._id === id ? { ...item, read: true } : item))
-    );
-    if (onNotificationRead) onNotificationRead();
+  // Function to handle marking a single notification as read
+  const markAsRead = (id) => {
+    console.log("Marking notification as read:", id);
+    if (onRead) onRead(id);
   };
 
+  // Function to handle reading all notifications
   const handleReadAll = () => {
-    setNotifications((prev) => prev.map((item) => ({ ...item, read: true })));
-    if (onNotificationRead) onNotificationRead();
+    console.log("Marking all notifications as read");
+    if (onRead) onRead();
   };
 
+  // Function to remove a notification
   const removeMessage = (id) => {
-    setNotifications((prev) => prev.filter((item) => item._id !== id));
+    console.log("Removing notification:", id);
+    // Since notifications are now passed as props, we don't modify them directly
+    // Instead, you might want to add a removeNotification function to the props
   };
 
   return (
@@ -63,11 +46,11 @@ const NotificationPopover = ({ onNotificationRead }) => {
         <div className="p-4 text-center text-white">
           <Spin size="small" />
         </div>
-      ) : notifications.length > 0 ? (
+      ) : notifications && notifications.length > 0 ? (
         <>
           <div className="flex justify-between items-center px-4 py-2 border-b border-gray-700">
             <h3 className="text-black font-medium">Notifications</h3>
-            {notifications.some((item) => !item.read) && (
+            {notifications.some((item) => !item.isRead) && (
               <Button size="small" onClick={handleReadAll} className="text-xs">
                 Mark all as read
               </Button>
@@ -83,12 +66,12 @@ const NotificationPopover = ({ onNotificationRead }) => {
               dark:[&::-webkit-scrollbar-track]:bg-neutral-700
               dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
           >
-            {notifications.map((item) => (
+            {notifications.map((item, index) => (
               <div
-                key={item._id}
-                onClick={() => markAsRead(item._id)}
+                key={item._id || index}
+                onClick={() => markAsRead(item._id || index)}
                 className={`w-full min-h-16 flex items-start justify-between gap-3 p-3 my-1 rounded-md cursor-pointer hover:bg-slate-100 ${
-                  !item.read ? "border border-quilocoD" : ""
+                  !item.isRead ? "border border-quilocoD" : ""
                 }`}
               >
                 <div className="flex items-start gap-3 flex-1">
@@ -101,14 +84,16 @@ const NotificationPopover = ({ onNotificationRead }) => {
                         <Tag color={getTypeColor(item.type)}>{item.type}</Tag>
                       )}
                       <span className="text-xs text-gray-500">
-                        {formatTime(item.createdAt)}
+                        {formatTime(item.createdAt || item.timestamp)}
                       </span>
                     </div>
-                    <p className="text-black font-medium">{item.title}</p>
-                    <p className="text-gray-400 text-xs whitespace-pre-line">
-                      {item.message}
+                    <p className="text-black font-medium">
+                      {item.title || item.subject}
                     </p>
-                    {item.read && (
+                    <p className="text-gray-400 text-xs whitespace-pre-line">
+                      {item.message || item.content}
+                    </p>
+                    {item.isRead && (
                       <div className="flex items-center mt-1 text-xs text-green-800">
                         <CheckCircleOutlined className="mr-1" /> Read
                       </div>
@@ -119,18 +104,18 @@ const NotificationPopover = ({ onNotificationRead }) => {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      markAsRead(item._id);
+                      markAsRead(item._id || index);
                     }}
                     className="text-gray-400 hover:text-white"
                     title="Mark as read"
-                    disabled={item.read}
+                    disabled={item.isRead}
                   >
                     <MdOutlineMarkEmailRead size={16} />
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      removeMessage(item._id);
+                      removeMessage(item._id || index);
                     }}
                     className="text-gray-400 hover:text-red-500"
                     title="Delete"
