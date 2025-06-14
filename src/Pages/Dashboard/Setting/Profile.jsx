@@ -72,44 +72,50 @@ function Profile() {
   }
 
   return (
-    <div className="bg-quilocoP w-full min-h-72 flex flex-col justify-start items-center px-4 border bg-white rounded-lg">
-      <div className="relative mt-6 flex flex-col items-center justify-center">
-        <img
-          src={
-            uploadedImage
-              ? URL.createObjectURL(uploadedImage)
-              : userProfile?.data?.image
-              ? `${getImageUrl}${userProfile?.data?.image}`
-              : man
-          }
-          width={120}
-          height={120}
-          className="border border-slate-500 rounded-full object-cover"
-          alt="Profile"
-        />
-        {showButton && (
-          <Upload
-            showUploadList={false}
-            beforeUpload={handleImageUpload}
-            accept="image/*"
-          >
-            <button
-              type="button"
-              className="absolute top-[4.5rem] left-[4.5rem]"
+    <div className="bg-quilocoP w-full min-h-72 flex flex-col justify-start items-center px-4 border bg-white rounded-lg overflow-hidden">
+      {/* Fixed header section with consistent height */}
+      <div className="w-full flex flex-col items-center pt-6 pb-4">
+        <div className="relative flex flex-col items-center justify-center">
+          {/* Fixed image container with consistent dimensions */}
+          <div className="relative w-[120px] h-[120px] border border-slate-500 rounded-full overflow-hidden">
+            <img
+              src={
+                uploadedImage
+                  ? URL.createObjectURL(uploadedImage)
+                  : userProfile?.data?.image
+                  ? `${getImageUrl}${userProfile?.data?.image}`
+                  : man
+              }
+              className="w-full h-full object-cover"
+              alt="Profile"
+            />
+          </div>
+
+          {showButton && (
+            <Upload
+              showUploadList={false}
+              beforeUpload={handleImageUpload}
+              accept="image/*"
             >
-              <MdCameraEnhance
-                size={30}
-                className="text-white border rounded-full bg-smart p-1 hover:bg-smart/80 transition-colors"
-              />
-            </button>
-          </Upload>
-        )}
-        <h3 className="text-black text-xl mt-3">
-          {userProfile?.data?.name || "User Name"}
-        </h3>
+              <button type="button" className="absolute top-[5rem] left-[6rem]">
+                <MdCameraEnhance
+                  size={30}
+                  className="text-white border rounded-full bg-smart p-1 hover:bg-smart/80 transition-colors"
+                />
+              </button>
+            </Upload>
+          )}
+        </div>
+
+        {/* Fixed height container for name to prevent layout shift */}
+        <div className="h-[2.5rem] flex items-center mt-3">
+          <h3 className="text-black text-xl text-center">
+            {userProfile?.data?.name || "User Name"}
+          </h3>
+        </div>
       </div>
 
-      <div className="w-full flex justify-end">
+      <div className="w-full flex justify-end mb-4">
         <Button
           onClick={() => {
             if (showButton) {
@@ -129,15 +135,18 @@ function Profile() {
         </Button>
       </div>
 
-      <ProfileDetails
-        showButton={showButton}
-        setShowButton={setShowButton}
-        user={userProfile?.data}
-        uploadedImage={uploadedImage}
-        setUploadedImage={setUploadedImage}
-        isUpdating={isUpdating}
-        refetchProfile={refetch}
-      />
+      {/* Form container with max width and proper spacing */}
+      <div className="w-full max-w-full px-2">
+        <ProfileDetails
+          showButton={showButton}
+          setShowButton={setShowButton}
+          user={userProfile?.data}
+          uploadedImage={uploadedImage}
+          setUploadedImage={setUploadedImage}
+          isUpdating={isUpdating}
+          refetchProfile={refetch}
+        />
+      </div>
     </div>
   );
 }
@@ -238,14 +247,14 @@ const ProfileDetails = ({
         form={form}
         layout="vertical"
         onFinish={handleFinish}
-        className="w-full"
+        className="w-full max-w-full"
         preserve={false} // Don't preserve form values when component unmounts
       >
-        <div className="flex justify-between gap-2 w-full">
+        <div className="flex flex-col sm:flex-row justify-between gap-2 w-full">
           <Form.Item
             name="name"
-            label={<p className="text-black font-medium">Name</p>}
-            className="w-full"
+            label={<p className="text-black font-medium text-sm">Name</p>}
+            className="w-full flex-1 mb-3"
             rules={[
               { required: false, message: "Name is required" },
               { min: 2, message: "Name must be at least 2 characters" },
@@ -253,7 +262,7 @@ const ProfileDetails = ({
             ]}
           >
             <Input
-              className="bg-white border border-black h-8 rounded-lg focus:border-smart"
+              className="bg-white border border-black h-8 rounded-lg focus:border-smart text-sm"
               readOnly={!showButton}
               style={{ color: "black" }}
               placeholder="Enter your name"
@@ -262,11 +271,11 @@ const ProfileDetails = ({
 
           <Form.Item
             name="email"
-            label={<p className="text-black font-medium">Email</p>}
-            className="w-full"
+            label={<p className="text-black font-medium text-sm">Email</p>}
+            className="w-full flex-1 mb-3"
           >
             <Input
-              className="bg-gray-100 border border-gray-400 h-8 rounded-lg"
+              className="bg-gray-100 border border-gray-400 h-8 rounded-lg text-sm"
               readOnly
               style={{ color: "gray" }}
               placeholder="Email address"
@@ -274,11 +283,11 @@ const ProfileDetails = ({
           </Form.Item>
         </div>
 
-        <div className="flex justify-between gap-2 w-full">
+        <div className="flex flex-col sm:flex-row justify-between gap-2 w-full">
           <Form.Item
             name="phone"
-            label={<p className="text-black font-medium">Phone</p>}
-            className="w-full"
+            label={<p className="text-black font-medium text-sm">Phone</p>}
+            className="w-full flex-1 mb-3"
             rules={[
               { required: false, message: "Phone number is required" },
               {
@@ -288,7 +297,7 @@ const ProfileDetails = ({
             ]}
           >
             <Input
-              className="bg-white border border-black h-8 rounded-lg focus:border-smart"
+              className="bg-white border border-black h-8 rounded-lg focus:border-smart text-sm"
               readOnly={!showButton}
               style={{ color: "black" }}
               placeholder="Enter phone number"
@@ -297,11 +306,11 @@ const ProfileDetails = ({
 
           <Form.Item
             name="role"
-            label={<p className="text-black font-medium">Role</p>}
-            className="w-full"
+            label={<p className="text-black font-medium text-sm">Role</p>}
+            className="w-full flex-1 mb-3"
           >
             <Input
-              className="bg-gray-100 border border-gray-400 h-8 rounded-lg"
+              className="bg-gray-100 border border-gray-400 h-8 rounded-lg text-sm"
               readOnly
               style={{ color: "gray" }}
               placeholder="User role"
@@ -310,7 +319,7 @@ const ProfileDetails = ({
         </div>
 
         {showButton && (
-          <Form.Item className="mb-0">
+          <Form.Item className="mb-2">
             <Button
               block
               htmlType="submit"
