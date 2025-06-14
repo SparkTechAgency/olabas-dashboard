@@ -67,16 +67,57 @@ function VehicleModal({
         numberOfLuggage: vehicleData.noOfLuggages,
         dailyRate: vehicleData.dailyRate,
         status: vehicleData.status,
+        // Don't set vehicleImage to avoid confusion with new uploads
+        vehicleImage: [],
       });
     } else if (mode === "add") {
       form.resetFields();
     }
   }, [mode, vehicleData, isModalOpen, form]);
 
+  // Improved file handling function
+  const getImageFile = (fileList) => {
+    console.log("getImageFile called with:", fileList);
+
+    if (!fileList || !Array.isArray(fileList) || fileList.length === 0) {
+      console.log("No fileList or empty fileList");
+      return null;
+    }
+
+    // Get the most recent file (last in array)
+    const file = fileList[fileList.length - 1];
+    console.log("Processing file:", file);
+
+    // For newly uploaded files, prioritize originFileObj
+    if (file?.originFileObj instanceof File) {
+      console.log("Found originFileObj:", file.originFileObj);
+      return file.originFileObj;
+    }
+    // Direct File instance
+    else if (file instanceof File) {
+      console.log("Found direct File instance:", file);
+      return file;
+    }
+    // Alternative structure
+    else if (file?.file instanceof File) {
+      console.log("Found file.file:", file.file);
+      return file.file;
+    }
+    // Check if it's a file object with status (newly uploaded)
+    else if (file?.status === "done" && file?.originFileObj) {
+      console.log("Found done status file:", file.originFileObj);
+      return file.originFileObj;
+    }
+
+    console.log("No valid file found");
+    return null;
+  };
+
   const onFinish = async (values) => {
     try {
-      const formData = new FormData();
+      console.log("Form values:", values);
 
+      const formData = new FormData();
       const vehicleType = values.carType;
 
       // Ensure dailyRate is a number
@@ -104,9 +145,13 @@ function VehicleModal({
 
       formData.append("data", JSON.stringify(vehiclePayload));
 
-      // Handle image for both add and edit modes
-      const imageFile =
-        values.vehicleImage?.[0]?.originFileObj || values.vehicleImage?.[0];
+      // Improved image handling for edit mode
+      const imageFile = getImageFile(values.vehicleImage);
+
+      console.log("Raw vehicleImage from form:", values.vehicleImage);
+      console.log("Extracted imageFile:", imageFile);
+      console.log("Mode:", mode);
+      console.log("Has existing image:", vehicleData?.image);
 
       // For add mode, image is required
       if (mode === "add" && !imageFile) {
@@ -114,33 +159,37 @@ function VehicleModal({
         return;
       }
 
-      // For edit mode, image is optional (only if user wants to change it)
-      if (imageFile) {
+      // For edit mode, append image only if a new one is uploaded
+      if (imageFile && imageFile instanceof File) {
+        console.log("Appending NEW image to FormData:", {
+          name: imageFile.name,
+          size: imageFile.size,
+          type: imageFile.type,
+          lastModified: imageFile.lastModified,
+        });
         formData.append("image", imageFile);
+      } else if (mode === "edit") {
+        console.log("No new image uploaded, keeping existing image");
       }
 
-      // Create a console-friendly representation
-      const consoleData = {
-        mode,
-        data: vehiclePayload,
-        image: imageFile
-          ? {
-              name: imageFile.name,
-              size: imageFile.size,
-              type: imageFile.type,
-              lastModified: imageFile.lastModified,
-            }
-          : "No new image",
-      };
-
-      console.log("FormData being sent:", consoleData);
+      // Log FormData contents for debugging
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`${key}:`, {
+            name: value.name,
+            size: value.size,
+            type: value.type,
+          });
+        } else {
+          console.log(`${key}:`, value);
+        }
+      }
 
       let res;
       if (mode === "add") {
         res = await createFleet(formData).unwrap();
       } else {
-        // For edit mode, include the vehicle ID
-        // formData.append("id", vehicleData._id || vehicleData.id);
         res = await updateFleet({
           id: vehicleData._id,
           updatedData: formData,
@@ -167,6 +216,52 @@ function VehicleModal({
       );
       message.error(err?.data?.message || "Something went wrong");
     }
+  };
+
+  // Custom normalization for file upload
+  const normFile = (e) => {
+    console.log("Upload event triggered:", e);
+
+    if (Array.isArray(e)) {
+      console.log("Event is array:", e);
+      return e;
+    }
+
+    const fileList = e?.fileList || [];
+    console.log("Normalized fileList:", fileList);
+
+    // Filter out files that don't have proper file objects
+    const validFiles = fileList.filter((file) => {
+      const isValid =
+        file?.originFileObj instanceof File ||
+        file instanceof File ||
+        file?.file instanceof File;
+      console.log("File validation:", file, "Valid:", isValid);
+      return isValid;
+    });
+
+    console.log("Valid files after filtering:", validFiles);
+    return validFiles;
+  };
+
+  // Custom beforeUpload function for better control
+  const beforeUpload = (file) => {
+    console.log("beforeUpload called with file:", file);
+
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("You can only upload image files!");
+      return Upload.LIST_IGNORE;
+    }
+
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error("Image must be smaller than 5MB!");
+      return Upload.LIST_IGNORE;
+    }
+
+    // Return false to prevent automatic upload
+    return false;
   };
 
   const modalTitle = mode === "add" ? "Add New Vehicle" : "Edit Vehicle";
@@ -274,12 +369,7 @@ function VehicleModal({
             }`}
             name="vehicleImage"
             valuePropName="fileList"
-            getValueFromEvent={(e) => {
-              if (Array.isArray(e)) {
-                return e;
-              }
-              return e && e.fileList;
-            }}
+            getValueFromEvent={normFile}
             rules={
               mode === "add"
                 ? [{ required: true, message: "Please upload a vehicle image" }]
@@ -288,15 +378,24 @@ function VehicleModal({
           >
             <Upload
               name="vehicleImage"
-              listType="text"
+              listType="picture"
               maxCount={1}
-              beforeUpload={() => false}
+              beforeUpload={beforeUpload}
               accept="image/*"
+              showUploadList={{
+                showPreviewIcon: false,
+                showRemoveIcon: true,
+              }}
+              onChange={(info) => {
+                console.log("Upload onChange:", info);
+              }}
             >
-              <Button>Choose File</Button>
+              <Button>
+                {mode === "edit" ? "Upload New Image" : "Choose File"}
+              </Button>
             </Upload>
             {mode === "edit" && vehicleData?.image && (
-              <div className="mb-4">
+              <div className="mt-2">
                 <label className="block text-sm font-medium mb-2">
                   Current Image:
                 </label>
@@ -305,6 +404,9 @@ function VehicleModal({
                   alt="Current vehicle"
                   className="w-16 h-16 object-cover rounded border"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Upload a new image above to replace this one
+                </p>
               </div>
             )}
           </Form.Item>
