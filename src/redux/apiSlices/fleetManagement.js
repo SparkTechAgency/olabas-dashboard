@@ -34,7 +34,11 @@ const fleetManagementSlice = api.injectEndpoints({
       invalidatesTags: ["Fleet"],
     }),
     getFleet: builder.query({
-      query: ({ page, limit }) => `/vehicle/?page=${page}&limit=${limit}`,
+      query: ({ page, limit }) => `/vehicle/admin?page=${page}&limit=${limit}`,
+      providesTags: ["Fleet"],
+    }),
+    getAvailableFleet: builder.query({
+      query: ({ page, limit }) => `/vehicle?page=${page}&limit=${limit}`,
       providesTags: ["Fleet"],
     }),
 
@@ -51,5 +55,6 @@ export const {
   useUpdateFleetMutation,
   useUpdateFleetStatusMutation,
   useGetFleetQuery,
+  useGetAvailableFleetQuery,
   useGetFleetByIdQuery,
 } = fleetManagementSlice;

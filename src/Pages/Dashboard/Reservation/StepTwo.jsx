@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Form, Input, Select, Table, Radio } from "antd";
 import { useSelector, useDispatch } from "react-redux";
-import { useGetFleetQuery } from "../../../redux/apiSlices/fleetManagement";
+import { useGetAvailableFleetQuery } from "../../../redux/apiSlices/fleetManagement";
 import {
   setSelectedCarSize,
   setVehicle,
@@ -21,7 +21,7 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
     (state) => state.carRental
   );
 
-  const { data: vehicleData, isLoading } = useGetFleetQuery({
+  const { data: vehicleData, isLoading } = useGetAvailableFleetQuery({
     page: null,
     limit: null,
   });
