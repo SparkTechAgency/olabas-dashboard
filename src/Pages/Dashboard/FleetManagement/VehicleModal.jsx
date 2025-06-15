@@ -14,7 +14,7 @@ import {
   useUpdateFleetMutation,
   useDeleteFleetMutation,
 } from "../../../redux/apiSlices/fleetManagement";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getImageUrl } from "../../../utils/baseUrl";
 
 function VehicleModal({
@@ -28,6 +28,10 @@ function VehicleModal({
   const [createFleet] = useCreateFleetMutation();
   const [updateFleet] = useUpdateFleetMutation();
   const [deleteFleet] = useDeleteFleetMutation();
+
+  // Store the actual file separately for better control
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [fileList, setFileList] = useState([]);
 
   const carType = [
     { label: "Large: Premium", value: "LARGE PREMIUM" },
@@ -49,6 +53,14 @@ function VehicleModal({
     { value: "manual", label: "Manual" },
   ];
 
+  // Reset states when modal opens/closes
+  useEffect(() => {
+    if (!isModalOpen) {
+      setUploadedFile(null);
+      setFileList([]);
+    }
+  }, [isModalOpen]);
+
   // Populate form when editing
   useEffect(() => {
     if (mode === "edit" && vehicleData && isModalOpen) {
@@ -67,55 +79,24 @@ function VehicleModal({
         numberOfLuggage: vehicleData.noOfLuggages,
         dailyRate: vehicleData.dailyRate,
         status: vehicleData.status,
-        // Don't set vehicleImage to avoid confusion with new uploads
-        vehicleImage: [],
       });
+      // Reset file states for edit mode
+      setUploadedFile(null);
+      setFileList([]);
     } else if (mode === "add") {
       form.resetFields();
+      setUploadedFile(null);
+      setFileList([]);
     }
   }, [mode, vehicleData, isModalOpen, form]);
 
-  // Improved file handling function
-  const getImageFile = (fileList) => {
-    console.log("getImageFile called with:", fileList);
-
-    if (!fileList || !Array.isArray(fileList) || fileList.length === 0) {
-      console.log("No fileList or empty fileList");
-      return null;
-    }
-
-    // Get the most recent file (last in array)
-    const file = fileList[fileList.length - 1];
-    console.log("Processing file:", file);
-
-    // For newly uploaded files, prioritize originFileObj
-    if (file?.originFileObj instanceof File) {
-      console.log("Found originFileObj:", file.originFileObj);
-      return file.originFileObj;
-    }
-    // Direct File instance
-    else if (file instanceof File) {
-      console.log("Found direct File instance:", file);
-      return file;
-    }
-    // Alternative structure
-    else if (file?.file instanceof File) {
-      console.log("Found file.file:", file.file);
-      return file.file;
-    }
-    // Check if it's a file object with status (newly uploaded)
-    else if (file?.status === "done" && file?.originFileObj) {
-      console.log("Found done status file:", file.originFileObj);
-      return file.originFileObj;
-    }
-
-    console.log("No valid file found");
-    return null;
-  };
-
   const onFinish = async (values) => {
     try {
+      console.log("=== FORM SUBMISSION DEBUG ===");
       console.log("Form values:", values);
+      console.log("Uploaded file state:", uploadedFile);
+      console.log("File list state:", fileList);
+      console.log("Mode:", mode);
 
       const formData = new FormData();
       const vehicleType = values.carType;
@@ -145,41 +126,32 @@ function VehicleModal({
 
       formData.append("data", JSON.stringify(vehiclePayload));
 
-      // Improved image handling for edit mode
-      const imageFile = getImageFile(values.vehicleImage);
-
-      console.log("Raw vehicleImage from form:", values.vehicleImage);
-      console.log("Extracted imageFile:", imageFile);
-      console.log("Mode:", mode);
-      console.log("Has existing image:", vehicleData?.image);
-
-      // For add mode, image is required
-      if (mode === "add" && !imageFile) {
-        message.error("Please upload a vehicle image");
-        return;
-      }
-
-      // For edit mode, append image only if a new one is uploaded
-      if (imageFile && imageFile instanceof File) {
-        console.log("Appending NEW image to FormData:", {
-          name: imageFile.name,
-          size: imageFile.size,
-          type: imageFile.type,
-          lastModified: imageFile.lastModified,
-        });
-        formData.append("image", imageFile);
+      // Handle image upload
+      if (mode === "add") {
+        if (!uploadedFile) {
+          message.error("Please upload a vehicle image");
+          return;
+        }
+        console.log("Adding image for CREATE:", uploadedFile);
+        formData.append("image", uploadedFile);
       } else if (mode === "edit") {
-        console.log("No new image uploaded, keeping existing image");
+        if (uploadedFile) {
+          console.log("Adding NEW image for UPDATE:", uploadedFile);
+          formData.append("image", uploadedFile);
+        } else {
+          console.log("No new image uploaded for UPDATE, keeping existing");
+        }
       }
 
-      // Log FormData contents for debugging
-      console.log("FormData contents:");
+      // Debug FormData contents
+      console.log("=== FORMDATA DEBUG ===");
       for (let [key, value] of formData.entries()) {
         if (value instanceof File) {
           console.log(`${key}:`, {
             name: value.name,
             size: value.size,
             type: value.type,
+            lastModified: value.lastModified,
           });
         } else {
           console.log(`${key}:`, value);
@@ -188,13 +160,17 @@ function VehicleModal({
 
       let res;
       if (mode === "add") {
+        console.log("Calling CREATE API...");
         res = await createFleet(formData).unwrap();
       } else {
+        console.log("Calling UPDATE API...");
         res = await updateFleet({
           id: vehicleData._id,
           updatedData: formData,
         }).unwrap();
       }
+
+      console.log("API Response:", res);
 
       if (res.success) {
         message.success(
@@ -203,6 +179,8 @@ function VehicleModal({
             : "Fleet updated successfully"
         );
         form.resetFields();
+        setUploadedFile(null);
+        setFileList([]);
         handleOk();
       } else {
         message.error(
@@ -210,58 +188,84 @@ function VehicleModal({
         );
       }
     } catch (err) {
-      console.error(
-        `Error ${mode === "add" ? "creating" : "updating"} fleet:`,
-        err
-      );
+      console.error("API Error:", err);
       message.error(err?.data?.message || "Something went wrong");
     }
   };
 
-  // Custom normalization for file upload
-  const normFile = (e) => {
-    console.log("Upload event triggered:", e);
+  // Custom upload props
+  const uploadProps = {
+    name: "vehicleImage",
+    listType: "picture",
+    maxCount: 1,
+    fileList: fileList,
+    beforeUpload: (file) => {
+      console.log("=== BEFORE UPLOAD DEBUG ===");
+      console.log("File object:", file);
+      console.log("File details:", {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: file.lastModified,
+      });
 
-    if (Array.isArray(e)) {
-      console.log("Event is array:", e);
-      return e;
-    }
+      const isImage = file.type.startsWith("image/");
+      if (!isImage) {
+        message.error("You can only upload image files!");
+        return Upload.LIST_IGNORE;
+      }
 
-    const fileList = e?.fileList || [];
-    console.log("Normalized fileList:", fileList);
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        message.error("Image must be smaller than 5MB!");
+        return Upload.LIST_IGNORE;
+      }
 
-    // Filter out files that don't have proper file objects
-    const validFiles = fileList.filter((file) => {
-      const isValid =
-        file?.originFileObj instanceof File ||
-        file instanceof File ||
-        file?.file instanceof File;
-      console.log("File validation:", file, "Valid:", isValid);
-      return isValid;
-    });
+      // Store the actual file
+      setUploadedFile(file);
+      console.log("File stored in state:", file);
 
-    console.log("Valid files after filtering:", validFiles);
-    return validFiles;
-  };
+      // Update file list for display
+      const newFileList = [
+        {
+          uid: file.uid || Date.now().toString(),
+          name: file.name,
+          status: "done",
+          originFileObj: file,
+        },
+      ];
+      setFileList(newFileList);
+      console.log("Updated file list:", newFileList);
 
-  // Custom beforeUpload function for better control
-  const beforeUpload = (file) => {
-    console.log("beforeUpload called with file:", file);
+      // Prevent automatic upload
+      return false;
+    },
+    onChange: (info) => {
+      console.log("=== UPLOAD CHANGE DEBUG ===");
+      console.log("Upload info:", info);
+      console.log("File list:", info.fileList);
 
-    const isImage = file.type.startsWith("image/");
-    if (!isImage) {
-      message.error("You can only upload image files!");
-      return Upload.LIST_IGNORE;
-    }
+      // Sync the fileList state
+      setFileList(info.fileList);
 
-    const isLt5M = file.size / 1024 / 1024 < 5;
-    if (!isLt5M) {
-      message.error("Image must be smaller than 5MB!");
-      return Upload.LIST_IGNORE;
-    }
-
-    // Return false to prevent automatic upload
-    return false;
+      // If file is removed, clear the uploaded file
+      if (info.fileList.length === 0) {
+        setUploadedFile(null);
+        console.log("File removed, cleared uploaded file state");
+      }
+    },
+    onRemove: (file) => {
+      console.log("=== FILE REMOVE DEBUG ===");
+      console.log("Removing file:", file);
+      setUploadedFile(null);
+      setFileList([]);
+      return true;
+    },
+    accept: "image/*",
+    showUploadList: {
+      showPreviewIcon: false,
+      showRemoveIcon: true,
+    },
   };
 
   const modalTitle = mode === "add" ? "Add New Vehicle" : "Edit Vehicle";
@@ -270,7 +274,11 @@ function VehicleModal({
     <Modal
       title={modalTitle}
       open={isModalOpen}
-      onCancel={handleCancel}
+      onCancel={() => {
+        handleCancel();
+        setUploadedFile(null);
+        setFileList([]);
+      }}
       centered
       footer={null}
       width={1000}
@@ -341,9 +349,9 @@ function VehicleModal({
           <Form.Item
             label="Number of Seats"
             name="numberOfSeats"
-            rules={[{ required: true }]}
+            rules={[{ required: true }, { type: "number", min: 1, max: 7 }]}
           >
-            <InputNumber min={1} max={50} className="w-full" />
+            <InputNumber min={1} max={7} className="w-full" />
           </Form.Item>
           <Form.Item
             label="Number of Door"
@@ -363,54 +371,53 @@ function VehicleModal({
 
         {/* Vehicle Image and Daily Rate */}
         <div className="grid grid-cols-2 gap-4">
-          <Form.Item
-            label={`Vehicle Image ${
-              mode === "edit" ? "(Upload to change)" : ""
-            }`}
-            name="vehicleImage"
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-            rules={
-              mode === "add"
-                ? [{ required: true, message: "Please upload a vehicle image" }]
-                : [] // Not required for edit mode
-            }
-          >
-            <Upload
-              name="vehicleImage"
-              listType="picture"
-              maxCount={1}
-              beforeUpload={beforeUpload}
-              accept="image/*"
-              showUploadList={{
-                showPreviewIcon: false,
-                showRemoveIcon: true,
-              }}
-              onChange={(info) => {
-                console.log("Upload onChange:", info);
-              }}
-            >
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Vehicle Image {mode === "edit" ? "(Upload to change)" : ""}
+              {mode === "add" && <span className="text-red-500"> *</span>}
+            </label>
+
+            <Upload {...uploadProps}>
               <Button>
                 {mode === "edit" ? "Upload New Image" : "Choose File"}
               </Button>
             </Upload>
-            {mode === "edit" && vehicleData?.image && (
-              <div className="mt-2">
+
+            {/* Show current image for edit mode */}
+            {mode === "edit" && vehicleData?.image && !uploadedFile && (
+              <div className="mt-3">
                 <label className="block text-sm font-medium mb-2">
                   Current Image:
                 </label>
                 <img
                   src={`${getImageUrl}${vehicleData.image}`}
                   alt="Current vehicle"
-                  className="w-16 h-16 object-cover rounded border"
+                  className="w-20 h-20 object-cover rounded border"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Upload a new image above to replace this one
                 </p>
               </div>
             )}
-          </Form.Item>
-          <div className=" flex gap-6 h-fit">
+
+            {/* Show upload status */}
+            {uploadedFile && (
+              <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
+                <p className="text-sm text-green-700">
+                  ✓ New image ready: {uploadedFile.name}
+                </p>
+              </div>
+            )}
+
+            {/* Validation message for add mode */}
+            {mode === "add" && !uploadedFile && (
+              <p className="text-xs text-gray-500 mt-1">
+                Please upload a vehicle image
+              </p>
+            )}
+          </div>
+
+          <div className="flex gap-6 h-fit">
             <Form.Item
               label="Daily Rate"
               name="dailyRate"
@@ -439,10 +446,32 @@ function VehicleModal({
 
         {/* Action Buttons */}
         <div className="flex gap-3 justify-between ">
+          {/* Debug info */}
+          {process.env.NODE_ENV === "development" && (
+            <div className="text-xs text-gray-500">
+              Debug:{" "}
+              {uploadedFile
+                ? `File ready: ${uploadedFile.name}`
+                : "No file selected"}
+            </div>
+          )}
+
           {/* Right side buttons */}
           <div className="flex gap-3 ml-auto">
-            <Button onClick={handleCancel}>Cancel</Button>
-            <Button htmlType="submit" className="bg-smart text-white">
+            <Button
+              onClick={() => {
+                handleCancel();
+                setUploadedFile(null);
+                setFileList([]);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              htmlType="submit"
+              className="bg-smart text-white"
+              disabled={mode === "add" && !uploadedFile}
+            >
               {mode === "add" ? "Save" : "Update"}
             </Button>
           </div>
