@@ -98,6 +98,40 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
     clientDetails,
   ]);
 
+  // Helper function to extract error messages from API response
+  const extractErrorMessage = (error) => {
+    // Check if it's an RTK Query error with data
+    if (error?.data) {
+      // If there's a main message
+      if (error.data.message) {
+        return error.data.message;
+      }
+
+      // If there are errorMessages array
+      if (error.data.errorMessages && Array.isArray(error.data.errorMessages)) {
+        return error.data.errorMessages.map((err) => err.message).join(", ");
+      }
+
+      // If there are field-specific errors
+      if (error.data.errors && typeof error.data.errors === "object") {
+        return Object.values(error.data.errors).join(", ");
+      }
+    }
+
+    // Check if it's a network error or other format
+    if (error?.message) {
+      return error.message;
+    }
+
+    // Check if error is a string
+    if (typeof error === "string") {
+      return error;
+    }
+
+    // Default fallback
+    return "An unexpected error occurred. Please try again.";
+  };
+
   // Validate current step fields
   const validateCurrentStep = async () => {
     try {
@@ -116,6 +150,23 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
           }
           if (!pickupLocation || !returnLocation) {
             throw new Error("Pickup and return locations are required");
+          }
+
+          // Validate dates are in the future
+          const now = new Date();
+          const pickup = new Date(pickupDateTime);
+          const returnDate = new Date(returnDateTime);
+
+          if (pickup <= now) {
+            throw new Error("Pickup date must be in the future");
+          }
+
+          if (returnDate <= now) {
+            throw new Error("Return date must be in the future");
+          }
+
+          if (returnDate <= pickup) {
+            throw new Error("Return date must be after pickup date");
           }
           break;
         case 2:
@@ -147,6 +198,7 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       return true;
     } catch (error) {
       console.warn("Validation failed:", error);
+      messageApi.error(error.message || "Validation failed");
       return false;
     }
   };
@@ -180,7 +232,7 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       dispatch(nextStep());
     } else {
       setHasError(true);
-      messageApi.error("Please fill in all required fields before proceeding.");
+      // Error message is already shown in validateCurrentStep
     }
   };
 
@@ -196,14 +248,10 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       await form.validateFields();
 
       // Additional validation for all steps
-      const allStepsValid = await Promise.all([
-        validateCurrentStep(),
-        // Add any other validation needed
-      ]);
+      const allStepsValid = await validateCurrentStep();
 
-      if (!allStepsValid.every(Boolean)) {
-        messageApi.error("Please ensure all steps are completed correctly.");
-        return;
+      if (!allStepsValid) {
+        return; // Error message already shown in validateCurrentStep
       }
 
       const transformedData = transformFormData();
@@ -216,7 +264,19 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       if (handleOk) handleOk();
     } catch (error) {
       console.error("Error creating reservation:", error);
-      messageApi.error("Failed to create reservation. Please try again.");
+
+      // Extract and display the actual error message from API
+      const errorMessage = extractErrorMessage(error);
+      messageApi.error(errorMessage);
+
+      // If it's a validation error, you might want to go back to the relevant step
+      if (
+        errorMessage.toLowerCase().includes("date") ||
+        errorMessage.toLowerCase().includes("time")
+      ) {
+        // Go back to step 1 for date/time errors
+        dispatch(setCurrentStep(1));
+      }
     }
   };
 

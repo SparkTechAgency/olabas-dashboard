@@ -285,7 +285,7 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
       </div>
 
       {/* Debug info - remove in production */}
-      <div className="mt-4 p-4 bg-gray-100 rounded">
+      {/* <div className="mt-4 p-4 bg-gray-100 rounded">
         <h4>Current Vehicle State (from Redux):</h4>
         <p>
           <strong>Vehicle ID:</strong> {vehicle?.vehicleId || "None"}
@@ -299,7 +299,7 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
         <p>
           <strong>Selected Car Size:</strong> {selectedCarSize || "None"}
         </p>
-      </div>
+      </div> */}
     </Form>
   );
 };

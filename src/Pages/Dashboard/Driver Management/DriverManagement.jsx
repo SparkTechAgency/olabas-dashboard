@@ -8,6 +8,7 @@ import { useSidebar } from "../../../Context/SidebarContext";
 import DriverTable from "./driverTable";
 import {
   useCreateDriverMutation,
+  useUpdateDriverMutation,
   useDeleteDriverMutation,
   useGetDriverQuery,
 } from "../../../redux/apiSlices/driverManagementApi";
@@ -17,11 +18,50 @@ function DriverManagement() {
   const handleDelete = () => {};
   const { isCollapsed } = useSidebar();
 
+  // State for edit modal
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+
   const [createDriver, { isLoading: createDriverLoading }] =
     useCreateDriverMutation();
+  const [updateDriver, { isLoading: updateDriverLoading }] =
+    useUpdateDriverMutation();
   const [deleteDriver, { isLoading: deleteDriverLoading }] =
     useDeleteDriverMutation();
   const { data, isLoading, refetch } = useGetDriverQuery();
+
+  // Handle edit driver
+  const handleEditDriver = (driver) => {
+    setSelectedDriver(driver);
+    setEditModalOpen(true);
+  };
+
+  // Handle update driver
+  const handleUpdateDriver = async (formData) => {
+    console.log("Updating driver with data:", formData);
+
+    try {
+      const result = await updateDriver({
+        id: selectedDriver._id,
+        updatedData: formData,
+      }).unwrap();
+      message.success("Driver updated successfully!");
+      setEditModalOpen(false);
+      setSelectedDriver(null);
+      refetch(); // Refresh the driver list
+      return result;
+    } catch (error) {
+      console.error("Error updating driver:", error);
+      message.error(error?.data?.message || "Failed to update driver");
+      throw error;
+    }
+  };
+
+  // Handle cancel edit
+  const handleCancelEdit = () => {
+    setEditModalOpen(false);
+    setSelectedDriver(null);
+  };
 
   console.log(data?.data);
 
@@ -41,7 +81,17 @@ function DriverManagement() {
         createDriverLoading={createDriverLoading}
         refetch={refetch}
       />
-      <DriverTable />
+      <DriverTable onEditDriver={handleEditDriver} refetch={refetch} />
+
+      {/* Edit Driver Modal */}
+      <DriverInformationModal
+        isModalOpen={editModalOpen}
+        onSubmit={handleUpdateDriver}
+        onCancel={handleCancelEdit}
+        loading={updateDriverLoading}
+        initialData={selectedDriver}
+        isEditMode={true}
+      />
     </div>
   );
 }
@@ -91,11 +141,13 @@ const Header = ({ pagename, createDriver, createDriverLoading, refetch }) => {
           Add Driver
         </Button>
 
+        {/* Create Driver Modal */}
         <DriverInformationModal
           isModalOpen={modalOpen}
           onSubmit={handleCreateDriver}
           onCancel={handleCancel}
           loading={createDriverLoading}
+          isEditMode={false}
         />
       </div>
     </div>

@@ -237,7 +237,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
         return (
           <span
             className={`font-semibold ${
-              total > 0 ? "text-blue-600" : "text-gray-400"
+              total > 0 ? "text-green-600" : "text-gray-400"
             }`}
           >
             ${total.toFixed(2)}
@@ -283,7 +283,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
             <span className="font-medium">{selectedExtrasCount}</span> extra
             service(s) selected
           </div>
-          <div className="text-lg font-semibold text-blue-600">
+          <div className="text-lg font-semibold text-green-600">
             Total Extras: ${totalExtrasAmount.toFixed(2)}
           </div>
         </div>
@@ -291,13 +291,13 @@ const StepThree = ({ isClicked, setIsClicked }) => {
         {/* Debug Info - Selected IDs */}
         {selectedExtraIds.length > 0 && (
           <div className="mt-2 text-xs text-gray-500">
-            <strong>Selected IDs (Redux):</strong> {selectedExtraIds.join(", ")}
+            {/* <strong>Selected IDs (Redux):</strong> {selectedExtraIds.join(", ")} */}
           </div>
         )}
       </div>
 
       {/* Debug info - Selected extras in Redux */}
-      <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+      {/* <div className="mt-4 p-4 bg-blue-50 rounded-lg">
         <h4 className="font-semibold text-blue-800 mb-2">
           Selected Extra Services (Redux State):
         </h4>
@@ -315,10 +315,10 @@ const StepThree = ({ isClicked, setIsClicked }) => {
         ) : (
           <p className="text-sm text-blue-600">No extra services selected</p>
         )}
-      </div>
+      </div> */}
 
       {/* Redux Store Debug Info */}
-      <div className="mt-4 p-4 bg-green-50 rounded-lg">
+      {/* <div className="mt-4 p-4 bg-green-50 rounded-lg">
         <h4 className="font-semibold text-green-800 mb-2">
           Redux State Debug:
         </h4>
@@ -337,7 +337,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
             <strong>Selected Count:</strong> {selectedExtrasCount}
           </p>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

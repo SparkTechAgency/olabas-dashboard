@@ -1,37 +1,103 @@
-// DriverInformationModal.jsx
 import { Button, DatePicker, Form, Input, Modal, Upload, message } from "antd";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ButtonEDU from "../../../components/common/ButtonEDU";
 import { UploadOutlined } from "@ant-design/icons";
+import dayjs from "dayjs";
 
-function DriverInformationModal({ isModalOpen, onSubmit, onCancel, loading }) {
+function DriverInformationModal({
+  isModalOpen,
+  onSubmit,
+  onCancel,
+  loading,
+  initialData = null,
+  isEditMode = false,
+}) {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
+
+  // Populate form when modal opens with initial data (for edit mode)
+  useEffect(() => {
+    if (isModalOpen) {
+      if (isEditMode && initialData) {
+        // Edit mode - populate with existing data
+        form.setFieldsValue({
+          name: initialData.name,
+          dateOfBirth: initialData.dateOfBirth
+            ? dayjs(initialData.dateOfBirth)
+            : null,
+          phone: initialData.phone,
+          email: initialData.email,
+          address: initialData.address,
+          licenseNumber: initialData.licenseNumber,
+        });
+
+        // If there's an existing image, show it in the file list
+        if (initialData.image) {
+          setFileList([
+            {
+              uid: "-1",
+              name: "current-image",
+              status: "done",
+              url: `http://10.0.60.110:5000${initialData.image}`,
+            },
+          ]);
+        } else {
+          setFileList([]);
+        }
+      } else {
+        // Create mode - reset form
+        form.resetFields();
+        setFileList([]);
+      }
+    }
+  }, [isModalOpen, initialData, isEditMode, form]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+      console.log("Form values:", values); // Debug log
 
       // Create FormData for multipart/form-data
       const formData = new FormData();
 
-      // Create the data object as JSON string
+      // Create the data object
       const driverData = {
         name: values.name,
-        dateOfBirth: values.dateOfBirth?.toISOString(),
         phone: values.phone,
         email: values.email,
         address: values.address,
         licenseNumber: values.licenseNumber,
-        password: values.password || "securePassword123", // You might want to generate this or ask user
       };
+
+      // Add dateOfBirth only if it exists
+      if (values.dateOfBirth) {
+        driverData.dateOfBirth = values.dateOfBirth.toISOString();
+      }
+
+      // // Only include password if it's provided AND it's create mode
+      // // For edit mode, only include password if user actually entered one
+      // if (values.password && values.password.trim() !== "") {
+      //   driverData.password = values.password;
+      // } else if (!isEditMode) {
+      //   // For create mode, password might be required
+      //   // Add a default or handle this based on your API requirements
+      // }
+
+      console.log("Driver data to send:", driverData); // Debug log
 
       // Append the JSON data
       formData.append("data", JSON.stringify(driverData));
 
-      // Append the image file if exists
+      // Append the image file if a new one was uploaded
       if (fileList.length > 0 && fileList[0].originFileObj) {
         formData.append("image", fileList[0].originFileObj);
+        console.log("Appending image file:", fileList[0].originFileObj.name); // Debug log
+      }
+
+      // Debug: Log FormData contents
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
       }
 
       await onSubmit(formData);
@@ -83,7 +149,7 @@ function DriverInformationModal({ isModalOpen, onSubmit, onCancel, loading }) {
 
   return (
     <Modal
-      title="Driver Information"
+      title={isEditMode ? "Edit Driver Information" : "Add Driver Information"}
       open={isModalOpen}
       onCancel={handleCancel}
       footer={null}
@@ -124,7 +190,7 @@ function DriverInformationModal({ isModalOpen, onSubmit, onCancel, loading }) {
           <div className="w-full border rounded-lg p-2">
             <Upload {...uploadProps} listType="text">
               <Button icon={<UploadOutlined />} className="text-xs">
-                Click to Upload Image
+                {fileList.length > 0 ? "Change Image" : "Click to Upload Image"}
               </Button>
             </Upload>
           </div>
@@ -187,7 +253,13 @@ function DriverInformationModal({ isModalOpen, onSubmit, onCancel, loading }) {
               onClick={handleSubmit}
               loading={loading}
             >
-              {loading ? "Creating..." : "Save"}
+              {loading
+                ? isEditMode
+                  ? "Updating..."
+                  : "Creating..."
+                : isEditMode
+                ? "Update"
+                : "Save"}
             </ButtonEDU>
           </div>
         </Form.Item>

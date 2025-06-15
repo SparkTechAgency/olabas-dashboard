@@ -20,6 +20,7 @@ const UserEditModal = ({ isModalOpen, handleCancel, providerData, onSave }) => {
       title="Edit User"
       open={isModalOpen}
       onCancel={handleCancel}
+      centered
       footer={[
         <Button key="cancel" onClick={handleCancel}>
           Cancel
