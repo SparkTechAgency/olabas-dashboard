@@ -5,11 +5,7 @@ const LocationAPi = api.injectEndpoints({
     createLocation: builder.mutation({
       query: (data) => {
         return {
-          url: `/location` /* 
-                {
-                "location":"Bangladesh, China"
-                }
-          */,
+          url: `/location`,
           method: "POST",
           body: data,
         };

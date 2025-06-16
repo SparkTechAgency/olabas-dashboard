@@ -6,7 +6,7 @@ import { FaCaretDown } from "react-icons/fa";
 import {
   useCreateLocationMutation,
   useGetSearchLocationQuery,
-} from "../../../redux/apiSlices/locationApi";
+} from "../../../redux/apiSlices/LocationApi";
 
 function Location() {
   const [form] = Form.useForm();
