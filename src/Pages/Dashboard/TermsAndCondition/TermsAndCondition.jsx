@@ -3,8 +3,7 @@ import JoditEditor from "jodit-react";
 import {
   useGetTermsAndConQuery,
   useUpdateTermsAndConMutation,
-} from "../../../redux/apiSlices/TermsAndConditionApi";
-import { message } from "antd";
+} from "../../../redux/apiSlices/termsConApi";
 
 function TermsAndCondition() {
   const editor = useRef(null);

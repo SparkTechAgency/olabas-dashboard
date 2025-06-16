@@ -6,5 +6,7 @@ export default defineConfig({
   server: {
     host: "10.0.60.210",
     port: 3030,
+    // host: "tanvir4002.binarybards.online",
+    // port: 3030,
   },
 });

@@ -10,6 +10,7 @@ const termsAndConditionSlice = api.injectEndpoints({
           body: { termsConditions },
         };
       },
+      invalidatesTags: ["TermsCondition"], // Add cache invalidation
     }),
     getTermsAndCon: builder.query({
       query: () => {
@@ -18,6 +19,7 @@ const termsAndConditionSlice = api.injectEndpoints({
           method: "GET",
         };
       },
+      providesTags: ["TermsCondition"], // Add cache tags
     }),
   }),
 });
