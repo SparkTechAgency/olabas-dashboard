@@ -102,14 +102,16 @@ function Reservation() {
   const formatReservationData = (data) => {
     if (!Array.isArray(data)) return [];
 
-    return data.map((item, index) => ({
+    return data?.map((item, index) => ({
       key: item._id || index,
       id: item._id,
       pickupTime: dayjs(item.pickupTime).format("DD/MM/YYYY, h:mm A"),
       pickupLocation: item.pickupLocation?.location || "N/A",
       returnTime: dayjs(item.returnTime).format("DD/MM/YYYY, h:mm A"),
       returnLocation: item.returnLocation?.location || "N/A",
-      carSize: item.vehicle?.name || "N/A",
+      carName: item.vehicle?.name || "N/A",
+      carSize: item.vehicleType || "N/A",
+      rentedDays: item.carRentedForInDays || 0,
       carNumberPlate: item.vehicle?.plateNumber || "N/A",
       carModel: item.vehicle?.model || "N/A",
       client:
@@ -223,16 +225,27 @@ function Reservation() {
       title: "Car",
       dataIndex: "car",
       key: "car",
-      render: (text, record) => (
+      render: (_, record) => (
         <div className="flex flex-col">
-          <span className="font-medium">{record.carSize}</span>
+          <span className="font-medium">{record.carName}</span>
           <div className="flex text-gray-600 text-sm">
-            <span>{record.carNumberPlate}</span>
-            {record.carNumberPlate !== "N/A" && record.carModel !== "N/A" && (
+            <span>{record.carSize}</span>
+            {record.carSize !== "N/A" && record.rentedDays !== 0 && (
               <span>, </span>
             )}
-            <span>{record.carModel}</span>
           </div>
+        </div>
+      ),
+    },
+    {
+      title: "Rented for",
+      dataIndex: "car",
+      key: "car",
+      render: (_, record) => (
+        <div className="flex text-gray-600 text-sm">
+          <span className="text-black font-bold">
+            {`${record.rentedDays} Days`}{" "}
+          </span>
         </div>
       ),
     },
