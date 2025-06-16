@@ -3,7 +3,7 @@ import { Form, Select, DatePicker, TimePicker } from "antd";
 import { CalendarOutlined, ClockCircleOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
-import { useGetAllLocationQuery } from "../../../redux/apiSlices/LocationApi";
+
 import {
   setPickupDateTime,
   setReturnDateTime,
@@ -11,6 +11,7 @@ import {
   setReturnLocation,
   calculateTotals,
 } from "../../../redux/features/ReservationSlice";
+import { useGetAllLocationQuery } from "../../../redux/apiSlices/LocationApi";
 
 const { Option } = Select;
 
