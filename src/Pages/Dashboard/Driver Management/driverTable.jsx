@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Table, Button, Popconfirm, message } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import {
@@ -7,17 +7,29 @@ import {
 } from "../../../redux/apiSlices/driverManagementApi";
 
 const DriverTable = ({ onEditDriver, refetch }) => {
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(5);
+
   const {
     data: driverData,
     isLoading,
     isError,
-  } = useGetDriverQuery(undefined, {
-    refetchOnMountOrArgChange: false,
-    refetchOnReconnect: false,
-    refetchOnFocus: false,
-    skip: false,
-    pollingInterval: 0,
-  });
+  } = useGetDriverQuery(
+    { undefined, page, limit },
+    {
+      refetchOnMountOrArgChange: false,
+      refetchOnReconnect: false,
+      refetchOnFocus: false,
+      skip: false,
+      pollingInterval: 0,
+    }
+  );
+
+  // Handle pagination change
+  const handleTableChange = (pagination) => {
+    setPage(pagination.current);
+    setLimit(pagination.pageSize);
+  };
 
   const [deleteDriver, { isLoading: deleteLoading }] =
     useDeleteDriverMutation();
@@ -92,7 +104,14 @@ const DriverTable = ({ onEditDriver, refetch }) => {
       dataIndex: driver.name,
       key: driver._id,
       width: 150,
-      render: (text) => text || "Not Assigned",
+      render: (text) => (
+        <p
+          className="bg-yellow-500 text-black 
+         px-2 py-1 rounded-md"
+        >
+          {text || "Not Assigned"}
+        </p>
+      ),
     }));
 
     return [...base, ...driverColumns];
@@ -249,12 +268,18 @@ const DriverTable = ({ onEditDriver, refetch }) => {
           columns={driverColumns}
           dataSource={driverTableData}
           scroll={{ x: "max-content" }}
+          onChange={handleTableChange}
           pagination={{
-            pageSize: 10,
+            current: page,
+            pageSize: limit,
+            total: driverData?.data?.meta?.total || 0,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} of ${total} items`,
+            position: ["bottomRight"],
+            size: "small",
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} drivers`,
+            pageSizeOptions: ["1", "5", "10", "20", "50"],
           }}
           size="middle"
         />

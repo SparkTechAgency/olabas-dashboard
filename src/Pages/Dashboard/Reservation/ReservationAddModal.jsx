@@ -15,7 +15,7 @@ import {
   previousStep,
   calculateTotals,
   resetForm,
-} from "../../../redux/features/ReservationSlice"; // Adjust path as needed
+} from "../../../redux/features/ReservationSlice";
 
 function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
   const [hasError, setHasError] = useState(false);
@@ -24,6 +24,7 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
   const [direction, setDirection] = useState(1);
+  const [stepValidationState, setStepValidationState] = useState({});
 
   // Redux state and dispatch
   const dispatch = useDispatch();
@@ -57,8 +58,93 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       setHasError(false);
       setIsClicked(false);
       setValidationErrors({});
+      setStepValidationState({});
     }
   }, [isModalOpen, dispatch, form]);
+
+  // Clear error state when step changes
+  useEffect(() => {
+    setHasError(false);
+    setIsClicked(false);
+  }, [currentStep]);
+
+  // Real-time validation effect - validates current step whenever relevant data changes
+  useEffect(() => {
+    const validateInBackground = async () => {
+      try {
+        const stepFields = getStepFields(currentStep);
+
+        // Validate form fields if they exist
+        if (stepFields.length > 0) {
+          await form.validateFields(stepFields);
+        }
+
+        // Additional custom validation based on step using Redux state
+        switch (currentStep) {
+          case 1:
+            if (
+              !pickupDateTime ||
+              !returnDateTime ||
+              !pickupLocation ||
+              !returnLocation
+            ) {
+              throw new Error("All fields are required");
+            }
+
+            const now = new Date();
+            const pickup = new Date(pickupDateTime);
+            const returnDate = new Date(returnDateTime);
+
+            if (pickup <= now || returnDate <= now || returnDate <= pickup) {
+              throw new Error("Invalid dates");
+            }
+            break;
+          case 2:
+            if (!vehicle?.vehicleId) {
+              throw new Error("Please select a vehicle");
+            }
+            break;
+          case 5:
+            if (
+              !clientDetails.firstName ||
+              !clientDetails.lastName ||
+              !clientDetails.email
+            ) {
+              throw new Error("Client details are required");
+            }
+            break;
+          default:
+            break;
+        }
+
+        // Mark this step as valid
+        setStepValidationState((prev) => ({
+          ...prev,
+          [currentStep]: true,
+        }));
+        setHasError(false);
+      } catch (error) {
+        // Mark this step as invalid
+        setStepValidationState((prev) => ({
+          ...prev,
+          [currentStep]: false,
+        }));
+        setHasError(true);
+      }
+    };
+
+    // Only validate if we have some data to work with
+    validateInBackground();
+  }, [
+    currentStep,
+    pickupDateTime,
+    returnDateTime,
+    pickupLocation,
+    returnLocation,
+    vehicle,
+    clientDetails,
+    form,
+  ]);
 
   // Update form fields when Redux state changes
   useEffect(() => {
@@ -73,10 +159,6 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
         // Step 2 fields
         selectedVehicle: vehicle?.vehicleId,
         vehicleType: vehicle?.vehicleType,
-
-        // Step 3 fields - extras will be handled in StepThree component
-
-        // Step 4 fields - protection will be handled in StepFour component
 
         // Step 5 fields
         firstName: clientDetails.firstName,
@@ -100,51 +182,39 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
 
   // Helper function to extract error messages from API response
   const extractErrorMessage = (error) => {
-    // Check if it's an RTK Query error with data
     if (error?.data) {
-      // If there's a main message
       if (error.data.message) {
         return error.data.message;
       }
-
-      // If there are errorMessages array
       if (error.data.errorMessages && Array.isArray(error.data.errorMessages)) {
         return error.data.errorMessages.map((err) => err.message).join(", ");
       }
-
-      // If there are field-specific errors
       if (error.data.errors && typeof error.data.errors === "object") {
         return Object.values(error.data.errors).join(", ");
       }
     }
-
-    // Check if it's a network error or other format
     if (error?.message) {
       return error.message;
     }
-
-    // Check if error is a string
     if (typeof error === "string") {
       return error;
     }
-
-    // Default fallback
     return "An unexpected error occurred. Please try again.";
   };
 
-  // Validate current step fields
-  const validateCurrentStep = async () => {
+  // Validate current step fields for when user clicks Next
+  const validateCurrentStepForNavigation = async () => {
     try {
       const stepFields = getStepFields(currentStep);
 
+      // First, validate form fields if they exist
       if (stepFields.length > 0) {
         await form.validateFields(stepFields);
       }
 
-      // Additional custom validation based on step
+      // Additional custom validation based on step using Redux state
       switch (currentStep) {
         case 1:
-          // Validate pickup and return times
           if (!pickupDateTime || !returnDateTime) {
             throw new Error("Date and time are required");
           }
@@ -152,7 +222,6 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
             throw new Error("Pickup and return locations are required");
           }
 
-          // Validate dates are in the future
           const now = new Date();
           const pickup = new Date(pickupDateTime);
           const returnDate = new Date(returnDateTime);
@@ -160,17 +229,14 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
           if (pickup <= now) {
             throw new Error("Pickup date must be in the future");
           }
-
           if (returnDate <= now) {
             throw new Error("Return date must be in the future");
           }
-
           if (returnDate <= pickup) {
             throw new Error("Return date must be after pickup date");
           }
           break;
         case 2:
-          // Validate vehicle selection
           if (!vehicle?.vehicleId) {
             throw new Error("Please select a vehicle");
           }
@@ -182,7 +248,6 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
           // Protection options validation if needed
           break;
         case 5:
-          // Validate client details
           if (
             !clientDetails.firstName ||
             !clientDetails.lastName ||
@@ -211,9 +276,9 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       case 2:
         return ["selectedVehicle"];
       case 3:
-        return []; // Extras are optional
+        return [];
       case 4:
-        return []; // Protection might have its own validation
+        return [];
       case 5:
         return ["firstName", "lastName", "email"];
       default:
@@ -224,57 +289,63 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
   const handleNextStep = async () => {
     setIsClicked(true);
 
-    const isValid = await validateCurrentStep();
+    console.log(
+      `Attempting to go from step ${currentStep} to step ${currentStep + 1}`
+    );
+    console.log("Current Redux state:", {
+      pickupDateTime,
+      returnDateTime,
+      pickupLocation,
+      returnLocation,
+      vehicle,
+      clientDetails,
+    });
+
+    const isValid = await validateCurrentStepForNavigation();
+    console.log("Validation result:", isValid);
 
     if (isValid) {
       setDirection(1);
       setHasError(false);
       dispatch(nextStep());
+      console.log("Moving to next step");
     } else {
       setHasError(true);
-      // Error message is already shown in validateCurrentStep
+      console.log("Validation failed, staying on current step");
     }
   };
 
   const handlePrevStep = () => {
     setDirection(-1);
-    setHasError(false); // Reset error state when going back
+    setHasError(false);
+    setIsClicked(false);
     dispatch(previousStep());
   };
 
   const handleSave = async () => {
     try {
-      // Validate all form fields for final submission
       await form.validateFields();
-
-      // Additional validation for all steps
-      const allStepsValid = await validateCurrentStep();
+      const allStepsValid = await validateCurrentStepForNavigation();
 
       if (!allStepsValid) {
-        return; // Error message already shown in validateCurrentStep
+        return;
       }
 
       const transformedData = transformFormData();
-
       await createReservation(transformedData).unwrap();
       messageApi.success("Reservation created successfully!");
 
-      // Reset Redux state
       dispatch(resetForm());
       if (handleOk) handleOk();
     } catch (error) {
       console.error("Error creating reservation:", error);
-
-      // Extract and display the actual error message from API
       const errorMessage = extractErrorMessage(error);
       messageApi.error(errorMessage);
 
-      // If it's a validation error, you might want to go back to the relevant step
       if (
         errorMessage.toLowerCase().includes("date") ||
         errorMessage.toLowerCase().includes("time")
       ) {
-        // Go back to step 1 for date/time errors
         dispatch(setCurrentStep(1));
       }
     }
@@ -286,17 +357,16 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
     setHasError(false);
     setIsClicked(false);
     setValidationErrors({});
+    setStepValidationState({});
     handleCancel();
   };
 
   // Transform form data for API submission
   const transformFormData = () => {
-    // Helper function to parse date/time string and create ISO format
     const parseDateTime = (dateTimeString) => {
       if (!dateTimeString) return new Date().toISOString();
 
       try {
-        // If the format is "03/30/2025 12:00 am", parse it
         const [datePart, timePart, period] = dateTimeString.split(" ");
         const [month, day, year] = datePart.split("/");
         const [hours, minutes] = timePart.split(":");
@@ -316,56 +386,43 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
       }
     };
 
-    // Format extra services - only include selected extras with quantities
     const formatExtraServices = () => {
       return extras
-        .filter((extra) => extra.includeStatus && extra._id) // Only selected extras with IDs
+        .filter((extra) => extra.includeStatus && extra._id)
         .map((extra) => ({
           serviceId: extra._id,
           qty: extra.qty || 1,
         }));
     };
 
-    // Parse the date/time strings from Redux state
     const formattedPickupDateTime = parseDateTime(pickupDateTime);
     const formattedReturnDateTime = parseDateTime(returnDateTime);
 
     return {
-      // Split pickup date/time - using same value for both date and time as per your example
       pickupDate: formattedPickupDateTime,
       pickupTime: formattedPickupDateTime,
-      pickupLocation: pickupLocation, // Assuming this is already an ID, if not you'll need to map it
-
-      // Split return date/time - using same value for both date and time as per your example
+      pickupLocation: pickupLocation,
       returnDate: formattedReturnDateTime,
       returnTime: formattedReturnDateTime,
-      returnLocation: returnLocation, // Assuming this is already an ID, if not you'll need to map it
-
-      // Vehicle information
+      returnLocation: returnLocation,
       vehicle: {
         vehicleId: vehicle?.vehicleId || "",
         vehicleType: vehicle?.vehicleType || "",
         rate: vehicle?.rate || 0,
       },
-
-      // Extra services - only selected ones with quantities
       extraServices: formatExtraServices(),
-
-      // Client details with proper field mapping
       clientDetails: {
         firstName: clientDetails.firstName || "",
         lastName: clientDetails.lastName || "",
         email: clientDetails.email || "",
         phone: clientDetails.phone || "",
-        parmanentAddress: clientDetails.permanentAddress || "", // Note: API uses "parmanentAddress" (typo?)
+        parmanentAddress: clientDetails.permanentAddress || "",
         country: clientDetails.country || "",
         presentAddress: clientDetails.presentAddress || "",
         state: clientDetails.state || "",
         postCode: clientDetails.postCode || "",
       },
-
-      // Add payment method if it exists in your state, otherwise default
-      paymentMethod: clientDetails.paymentMethod || "BANK", // You may need to add this field to your Redux state
+      paymentMethod: clientDetails.paymentMethod || "BANK",
     };
   };
 
@@ -429,6 +486,9 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
     ease: "easeInOut",
   };
 
+  // Determine if Next button should be disabled
+  const isNextButtonDisabled = hasError;
+
   return (
     <>
       {contextHolder}
@@ -488,7 +548,7 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
                   onClick={handleNextStep}
                   icon={<FaAngleRight size={20} />}
                   iconPosition="end"
-                  disabled={hasError && isClicked}
+                  disabled={isNextButtonDisabled}
                 >
                   Next
                 </Button>

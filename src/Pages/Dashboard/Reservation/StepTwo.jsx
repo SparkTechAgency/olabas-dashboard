@@ -55,27 +55,23 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
     },
   ];
 
-  // Function to save vehicle data to Redux and calculate totals
-  const saveVehicleToRedux = () => {
-    if (vehicle?.vehicleId) {
-      // Data is already in Redux state, just calculate totals
-      dispatch(calculateTotals());
-      console.log("Vehicle data updated in Redux:", vehicle);
-
-      // Set isClicked to false after saving
-      setIsClicked(false);
-    } else {
-      console.warn("No vehicle selected to save");
-      setIsClicked(false);
-    }
-  };
-
-  // Function to validate required fields
+  // Function to validate required fields - IMPROVED VERSION
   const validateRequiredFields = () => {
-    const vehicleValue = form.getFieldValue("vehicle");
-    const hasErrors = !vehicleValue || !vehicle?.vehicleId;
+    // Check both form field and Redux state
+    const formVehicleValue = form.getFieldValue("vehicle");
+    const reduxVehicleId = vehicle?.vehicleId;
+
+    console.log("Validation check:", {
+      formVehicleValue,
+      reduxVehicleId,
+      vehicleObject: vehicle,
+    });
+
+    const isValid = formVehicleValue && reduxVehicleId;
+    const hasErrors = !isValid;
+
     setHasError(hasErrors);
-    return hasErrors;
+    return isValid;
   };
 
   const getSelectedKey = () => {
@@ -105,9 +101,13 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
   };
 
   const handleVehicleChange = (vehicleId) => {
+    console.log("Vehicle selection changed:", vehicleId);
+
     const selectedVehicle = vehicleData?.data?.result?.find(
       (v) => v._id === vehicleId
     );
+
+    console.log("Selected vehicle object:", selectedVehicle);
 
     if (selectedVehicle) {
       const vehicleTypeMapping = {
@@ -121,22 +121,26 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
       const mappedCarSize = vehicleTypeMapping[selectedVehicle.vehicleType];
 
       // Update Redux state with complete vehicle object
-      dispatch(
-        setVehicle({
-          vehicleId: selectedVehicle._id,
-          vehicleType: selectedVehicle.vehicleType,
-          rate: selectedVehicle.dailyRate || vehiclePrice,
-        })
-      );
+      const vehicleData = {
+        vehicleId: selectedVehicle._id,
+        vehicleType: selectedVehicle.vehicleType,
+        rate: selectedVehicle.dailyRate || vehiclePrice,
+      };
+
+      console.log("Dispatching vehicle data:", vehicleData);
+      dispatch(setVehicle(vehicleData));
 
       if (mappedCarSize) {
         dispatch(setSelectedCarSize(mappedCarSize));
       }
 
-      // Update form field value
+      // Update form field value - this is important!
       form.setFieldsValue({ vehicle: vehicleId });
-    } else {
-      // Clear vehicle if no selection
+
+      console.log("Form field set to:", vehicleId);
+    } else if (vehicleId === undefined || vehicleId === null) {
+      // Clear vehicle if no selection or cleared
+      console.log("Clearing vehicle selection");
       dispatch(
         setVehicle({
           vehicleId: "",
@@ -150,8 +154,16 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
     // Recalculate totals
     dispatch(calculateTotals());
 
-    // Validate after change
-    setTimeout(validateRequiredFields, 0);
+    // Validate after change and clear error state if valid
+    setTimeout(() => {
+      const isValid = validateRequiredFields();
+      console.log("Validation result after vehicle change:", isValid);
+
+      // Clear isClicked if validation passes
+      if (isValid && isClicked) {
+        setIsClicked(false);
+      }
+    }, 100);
   };
 
   const handlePriceChange = (value, record) => {
@@ -171,28 +183,43 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
     }
   };
 
-  // Save to Redux when isClicked is true
-  useEffect(() => {
-    if (isClicked) {
-      saveVehicleToRedux();
-    }
-  }, [isClicked, vehicle, vehiclePrice]);
-
-  // Validate on component mount and when vehicle data changes
-  useEffect(() => {
-    setTimeout(validateRequiredFields, 100);
-  }, [vehicle, form]);
-
   // Set initial form values from Redux state
   useEffect(() => {
+    console.log("Setting initial form values. Vehicle from Redux:", vehicle);
     if (vehicle?.vehicleId) {
       form.setFieldsValue({ vehicle: vehicle.vehicleId });
+      console.log("Form initialized with vehicle:", vehicle.vehicleId);
     }
   }, [vehicle?.vehicleId, form]);
 
+  // Validate when component mounts and when dependencies change
   useEffect(() => {
-    // Debugging log
-    console.log("Current vehicle state from Redux:", vehicle);
+    console.log("Running validation effect. Vehicle state:", vehicle);
+
+    // Only validate if the form has been interacted with
+    if (vehicle?.vehicleId || form.getFieldValue("vehicle")) {
+      setTimeout(() => {
+        validateRequiredFields();
+      }, 100);
+    }
+  }, [vehicle?.vehicleId]);
+
+  // Handle the isClicked state properly - IMPROVED VERSION
+  useEffect(() => {
+    if (isClicked) {
+      console.log("Next button clicked, running validation...");
+      const isValid = validateRequiredFields();
+      console.log("Final validation result:", isValid);
+
+      // Don't reset isClicked here - let the parent component handle it
+      // The parent will reset isClicked when validation passes or step changes
+    }
+  }, [isClicked]);
+
+  // Debug current state
+  useEffect(() => {
+    console.log("Current Redux vehicle state:", vehicle);
+    console.log("Current form vehicle field:", form.getFieldValue("vehicle"));
   }, [vehicle]);
 
   const columns = [
@@ -232,12 +259,7 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
   ];
 
   return (
-    <Form
-      form={form}
-      layout="vertical"
-      initialValues={{ remember: true }}
-      onFieldsChange={validateRequiredFields}
-    >
+    <Form form={form} layout="vertical" initialValues={{ remember: true }}>
       <Table
         columns={columns}
         dataSource={data}
@@ -256,23 +278,15 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
           <Select
             placeholder="-- Choose --"
             className="w-full"
-            value={vehicle?.vehicleId}
+            value={vehicle?.vehicleId || undefined}
             onChange={handleVehicleChange}
             loading={isLoading}
             showSearch
             optionFilterProp="children"
             allowClear
             onClear={() => {
-              dispatch(
-                setVehicle({
-                  vehicleId: "",
-                  vehicleType: "",
-                  rate: 0,
-                })
-              );
-              form.setFieldsValue({ vehicle: undefined });
-              dispatch(calculateTotals());
-              setTimeout(validateRequiredFields, 0);
+              console.log("Vehicle selection cleared");
+              handleVehicleChange(undefined);
             }}
           >
             {vehicleData?.data?.result?.map((vehicleItem) => (
@@ -284,11 +298,15 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
         </Form.Item>
       </div>
 
-      {/* Debug info - remove in production */}
-      {/* <div className="mt-4 p-4 bg-gray-100 rounded">
-        <h4>Current Vehicle State (from Redux):</h4>
+      {/* Debug info - you can remove this in production */}
+      {/* <div className="mt-4 p-4 bg-gray-100 rounded text-sm">
+        <h4>Debug Info:</h4>
         <p>
-          <strong>Vehicle ID:</strong> {vehicle?.vehicleId || "None"}
+          <strong>Redux Vehicle ID:</strong> {vehicle?.vehicleId || "None"}
+        </p>
+        <p>
+          <strong>Form Vehicle Value:</strong>{" "}
+          {form.getFieldValue("vehicle") || "None"}
         </p>
         <p>
           <strong>Vehicle Type:</strong> {vehicle?.vehicleType || "None"}
@@ -297,7 +315,10 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
           <strong>Rate:</strong> {vehicle?.rate || vehiclePrice || 0}
         </p>
         <p>
-          <strong>Selected Car Size:</strong> {selectedCarSize || "None"}
+          <strong>Has Error:</strong> {String(!!vehicle?.vehicleId === false)}
+        </p>
+        <p>
+          <strong>Is Clicked:</strong> {String(isClicked)}
         </p>
       </div> */}
     </Form>

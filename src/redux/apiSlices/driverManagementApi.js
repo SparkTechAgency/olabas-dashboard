@@ -27,8 +27,8 @@ const driverSlice = api.injectEndpoints({
       invalidatesTags: ["DRIVER"],
     }),
     getDriver: builder.query({
-      query: () => ({
-        url: `/user/driver`,
+      query: ({ page, limit }) => ({
+        url: `/user/driver?page=${page}&limit=${limit}`,
         method: "GET",
       }),
       providesTags: ["DRIVER"],
