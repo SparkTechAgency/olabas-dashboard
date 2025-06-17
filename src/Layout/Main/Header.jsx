@@ -248,7 +248,7 @@ const Header = () => {
               }
             }}
           >
-            <div className="w-12 h-12 bg-[#cfd4ff] flex items-center justify-center rounded-md relative cursor-pointer">
+            <div className="w-12 h-12 bg-[#ccf6c8] flex items-center justify-center rounded-md relative cursor-pointer">
               <FaRegBell size={30} className="text-smart" />
               {unreadCount > 0 && (
                 <Badge

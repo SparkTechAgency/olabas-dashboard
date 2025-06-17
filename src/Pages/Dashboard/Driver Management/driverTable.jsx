@@ -16,7 +16,7 @@ const DriverTable = ({ onEditDriver, refetch }) => {
     isLoading,
     isError,
   } = useGetDriverQuery(
-    { undefined, page, limit }
+    { page, limit }
     // {
     //   refetchOnMountOrArgChange: false,
     //   refetchOnReconnect: false,
@@ -25,6 +25,8 @@ const DriverTable = ({ onEditDriver, refetch }) => {
     //   pollingInterval: 0,
     // }
   );
+
+  console.log("driver", driverData?.data);
 
   // Handle pagination change
   const handleTableChange = (pagination) => {
