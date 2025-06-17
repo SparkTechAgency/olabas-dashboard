@@ -1,5 +1,5 @@
 import { Button, Form, Modal, message } from "antd";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
@@ -362,6 +362,70 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
   };
 
   // Transform form data for API submission
+  // const transformFormData = () => {
+  //   const parseDateTime = (dateTimeString) => {
+  //     if (!dateTimeString) return new Date().toISOString();
+
+  //     try {
+  //       const [datePart, timePart, period] = dateTimeString.split(" ");
+  //       const [month, day, year] = datePart.split("/");
+  //       const [hours, minutes] = timePart.split(":");
+
+  //       let hour24 = parseInt(hours);
+  //       if (period?.toLowerCase() === "pm" && hour24 !== 12) {
+  //         hour24 += 12;
+  //       } else if (period?.toLowerCase() === "am" && hour24 === 12) {
+  //         hour24 = 0;
+  //       }
+
+  //       const date = new Date(year, month - 1, day, hour24, parseInt(minutes));
+  //       return date.toISOString();
+  //     } catch (error) {
+  //       console.warn("Date parsing error:", error);
+  //       return new Date().toISOString();
+  //     }
+  //   };
+
+  //   const formatExtraServices = () => {
+  //     return extras
+  //       .filter((extra) => extra.includeStatus && extra._id)
+  //       .map((extra) => ({
+  //         serviceId: extra._id,
+  //         qty: extra.qty || 1,
+  //       }));
+  //   };
+
+  //   const formattedPickupDateTime = parseDateTime(pickupDateTime);
+  //   const formattedReturnDateTime = parseDateTime(returnDateTime);
+
+  //   return {
+  //     pickupDate: formattedPickupDateTime,
+  //     pickupTime: formattedPickupDateTime,
+  //     pickupLocation: pickupLocation,
+  //     returnDate: formattedReturnDateTime,
+  //     returnTime: formattedReturnDateTime,
+  //     returnLocation: returnLocation,
+  //     vehicle: {
+  //       vehicleId: vehicle?.vehicleId || "",
+  //       vehicleType: vehicle?.vehicleType || "",
+  //       rate: vehicle?.rate || 0,
+  //     },
+  //     extraServices: formatExtraServices(),
+  //     clientDetails: {
+  //       firstName: clientDetails.firstName || "",
+  //       lastName: clientDetails.lastName || "",
+  //       email: clientDetails.email || "",
+  //       phone: clientDetails.phone || "",
+  //       parmanentAddress: clientDetails.permanentAddress || "",
+  //       country: clientDetails.country || "",
+  //       presentAddress: clientDetails.presentAddress || "",
+  //       state: clientDetails.state || "",
+  //       postCode: clientDetails.postCode || "",
+  //     },
+  //     paymentMethod: clientDetails.paymentMethod || "BANK",
+  //   };
+  // };
+
   const transformFormData = () => {
     const parseDateTime = (dateTimeString) => {
       if (!dateTimeString) return new Date().toISOString();
@@ -387,12 +451,29 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
     };
 
     const formatExtraServices = () => {
-      return extras
+      const services = [];
+
+      // Add extra services
+      extras
         .filter((extra) => extra.includeStatus && extra._id)
-        .map((extra) => ({
-          serviceId: extra._id,
-          qty: extra.qty || 1,
-        }));
+        .forEach((extra) => {
+          services.push({
+            serviceId: extra._id,
+            qty: extra.qty || 1,
+          });
+        });
+
+      // Add protection services
+      protection
+        .filter((protect) => protect.includeStatus && protect._id)
+        .forEach((protect) => {
+          services.push({
+            protectionId: protect._id,
+            qty: protect.qty || 1,
+          });
+        });
+
+      return services;
     };
 
     const formattedPickupDateTime = parseDateTime(pickupDateTime);

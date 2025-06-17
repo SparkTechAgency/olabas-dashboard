@@ -85,15 +85,15 @@ const Sidebar = ({ isCollapsed }) => {
             <Link to="/driver-management">Driver Management</Link>
           ),
         },
-        {
-          key: "/driver-schedule",
-          icon: <RxLapTimer size={23} />,
-          label: isCollapsed ? (
-            <Link to="/driver-schedule">Driver Schedule</Link>
-          ) : (
-            <Link to="/driver-schedule">Driver Schedule</Link>
-          ),
-        },
+        // {
+        //   key: "/driver-schedule",
+        //   icon: <RxLapTimer size={23} />,
+        //   label: isCollapsed ? (
+        //     <Link to="/driver-schedule">Driver Schedule</Link>
+        //   ) : (
+        //     <Link to="/driver-schedule">Driver Schedule</Link>
+        //   ),
+        // },
       ],
     },
     {
@@ -197,33 +197,7 @@ const Sidebar = ({ isCollapsed }) => {
             </Link>
           ),
         },
-        // {
-        //   key: "/announcement",
-        //   icon: <GrAnnounce size={25} />,
-        //   label: isCollapsed ? (
-        //     <Link to="/announcement">Announcement</Link>
-        //   ) : (
-        //     <Link to="/announcement">Announcement</Link>
-        //   ),
-        // },
-        // {
-        //   key: "/category-list",
-        //   icon: <TbCategory2 size={24} />,
-        //   label: (
-        //     <Link to="/category-list" className="text-white hover:text-white">
-        //       Category
-        //     </Link>
-        //   ),
-        // },
-        // {
-        //   key: "/logo",
-        //   icon: <SiAntdesign size={24} />,
-        //   label: (
-        //     <Link to="/logo" className="text-white hover:text-white">
-        //       Logo
-        //     </Link>
-        //   ),
-        // },
+
         {
           key: "/contact",
           icon: <RiContactsBook3Line size={24} />,

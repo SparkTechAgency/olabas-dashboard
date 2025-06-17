@@ -48,7 +48,8 @@ const Header = () => {
         }
 
         console.log("🔌 Attempting to connect to socket server...");
-        socketRef.current = io("ws://10.0.60.110:5000", {
+        // socketRef.current = io("ws://10.0.60.110:5000", {
+        socketRef.current = io("https://pravab3001.binarybards.online", {
           auth: { token },
           transports: ["websocket"],
           reconnection: true,

@@ -5,6 +5,7 @@ import {
   useGetDriverQuery,
   useDeleteDriverMutation,
 } from "../../../redux/apiSlices/driverManagementApi";
+import { getImageUrl } from "../../../utils/baseUrl";
 
 const DriverTable = ({ onEditDriver, refetch }) => {
   const [page, setPage] = useState(1);
@@ -15,14 +16,14 @@ const DriverTable = ({ onEditDriver, refetch }) => {
     isLoading,
     isError,
   } = useGetDriverQuery(
-    { undefined, page, limit },
-    {
-      refetchOnMountOrArgChange: false,
-      refetchOnReconnect: false,
-      refetchOnFocus: false,
-      skip: false,
-      pollingInterval: 0,
-    }
+    { undefined, page, limit }
+    // {
+    //   refetchOnMountOrArgChange: false,
+    //   refetchOnReconnect: false,
+    //   refetchOnFocus: false,
+    //   skip: false,
+    //   pollingInterval: 0,
+    // }
   );
 
   // Handle pagination change
@@ -104,7 +105,7 @@ const DriverTable = ({ onEditDriver, refetch }) => {
       dataIndex: driver.name,
       key: driver._id,
       width: 150,
-      render: (text) => (
+      render: (text, record) => (
         <p
           className="bg-yellow-500 text-black 
          px-2 py-1 rounded-md"
@@ -128,13 +129,9 @@ const DriverTable = ({ onEditDriver, refetch }) => {
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
             {image ? (
               <img
-                src={`http://10.0.60.110:5000${image}`}
+                src={`${getImageUrl}${image}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.src =
-                    "https://via.placeholder.com/40x40?text=No+Image";
-                }}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">

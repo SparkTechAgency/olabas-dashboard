@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Button, Select, message, Modal } from "antd";
+import { Table, Button, Select, message, Modal, Pagination } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
@@ -12,6 +12,7 @@ import {
   useAssignDreiverMutation,
   useGetReservationQuery,
   useDeleteReservationMutation,
+  useUpdateReservationStatusMutation,
 } from "../../../redux/apiSlices/reservation";
 import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi";
 
@@ -25,6 +26,8 @@ function Reservation() {
   const [limit, setLimit] = useState(5);
   const [csvData, setCsvData] = useState([]);
   const [exportLoading, setExportLoading] = useState(false);
+
+  const [updateStatus] = useUpdateReservationStatusMutation();
 
   // API hooks - now passing page and limit parameters
   const {
@@ -97,6 +100,27 @@ function Reservation() {
           });
       },
     });
+  };
+
+  //Status Update
+  const handleStatusUpdate = async (reservationId, newStatus) => {
+    console.log("Updating status:", { reservationId, newStatus }); // Debug log
+
+    try {
+      const result = await updateStatus({
+        id: reservationId,
+        data: { status: newStatus },
+      }).unwrap();
+
+      console.log("Status update result:", result); // Debug log
+      message.success("Status updated successfully");
+      refetch(); // Refresh the data after status update
+    } catch (error) {
+      console.error("Status update failed:", error); // Enhanced error logging
+      message.error(
+        error?.data?.message || error?.message || "Failed to update status"
+      );
+    }
   };
 
   const formatReservationData = (data) => {
@@ -174,6 +198,8 @@ function Reservation() {
       dataToExport = displayData.filter((item) =>
         selectedRowKeys.includes(item.key)
       );
+    } else {
+      dataToExport = displayData;
     }
 
     setCsvData(dataToExport);
@@ -197,6 +223,14 @@ function Reservation() {
     setPage(pagination.current);
     setLimit(pagination.pageSize);
   };
+
+  // const statusUpdateOptions = [
+  //   (NOT_CONFIRMED = "NOT CONFIRMED"),
+  //   (CONFIRMED = "CONFIRMED"),
+  //   (ON_RIDE = "ON RIDE"),
+  //   (CANCELLED = "CANCELLED"),
+  //   (COMPLETED = "COMPLETED"),
+  // ];
 
   const columns = [
     {
@@ -241,6 +275,7 @@ function Reservation() {
       title: "Rented for",
       dataIndex: "car",
       key: "car",
+      width: "8%",
       render: (_, record) => (
         <div className="flex text-gray-600 text-sm">
           <span className="text-black font-bold">
@@ -268,13 +303,67 @@ function Reservation() {
         <span className="font-medium text-green-600">{text}</span>
       ),
     },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   render: (text, record) => {
+    //     const getStatusColor = (status) => {
+    //       switch (status?.toLowerCase()) {
+    //         case "confirmed":
+    //           return "bg-[#5AC5B6]";
+    //         case "not confirmed":
+    //           return "bg-[#F9C74F]";
+    //         case "canceled":
+    //         case "cancelled":
+    //           return "bg-[#F37272]";
+    //         case "completed":
+    //           return "bg-[#90BE6D]";
+    //         case "on ride":
+    //           return "bg-[#6366F1]";
+    //         default:
+    //           return "bg-[#F9C74F]";
+    //       }
+    //     };
+
+    //     return (
+    //       <div className="flex flex-col gap-1">
+    //         <span
+    //           className={`text-xs font-light text-white px-2 py-0.5 rounded w-fit ${getStatusColor(
+    //             text
+    //           )}`}
+    //         >
+    //           {text}
+    //         </span>
+    //         <Select
+    //           className="w-full"
+    //           size="small"
+    //           value={text}
+    //           onChange={(value) => handleStatusUpdate(record.id, value)}
+    //           placeholder="Update status"
+    //         >
+    //           <Option value="NOT CONFIRMED">NOT CONFIRMED</Option>
+    //           <Option value="CONFIRMED">CONFIRMED</Option>
+    //           <Option value="ON RIDE">ON RIDE</Option>
+    //           <Option value="CANCELLED">CANCELLED</Option>
+    //           <Option value="COMPLETED">COMPLETED</Option>
+    //         </Select>
+    //       </div>
+    //     );
+    //   },
+    // },
+
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (text) => {
+      width: "20%",
+      render: (text, record) => {
         const getStatusColor = (status) => {
-          switch (status?.toLowerCase()) {
+          const normalizedStatus = status?.toLowerCase().trim();
+          console.log("Status for color:", normalizedStatus); // Debug log
+
+          switch (normalizedStatus) {
             case "confirmed":
               return "bg-[#5AC5B6]";
             case "not confirmed":
@@ -284,60 +373,165 @@ function Reservation() {
               return "bg-[#F37272]";
             case "completed":
               return "bg-[#90BE6D]";
+            case "on ride":
+            case "on_ride":
+            case "onride":
+              return "bg-[#ef621e]";
             default:
+              console.log("Using default color for status:", normalizedStatus); // Debug log
               return "bg-[#F9C74F]";
           }
         };
 
+        // Check if status updates should be disabled
+        const isStatusUpdateDisabled = (currentStatus) => {
+          const status = currentStatus?.toLowerCase();
+          return status === "cancelled" || status === "completed";
+        };
+
+        // Get available status options based on current status
+        const getAvailableStatusOptions = (currentStatus) => {
+          const status = currentStatus?.toLowerCase();
+
+          switch (status) {
+            case "not confirmed":
+              return ["NOT CONFIRMED", "CONFIRMED", "CANCELLED"];
+            case "confirmed":
+              return ["CONFIRMED", "ON RIDE", "CANCELLED"];
+            case "on ride":
+              return ["ON RIDE", "COMPLETED", "CANCELLED"];
+            case "cancelled":
+            case "completed":
+              return []; // No options available
+            default:
+              return [
+                "NOT CONFIRMED",
+                "CONFIRMED",
+                "ON RIDE",
+                "CANCELLED",
+                "COMPLETED",
+              ];
+          }
+        };
+
+        const availableOptions = getAvailableStatusOptions(text);
+        const isDisabled = isStatusUpdateDisabled(text);
+
         return (
-          <div className="flex justify-start">
+          <div className="flex items-center gap-1">
             <span
-              className={`text-xs font-light text-white px-2 py-0.5 rounded ${getStatusColor(
+              className={`text-xs font-light text-white px-2 py-1 rounded h-[24px] flex items-center ${getStatusColor(
                 text
               )}`}
             >
               {text}
             </span>
+            {isDisabled ? (
+              <span className="text-xs text-gray-500 italic">
+                No further updates allowed
+              </span>
+            ) : (
+              <Select
+                className="h-[24px]"
+                size="small"
+                value={text}
+                onChange={(value) => handleStatusUpdate(record.id, value)}
+                placeholder="Update status"
+              >
+                {availableOptions.map((option) => (
+                  <Option key={option} value={option}>
+                    {option}
+                  </Option>
+                ))}
+              </Select>
+            )}
           </div>
         );
       },
     },
+    // {
+    //   title: "Action",
+    //   dataIndex: "action",
+    //   key: "action",
+    //   width: "15%",
+    //   render: (text, record) => (
+    //     <div className="flex gap-2">
+    //       <Select
+    //         className="w-[160px]"
+    //         placeholder="Assign Driver"
+    //         value={record.driverId || undefined}
+    //         onChange={(value) => handleAssignDriver(record.id, value)}
+    //       >
+    //         {driverData?.data?.map((driver) => (
+    //           <Option key={driver._id} value={driver._id}>
+    //             {driver.name}
+    //           </Option>
+    //         ))}
+    //       </Select>
+    //       <Button
+    //         danger
+    //         icon={<DeleteOutlined />}
+    //         onClick={() => {
+    //           confirm({
+    //             title: "Are you sure you want to delete this reservation?",
+    //             content: "This action cannot be undone.",
+    //             okText: "Yes, delete",
+    //             okType: "danger",
+    //             cancelText: "No",
+    //             onOk() {
+    //               return handleDeleteReservation(record.id);
+    //             },
+    //           });
+    //         }}
+    //       />
+    //     </div>
+    //   ),
+    // },
+
     {
       title: "Action",
       dataIndex: "action",
       key: "action",
-      render: (text, record) => (
-        <div className="flex gap-2">
-          <Select
-            className="w-[160px]"
-            placeholder="Assign Driver"
-            value={record.driverId || undefined}
-            onChange={(value) => handleAssignDriver(record.id, value)}
-          >
-            {driverData?.data?.map((driver) => (
-              <Option key={driver._id} value={driver._id}>
-                {driver.name}
-              </Option>
-            ))}
-          </Select>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => {
-              confirm({
-                title: "Are you sure you want to delete this reservation?",
-                content: "This action cannot be undone.",
-                okText: "Yes, delete",
-                okType: "danger",
-                cancelText: "No",
-                onOk() {
-                  return handleDeleteReservation(record.id);
-                },
-              });
-            }}
-          />
-        </div>
-      ),
+      width: "15%",
+      render: (text, record) => {
+        // Check if driver assignment should be disabled
+        const isDriverAssignmentDisabled =
+          record.status?.toLowerCase() === "on ride";
+
+        return (
+          <div className="flex gap-2">
+            <Select
+              className="w-[160px]"
+              placeholder="Assign Driver"
+              value={record.driverId || undefined}
+              onChange={(value) => handleAssignDriver(record.id, value)}
+              disabled={isDriverAssignmentDisabled}
+            >
+              {driverData?.data?.map((driver) => (
+                <Option key={driver._id} value={driver._id}>
+                  {driver.name}
+                </Option>
+              ))}
+            </Select>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                confirm({
+                  title: "Are you sure you want to delete this reservation?",
+                  content: "This action cannot be undone.",
+                  okText: "Yes, delete",
+                  okType: "danger",
+                  cancelText: "No",
+                  onOk() {
+                    return handleDeleteReservation(record.id);
+                  },
+                });
+              }}
+            />
+          </div>
+        );
+      },
     },
   ];
 
