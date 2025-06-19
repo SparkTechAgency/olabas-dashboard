@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, message } from "antd";
+import { Table, Button, message, Checkbox } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import GetPageName from "../../../components/common/GetPageName";
@@ -10,6 +10,7 @@ import { GrFormAdd } from "react-icons/gr";
 import driver from "../../../assets/driver.png";
 import AddNewExtraModal from "./AddNewExtraModal";
 import {
+  useAddToProtectionMutation,
   useCreateExtraMutation,
   useDeleteExtraMutation,
   useGetExtraQuery,
@@ -30,6 +31,8 @@ function Extra() {
     isError,
   } = useGetExtraQuery({ page, limit, status: filter.toUpperCase() });
   console.log("sss", extraData);
+
+  const [addToProtection] = useAddToProtectionMutation();
 
   // Handle pagination change
   const handleTableChange = (pagination) => {
@@ -56,7 +59,7 @@ function Extra() {
     const data = {
       name: values.name,
       description: values.description,
-      cost: parseFloat(values.cost), // Fixed: use values.cost instead of editingRecord.cost
+      cost: parseFloat(values.cost),
       status: values.status.toUpperCase(),
     };
 
@@ -112,6 +115,30 @@ function Extra() {
     }
   };
 
+  const handleToggleProtection = async (record, checked) => {
+    try {
+      const updatedData = {
+        isProtection: checked ? true : false,
+      };
+
+      const res = await addToProtection({
+        id: record.key,
+        updatedData,
+      }).unwrap();
+
+      if (res.success) {
+        message.success(
+          `Protection ${checked ? "enabled" : "disabled"} successfully`
+        );
+      } else {
+        message.error("Failed to update protection status");
+      }
+    } catch (err) {
+      console.error("Protection toggle failed:", err);
+      message.error("Failed to update protection status");
+    }
+  };
+
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys) => setSelectedRowKeys(keys),
@@ -122,8 +149,10 @@ function Extra() {
     image: item.image,
     name: item.name,
     description: item.description,
-    cost: `$${item.cost}`, // Fixed: changed from 'price' to 'cost'
+    cost: `$${item.cost}`,
     status: item.status === "ACTIVE" ? "Active" : "Inactive",
+    isProtection: item.isProtection, // Add this field to track protection status
+    originalRecord: item, // Keep reference to original record
   }));
 
   const columns = [
@@ -148,7 +177,7 @@ function Extra() {
     },
     { title: "Name", dataIndex: "name", key: "name" },
     { title: "Description", dataIndex: "description", key: "description" },
-    { title: "Cost", dataIndex: "cost", key: "cost" }, // Fixed: changed title from "Price" to "Cost"
+    { title: "Cost", dataIndex: "cost", key: "cost" },
     {
       title: "Status",
       dataIndex: "status",
@@ -176,6 +205,20 @@ function Extra() {
           </div>
         );
       },
+    },
+    {
+      title: `Add to Protection`,
+      key: "addToProtection",
+      render: (_, record) => (
+        <div className="flex items-center gap-4">
+          <Checkbox
+            checked={
+              record.isProtection === "true" || record.isProtection === true
+            }
+            onChange={(e) => handleToggleProtection(record, e.target.checked)}
+          />
+        </div>
+      ),
     },
     {
       title: "Actions",

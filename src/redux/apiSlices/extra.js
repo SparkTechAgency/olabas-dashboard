@@ -18,6 +18,14 @@ const extraSlice = api.injectEndpoints({
       }),
       invalidatesTags: ["Extra"],
     }),
+    addToProtection: builder.mutation({
+      query: ({ id, updatedData }) => ({
+        url: `/extra-service/${id}`,
+        method: "PATCH",
+        body: updatedData,
+      }),
+      invalidatesTags: ["Extra"],
+    }),
     deleteExtra: builder.mutation({
       query: (id) => ({
         url: `/extra-service/${id}`,
@@ -42,4 +50,5 @@ export const {
   useCreateExtraMutation,
   useUpdateExtraMutation,
   useDeleteExtraMutation,
+  useAddToProtectionMutation,
 } = extraSlice;
