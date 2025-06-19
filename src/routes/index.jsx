@@ -28,6 +28,7 @@ import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
 import DriverSchedule from "../Pages/Dashboard/Driver Schedule/DriverSchedule.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import ContactList from "../Pages/Dashboard/ContactList/contactList.jsx";
+import DriverManagementSchedule from "../Pages/Dashboard/Driver Management/DriverManagementSchedule.jsx";
 
 const router = createBrowserRouter([
   {
@@ -85,7 +86,7 @@ const router = createBrowserRouter([
         path: "/driver-schedule",
         element: (
           <ProtectedRoute>
-            <DriverSchedule />{" "}
+            <DriverManagementSchedule />{" "}
           </ProtectedRoute>
         ),
       },

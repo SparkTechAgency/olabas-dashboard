@@ -6,8 +6,9 @@ import {
   useDeleteDriverMutation,
 } from "../../../redux/apiSlices/driverManagementApi";
 import { getImageUrl } from "../../../utils/baseUrl";
+import DriverManagementSchedule from "./DriverManagementSchedule";
 
-const DriverTable = ({ onEditDriver, refetch }) => {
+const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
 
@@ -15,16 +16,7 @@ const DriverTable = ({ onEditDriver, refetch }) => {
     data: driverData,
     isLoading,
     isError,
-  } = useGetDriverQuery(
-    { page, limit }
-    // {
-    //   refetchOnMountOrArgChange: false,
-    //   refetchOnReconnect: false,
-    //   refetchOnFocus: false,
-    //   skip: false,
-    //   pollingInterval: 0,
-    // }
-  );
+  } = useGetDriverQuery({ page, limit });
 
   console.log("driver", driverData?.data);
 
@@ -50,75 +42,8 @@ const DriverTable = ({ onEditDriver, refetch }) => {
 
   const handleEdit = (driver) => {
     console.log("Editing driver:", driver);
-
     onEditDriver(driver);
   };
-
-  const transformedData = useMemo(() => {
-    if (!driverData?.data || !Array.isArray(driverData.data)) return [];
-
-    const groupedByDate = {};
-
-    driverData.data.forEach((driver) => {
-      driver.bookings?.forEach((booking) => {
-        const pickupDate = new Date(booking.pickupDate).toLocaleDateString(
-          "en-GB",
-          {
-            day: "2-digit",
-            month: "short",
-            year: "2-digit",
-          }
-        );
-
-        if (!groupedByDate[pickupDate]) {
-          groupedByDate[pickupDate] = {
-            key: pickupDate,
-            dateDriver: pickupDate,
-          };
-        }
-
-        const vehicleName = booking.vehicle?.name || "N/A";
-        if (groupedByDate[pickupDate][driver.name]) {
-          groupedByDate[pickupDate][driver.name] += `, ${vehicleName}`;
-        } else {
-          groupedByDate[pickupDate][driver.name] = vehicleName;
-        }
-      });
-    });
-
-    return Object.values(groupedByDate);
-  }, [driverData?.data]);
-
-  const scheduleColumns = useMemo(() => {
-    const base = [
-      {
-        title: "Date/Driver",
-        dataIndex: "dateDriver",
-        key: "dateDriver",
-        fixed: "left",
-        width: 130,
-      },
-    ];
-
-    if (!driverData?.data) return base;
-
-    const driverColumns = driverData.data.map((driver, index) => ({
-      title: driver.name,
-      dataIndex: driver.name,
-      key: driver._id,
-      width: 150,
-      render: (text, record) => (
-        <p
-          className="bg-yellow-500 text-black 
-         px-2 py-1 rounded-md"
-        >
-          {text || "Not Assigned"}
-        </p>
-      ),
-    }));
-
-    return [...base, ...driverColumns];
-  }, [driverData?.data]);
 
   const driverColumns = useMemo(
     () => [
@@ -256,47 +181,40 @@ const DriverTable = ({ onEditDriver, refetch }) => {
 
   return (
     <div className="w-full p-4">
-      {/* Driver Management Table */}
-      <div className="mb-8">
-        <div className="mb-4 flex justify-between items-center">
-          <h3 className="text-lg font-semibold">
-            Driver Management ({driverData?.data?.length || 0} drivers)
-          </h3>
+      {/* Conditional rendering based on selected segment */}
+      {selectedSegment === "drivers" && (
+        <div className="mb-8">
+          <div className="mb-4 flex justify-between items-center">
+            <h3 className="text-lg font-semibold">
+              Driver Management ({driverData?.data?.length || 0} drivers)
+            </h3>
+          </div>
+          <Table
+            columns={driverColumns}
+            dataSource={driverTableData}
+            scroll={{ x: "max-content" }}
+            onChange={handleTableChange}
+            pagination={{
+              current: page,
+              pageSize: limit,
+              total: driverData?.data?.meta?.total || 0,
+              showTotal: (total, range) =>
+                `${range[0]}-${range[1]} of ${total} items`,
+              position: ["bottomRight"],
+              size: "small",
+              showSizeChanger: true,
+              showQuickJumper: true,
+              pageSizeOptions: ["5", "10"],
+            }}
+            size="middle"
+          />
         </div>
-        <Table
-          columns={driverColumns}
-          dataSource={driverTableData}
-          scroll={{ x: "max-content" }}
-          onChange={handleTableChange}
-          pagination={{
-            current: page,
-            pageSize: limit,
-            total: driverData?.data?.meta?.total || 0,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} items`,
-            position: ["bottomRight"],
-            size: "small",
-            showSizeChanger: true,
-            showQuickJumper: true,
-            pageSizeOptions: ["1", "5", "10", "20", "50"],
-          }}
-          size="middle"
-        />
-      </div>
+      )}
 
-      {/* Driver Schedule Table */}
-      <div>
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">Driver Booking Schedule</h3>
-        </div>
-        <Table
-          columns={scheduleColumns}
-          dataSource={transformedData}
-          scroll={{ x: "max-content", y: 550 }}
-          pagination={{ pageSize: 10 }}
-          size="middle"
-        />
-      </div>
+      {/* Driver Schedule Table - Only show when schedule segment is selected */}
+      {selectedSegment === "schedule" && (
+        <DriverManagementSchedule driverData={driverData} />
+      )}
     </div>
   );
 };

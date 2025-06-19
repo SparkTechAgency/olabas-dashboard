@@ -228,7 +228,7 @@ function Extra() {
           size: "small",
           showSizeChanger: true,
           showQuickJumper: true,
-          pageSizeOptions: ["1", "5", "10", "20", "50"],
+          pageSizeOptions: ["5", "10"],
         }}
         showSorterTooltip={{ target: "sorter-icon" }}
       />

@@ -33,6 +33,14 @@ function AntdConfig({ children }) {
           //   borderRadius: "3px",
           //   itemActiveBg: "#18a0fb",
           // },
+          Segmented: {
+            itemHoverBg: "#000000",
+            itemHoverColor: "white",
+            trackBg: "#04bf61",
+            itemColor: "white",
+            itemSelectedColor: "black",
+            fontSize: 18,
+          },
 
           token: {
             colorPrimary: "#04bf61 !important",

@@ -39,7 +39,7 @@ function Team() {
 
   // Show Add Modal
   const handleAdd = () => {
-    setEditingRecord(null); // Clear any previous edit data
+    setEditingRecord(null);
     setIsAddModalOpen(true);
   };
 
@@ -289,7 +289,7 @@ function Team() {
           size: "small",
           showSizeChanger: true,
           showQuickJumper: true,
-          pageSizeOptions: ["1", "5", "10", "20", "50"],
+          pageSizeOptions: ["5", "10"],
         }}
         rowKey="key"
       />

@@ -62,40 +62,40 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/client-management">Client Management</Link>
       ),
     },
-    // {
-    //   key: "/driver-management",
-    //   icon: <FaUserNurse size={23} />,
-    //   label: isCollapsed ? (
-    //     <Link to="/driver-management">Driver Management</Link>
-    //   ) : (
-    //     <Link to="/driver-management">Driver Management</Link>
-    //   ),
-    // },
     {
-      key: "subMenuSetting-3",
-      icon: <FaUserNurse size={`${isCollapsed ? 25 : 25}`} />,
-      label: "Driver Management",
-      children: [
-        {
-          key: "/driver-management",
-          icon: <RiUserSettingsFill size={23} />,
-          label: isCollapsed ? (
-            <Link to="/driver-management">Driver Management</Link>
-          ) : (
-            <Link to="/driver-management">Driver Management</Link>
-          ),
-        },
-        // {
-        //   key: "/driver-schedule",
-        //   icon: <RxLapTimer size={23} />,
-        //   label: isCollapsed ? (
-        //     <Link to="/driver-schedule">Driver Schedule</Link>
-        //   ) : (
-        //     <Link to="/driver-schedule">Driver Schedule</Link>
-        //   ),
-        // },
-      ],
+      key: "/driver-management",
+      icon: <FaUserNurse size={23} />,
+      label: isCollapsed ? (
+        <Link to="/driver-management">Driver Management</Link>
+      ) : (
+        <Link to="/driver-management">Driver Management</Link>
+      ),
     },
+    // {
+    //   key: "subMenuSetting-3",
+    //   icon: <FaUserNurse size={`${isCollapsed ? 25 : 25}`} />,
+    //   label: "Driver Management",
+    //   children: [
+    //     {
+    //       key: "/driver-management",
+    //       icon: <RiUserSettingsFill size={23} />,
+    //       label: isCollapsed ? (
+    //         <Link to="/driver-management">Driver Management</Link>
+    //       ) : (
+    //         <Link to="/driver-management">Driver Management</Link>
+    //       ),
+    //     },
+    //     {
+    //       key: "/driver-schedule",
+    //       icon: <RxLapTimer size={23} />,
+    //       label: isCollapsed ? (
+    //         <Link to="/driver-schedule">Driver Schedule</Link>
+    //       ) : (
+    //         <Link to="/driver-schedule">Driver Schedule</Link>
+    //       ),
+    //     },
+    //   ],
+    // },
     {
       key: "/fleet-management",
       icon: <BiSolidCarMechanic size={23} />,
