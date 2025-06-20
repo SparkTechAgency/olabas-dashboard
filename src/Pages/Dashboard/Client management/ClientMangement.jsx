@@ -128,7 +128,7 @@ function ClientMangement() {
       render: (_, record) => (
         <div className="flex items-center gap-4">
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-2 border-smart"
             onClick={() => handleViewClient(record)}
           >
             <AiOutlineEye size={20} className="text-black" />
@@ -203,7 +203,7 @@ function Head({ onSearch, selectedRowKeys, handleDelete, filteredData }) {
       <div className="flex gap-3 items-center">
         <CustomSearch
           onSearch={onSearch}
-          placeholder="Search by name, email, phone..."
+          placeholder="Search by email, phone..."
         />
 
         {selectedRowKeys.length > 0 && (

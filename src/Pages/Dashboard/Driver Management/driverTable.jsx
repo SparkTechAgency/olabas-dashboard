@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Table, Button, Popconfirm, message } from "antd";
+import { Table, Button, Popconfirm, message, Pagination } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import {
   useGetDriverQuery,
@@ -10,7 +10,7 @@ import DriverManagementSchedule from "./DriverManagementSchedule";
 
 const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(50);
 
   const {
     data: driverData,
@@ -19,12 +19,6 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
   } = useGetDriverQuery({ page, limit });
 
   console.log("driver", driverData?.data);
-
-  // Handle pagination change
-  const handleTableChange = (pagination) => {
-    setPage(pagination.current);
-    setLimit(pagination.pageSize);
-  };
 
   const [deleteDriver, { isLoading: deleteLoading }] =
     useDeleteDriverMutation();
@@ -52,6 +46,7 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
         dataIndex: "image",
         key: "image",
         width: 80,
+        // No sorter for Profile column
         render: (image) => (
           <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200">
             {image ? (
@@ -72,27 +67,37 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
         title: "Name",
         dataIndex: "name",
         key: "name",
+        sorter: (a, b) => (a.name || "").localeCompare(b.name || ""),
         render: (text) => <span className="font-medium">{text}</span>,
       },
       {
         title: "Email",
         dataIndex: "email",
         key: "email",
+        sorter: (a, b) => (a.email || "").localeCompare(b.email || ""),
       },
       {
         title: "Phone",
         dataIndex: "phone",
         key: "phone",
+        sorter: (a, b) => (a.phone || "").localeCompare(b.phone || ""),
       },
       {
         title: "License Number",
         dataIndex: "licenseNumber",
         key: "licenseNumber",
+        sorter: (a, b) =>
+          (a.licenseNumber || "").localeCompare(b.licenseNumber || ""),
       },
       {
         title: "Status",
         dataIndex: "driverCurrentStatus",
         key: "driverCurrentStatus",
+        sorter: (a, b) => {
+          const statusA = a.driverCurrentStatus || "IDLE";
+          const statusB = b.driverCurrentStatus || "IDLE";
+          return statusA.localeCompare(statusB);
+        },
         render: (status) => (
           <div className="flex items-center gap-2.5">
             <span
@@ -115,6 +120,11 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
       {
         title: "Active Bookings",
         key: "bookings",
+        sorter: (a, b) => {
+          const bookingsA = a.bookings?.length || 0;
+          const bookingsB = b.bookings?.length || 0;
+          return bookingsA - bookingsB;
+        },
         render: (_, record) => (
           <span className="font-medium">{record.bookings?.length || 0}</span>
         ),
@@ -123,6 +133,12 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
         title: "Verified",
         dataIndex: "verified",
         key: "verified",
+        sorter: (a, b) => {
+          // Sort verified drivers first (true > false)
+          const verifiedA = a.verified ? 1 : 0;
+          const verifiedB = b.verified ? 1 : 0;
+          return verifiedB - verifiedA;
+        },
         render: (verified) => (
           <span
             className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -139,6 +155,7 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
         title: "Actions",
         key: "actions",
         width: 120,
+        // No sorter for Actions column
         render: (_, record) => (
           <div className="flex gap-2">
             <Button
@@ -189,24 +206,39 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
               Driver Management ({driverData?.data?.length || 0} drivers)
             </h3>
           </div>
-          <Table
-            columns={driverColumns}
-            dataSource={driverTableData}
-            scroll={{ x: "max-content" }}
-            onChange={handleTableChange}
-            pagination={{
-              current: page,
-              pageSize: limit,
-              total: driverData?.data?.meta?.total || 0,
-              showTotal: (total, range) =>
-                `${range[0]}-${range[1]} of ${total} items`,
-              position: ["bottomRight"],
-              size: "small",
-              showSizeChanger: true,
-              showQuickJumper: true,
-              pageSizeOptions: ["5", "10"],
+          <div className="max-h-[62vh] overflow-auto border rounded-md">
+            <Table
+              columns={driverColumns}
+              dataSource={driverTableData}
+              scroll={{ x: "max-content" }}
+              size="middle"
+              pagination={false}
+              showSorterTooltip={{ target: "sorter-icon" }}
+            />
+          </div>
+
+          {/* Separate Pagination Component */}
+          <Pagination
+            current={page}
+            pageSize={limit}
+            total={driverData?.data?.meta?.total || 0}
+            showTotal={(total, range) =>
+              `${range[0]}-${range[1]} of ${total} items`
+            }
+            size="small"
+            align="end"
+            showSizeChanger={true}
+            showQuickJumper={true}
+            pageSizeOptions={["10", "20", "50"]}
+            onChange={(newPage, newPageSize) => {
+              setPage(newPage);
+              setLimit(newPageSize);
             }}
-            size="middle"
+            onShowSizeChange={(current, size) => {
+              setPage(1); // Reset to first page when changing page size
+              setLimit(size);
+            }}
+            className="mt-2 text-right" // Add some top margin and align to right
           />
         </div>
       )}

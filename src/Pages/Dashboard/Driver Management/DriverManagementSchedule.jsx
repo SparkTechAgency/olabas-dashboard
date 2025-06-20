@@ -77,8 +77,8 @@ function DriverManagementSchedule({ driverData }) {
         columns={scheduleColumns}
         dataSource={transformedData}
         scroll={{ x: "max-content", y: 550 }}
-        pagination={{ pageSize: 1 }}
         size="middle"
+        pagination={false}
       />
     </div>
   );
