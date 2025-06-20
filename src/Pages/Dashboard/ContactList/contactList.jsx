@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Table, Button, message } from "antd";
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { FiEdit3 } from "react-icons/fi";
+import { Table, Button, Pagination } from "antd";
 import { useGetContactListQuery } from "../../../redux/apiSlices/contact";
+import { AiOutlineEye } from "react-icons/ai";
+import ContactInfoModal from "./contactInfoModal";
+import dayjs from "dayjs";
 
 function ContactList() {
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
-
+  const [limit, setLimit] = useState(50);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [showInfoModal, setShowInfoModal] = useState(false);
   const {
     data: contactlistData,
     isError,
@@ -16,36 +18,9 @@ function ContactList() {
 
   console.log("Contact List Data:", contactlistData);
 
-  // Handle pagination change
-  const handleTableChange = (pagination) => {
-    setPage(pagination.current);
-    setLimit(pagination.pageSize);
-  };
-
-  // Handle edit action
-  const handleEdit = (record) => {
-    console.log("Edit record:", record);
-    // Add your edit logic here
-  };
-
-  // Handle delete action
-  const handleDeleteSingle = (id) => {
-    console.log("Delete record with id:", id);
-    // Add your delete logic here
-  };
-
-  // Get status color helper function
-  const getStatusColor = (status) => {
-    switch (status?.toLowerCase()) {
-      case "active":
-        return "bg-green-500";
-      case "inactive":
-        return "bg-red-500";
-      case "pending":
-        return "bg-yellow-500";
-      default:
-        return "bg-gray-500";
-    }
+  const handleViewClient = (record) => {
+    setSelectedClient(record);
+    setShowInfoModal(true);
   };
 
   const columns = [
@@ -54,24 +29,28 @@ function ContactList() {
       dataIndex: "id",
       key: "id",
       width: 100,
+      sorter: (a, b) => a.id - b.id,
     },
     {
       title: "Name",
       dataIndex: "name",
       key: "name",
       width: 150,
+      sorter: (a, b) => a.name.localeCompare(b.name),
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
       width: 200,
+      sorter: (a, b) => a.email.localeCompare(b.email),
     },
     {
       title: "Subject",
       dataIndex: "subject",
       key: "subject",
       width: 150,
+      sorter: (a, b) => a.subject.localeCompare(b.subject),
     },
     {
       title: "Message",
@@ -82,6 +61,31 @@ function ContactList() {
         <div className="max-w-xs truncate" title={text}>
           {text}
         </div>
+      ),
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      width: 150,
+      sorter: (a, b) =>
+        dayjs(a.dateOriginal).unix() - dayjs(b.dateOriginal).unix(),
+      render: (text, record) => (
+        <span>{dayjs(record.dateOriginal).format("MMM D, YYYY h:mm A")}</span>
+      ),
+    },
+    {
+      title: "Actions",
+      key: "action",
+      align: "right",
+      width: 150,
+      render: (_, record) => (
+        <Button
+          className="p-1 border-2 border-smart"
+          onClick={() => handleViewClient(record)}
+        >
+          <AiOutlineEye size={20} className="text-black" />
+        </Button>
       ),
     },
   ];
@@ -95,6 +99,8 @@ function ContactList() {
       email: contact.email,
       subject: contact.subject,
       message: contact.message,
+      date: dayjs(contact.createdAt).format("MMM D, YYYY h:mm A"), // Formatted date for display
+      dateOriginal: contact.createdAt, // Keep original date for sorting
     })) || [];
 
   return (
@@ -103,27 +109,43 @@ function ContactList() {
         <h1 className="text-[20px] font-medium">Contact Management</h1>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={tableData} // Add the data source
+      <div className="max-h-[77vh] overflow-auto border rounded-md">
+        <Table
+          columns={columns}
+          dataSource={tableData}
+          size="small"
+          loading={isLoading}
+          scroll={{ x: 1000 }}
+          pagination={false}
+        />
+      </div>
+      <Pagination
+        current={page}
+        pageSize={limit}
+        total={contactlistData?.data?.meta?.total || 0}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
         size="small"
-        loading={isLoading}
-        onChange={handleTableChange}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: contactlistData?.meta?.total || 0,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomRight"],
-          size: "small",
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ["1", "5", "10", "20", "50"],
+        align="end"
+        showSizeChanger={true}
+        showQuickJumper={true}
+        pageSizeOptions={["10", "20", "50"]}
+        onChange={(newPage, newPageSize) => {
+          setPage(newPage);
+          setLimit(newPageSize);
         }}
-        scroll={{ x: 1000 }} // Add horizontal scroll for responsive design
+        onShowSizeChange={(current, size) => {
+          setPage(1); // Reset to first page when changing page size
+          setLimit(size);
+        }}
+        className="mt-2 text-right"
       />
-
+      <ContactInfoModal
+        open={showInfoModal}
+        onCancel={() => setShowInfoModal(false)}
+        record={selectedClient}
+      />
       {isError && (
         <div className="text-red-500 text-center mt-4">
           Error loading contact data. Please try again.
