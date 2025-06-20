@@ -21,7 +21,7 @@ function Team() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(50);
 
   const {
     data: teamData,
@@ -314,7 +314,7 @@ function Team() {
         align="end"
         showSizeChanger={true}
         showQuickJumper={true}
-        pageSizeOptions={["1", "10", "20", "50"]}
+        pageSizeOptions={["10", "20", "50"]}
         onChange={(newPage, newPageSize) => {
           setPage(newPage);
           setLimit(newPageSize);

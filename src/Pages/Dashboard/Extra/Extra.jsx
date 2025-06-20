@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Button, message, Checkbox } from "antd";
+import { Table, Button, message, Checkbox, Pagination } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import GetPageName from "../../../components/common/GetPageName";
@@ -24,7 +24,7 @@ function Extra() {
   const [filter, setFilter] = useState("All");
   const [editingRecord, setEditingRecord] = useState(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(50);
   const {
     data: extraData,
     isLoading,
@@ -175,13 +175,31 @@ function Extra() {
           />
         ),
     },
-    { title: "Name", dataIndex: "name", key: "name" },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      sortDirections: ["ascend", "descend"],
+    },
     { title: "Description", dataIndex: "description", key: "description" },
-    { title: "Cost", dataIndex: "cost", key: "cost" },
+    {
+      title: "Cost",
+      dataIndex: "cost",
+      key: "cost",
+      sorter: (a, b) => {
+        const numA = parseFloat(a.cost.replace(/[^\d.]/g, "")) || 0;
+        const numB = parseFloat(b.cost.replace(/[^\d.]/g, "")) || 0;
+        return numA - numB;
+      },
+      sortDirections: ["ascend", "descend"],
+    },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      sorter: (a, b) => a.status.localeCompare(b.status),
+      sortDirections: ["ascend", "descend"],
       render: (text) => {
         const getStatusColor = (status) => {
           switch (status) {
@@ -209,6 +227,7 @@ function Extra() {
     {
       title: `Add to Protection`,
       key: "addToProtection",
+
       render: (_, record) => (
         <div className="flex items-center gap-4">
           <Checkbox
@@ -255,25 +274,37 @@ function Extra() {
         setFilter={setFilter}
       />
 
-      <Table
-        columns={columns}
-        rowSelection={rowSelection}
-        dataSource={transformedData}
+      <div className="h-[72vh] overflow-auto border rounded-md">
+        <Table
+          columns={columns}
+          rowSelection={rowSelection}
+          dataSource={transformedData}
+          size="small"
+          showSorterTooltip={{ target: "sorter-icon" }}
+          pagination={false}
+        />
+      </div>
+      <Pagination
+        current={page}
+        pageSize={limit}
+        total={extraData?.data?.meta?.total || 0}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
         size="small"
-        onChange={handleTableChange}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: extraData?.data?.meta?.total || 0,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomRight"],
-          size: "small",
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ["5", "10"],
+        align="end"
+        showSizeChanger={true}
+        showQuickJumper={true}
+        pageSizeOptions={["10", "20", "50"]}
+        onChange={(newPage, newPageSize) => {
+          setPage(newPage);
+          setLimit(newPageSize);
         }}
-        showSorterTooltip={{ target: "sorter-icon" }}
+        onShowSizeChange={(current, size) => {
+          setPage(1); // Reset to first page when changing page size
+          setLimit(size);
+        }}
+        className="mt-2 text-right" // Add some top margin and align to right
       />
 
       <AddNewExtraModal
