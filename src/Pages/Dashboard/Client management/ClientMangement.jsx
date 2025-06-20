@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Button, message } from "antd";
+import { Table, Button, message, Pagination } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
 import GetPageName from "../../../components/common/GetPageName";
@@ -13,7 +13,7 @@ function ClientMangement() {
   const [selectedClient, setSelectedClient] = useState(null);
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(50);
 
   const {
     data: clientData,
@@ -121,27 +121,39 @@ function ClientMangement() {
         filteredData={clientList} // Use server-filtered data
       />
 
-      <Table
-        columns={columns}
-        rowSelection={rowSelection}
-        dataSource={clientList} // Use server-filtered data
-        loading={isLoading}
+      <div className="max-h-[75vh] overflow-auto">
+        <Table
+          columns={columns}
+          rowSelection={rowSelection}
+          dataSource={clientList} // Use server-filtered data
+          loading={isLoading}
+          size="small"
+          rowKey={(record) => record._id || record.id}
+          pagination={false}
+          showSorterTooltip={{ target: "sorter-icon" }}
+        />
+      </div>
+      <Pagination
+        current={page}
+        pageSize={limit}
+        total={clientData?.data?.meta?.total || 0}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
         size="small"
-        onChange={handleTableChange}
-        rowKey={(record) => record._id || record.id}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: clientData?.data?.meta?.total || 0,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomRight"],
-          size: "small",
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ["1", "5", "10", "20", "50"],
+        align="end"
+        showSizeChanger={true}
+        showQuickJumper={true}
+        pageSizeOptions={["10", "20", "50"]}
+        onChange={(newPage, newPageSize) => {
+          setPage(newPage);
+          setLimit(newPageSize);
         }}
-        showSorterTooltip={{ target: "sorter-icon" }}
+        onShowSizeChange={(current, size) => {
+          setPage(1); // Reset to first page when changing page size
+          setLimit(size);
+        }}
+        className="mt-2 text-right" // Add some top margin and align to right
       />
 
       <ClientInfoModal

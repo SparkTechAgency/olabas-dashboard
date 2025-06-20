@@ -42,6 +42,14 @@ const extraSlice = api.injectEndpoints({
       }),
       providesTags: ["Extra"],
     }),
+
+    getAllProtections: builder.query({
+      query: () => ({
+        url: `/extra-service/protection`,
+        method: "GET",
+      }),
+      providesTags: ["Extra"],
+    }),
   }),
 });
 
@@ -51,4 +59,5 @@ export const {
   useUpdateExtraMutation,
   useDeleteExtraMutation,
   useAddToProtectionMutation,
+  useGetAllProtectionsQuery,
 } = extraSlice;

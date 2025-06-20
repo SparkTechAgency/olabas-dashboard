@@ -29,10 +29,10 @@ function AntdConfig({ children }) {
             headerBorderRadius: "none",
             cellFontSize: "16px",
           },
-          // Pagination: {
-          //   borderRadius: "3px",
-          //   itemActiveBg: "#18a0fb",
-          // },
+          Pagination: {
+            borderRadius: "5px",
+            itemActiveBg: "#18a0fb",
+          },
           Segmented: {
             itemHoverBg: "#000000",
             itemHoverColor: "white",

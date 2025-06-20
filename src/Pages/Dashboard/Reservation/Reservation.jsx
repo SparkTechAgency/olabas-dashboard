@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Table, Button, Select, message, Modal, Pagination } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { AlignCenterOutlined, DeleteOutlined } from "@ant-design/icons";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
 import { CSVLink } from "react-csv";
@@ -23,7 +23,7 @@ function Reservation() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(50);
   const [csvData, setCsvData] = useState([]);
   const [exportLoading, setExportLoading] = useState(false);
 
@@ -127,36 +127,37 @@ function Reservation() {
     if (!Array.isArray(data)) return [];
 
     return data?.map((item, index) => ({
-      key: item._id || index,
-      id: item._id,
-      pickupTime: dayjs(item.pickupTime).format("DD/MM/YYYY, h:mm A"),
-      pickupLocation: item.pickupLocation?.location || "N/A",
-      returnTime: dayjs(item.returnTime).format("DD/MM/YYYY, h:mm A"),
-      returnLocation: item.returnLocation?.location || "N/A",
-      carName: item.vehicle?.name || "N/A",
-      carSize: item.vehicleType || "N/A",
-      rentedDays: item.carRentedForInDays || 0,
-      carNumberPlate: item.vehicle?.plateNumber || "N/A",
-      carModel: item.vehicle?.model || "N/A",
+      key: item?._id || index,
+      id: item?._id,
+      pickupTime: dayjs(item?.pickupTime).format("DD/MM/YYYY, h:mm A"),
+      pickupLocation: item?.pickupLocation?.location || "N/A",
+      returnTime: dayjs(item?.returnTime).format("DD/MM/YYYY, h:mm A"),
+      returnLocation: item?.returnLocation?.location || "N/A",
+      carName: item?.vehicle?.name || "N/A",
+      carSize: item?.vehicleType || "N/A",
+      rentedDays: item?.carRentedForInDays || 0,
+      carNumberPlate: item?.vehicle?.plateNumber || "N/A",
+      carModel: item?.vehicle?.model || "N/A",
       client:
-        `${item.clientId?.firstName || ""} ${
-          item.clientId?.lastName || ""
+        `${item?.clientId?.firstName || ""} ${
+          item?.clientId?.lastName || ""
         }`.trim() || "N/A",
-      clientPhone: item.clientId?.phoneNumber || item.clientId?.email || "N/A",
-      price: `₦${item.amount || 0}`,
-      status: item.status || "NOT CONFIRMED",
-      driverId: item.driverId?._id || null,
-      driverName: item.driverId?.name || "Not Assigned",
+      clientPhone:
+        item?.clientId?.phoneNumber || item?.clientId?.email || "N/A",
+      price: `₦${item?.amount || 0}`,
+      status: item?.status || "NOT CONFIRMED",
+      driverId: item?.driverId?._id || null,
+      driverName: item?.driverId?.name || "Not Assigned",
       // Additional fields for CSV export
-      rawAmount: item.amount || 0,
-      clientEmail: item.clientId?.email || "N/A",
-      clientFirstName: item.clientId?.firstName || "N/A",
-      clientLastName: item.clientId?.lastName || "N/A",
-      vehicleBrand: item.vehicle?.brand || "N/A",
-      pickupDate: dayjs(item.pickupTime).format("DD/MM/YYYY"),
-      pickupTimeOnly: dayjs(item.pickupTime).format("h:mm A"),
-      returnDate: dayjs(item.returnTime).format("DD/MM/YYYY"),
-      returnTimeOnly: dayjs(item.returnTime).format("h:mm A"),
+      rawAmount: item?.amount || 0,
+      clientEmail: item?.clientId?.email || "N/A",
+      clientFirstName: item?.clientId?.firstName || "N/A",
+      clientLastName: item?.clientId?.lastName || "N/A",
+      vehicleBrand: item?.vehicle?.brand || "N/A",
+      pickupDate: dayjs(item?.pickupTime).format("DD/MM/YYYY"),
+      pickupTimeOnly: dayjs(item?.pickupTime).format("h:mm A"),
+      returnDate: dayjs(item?.returnTime).format("DD/MM/YYYY"),
+      returnTimeOnly: dayjs(item?.returnTime).format("h:mm A"),
     }));
   };
 
@@ -224,19 +225,280 @@ function Reservation() {
     setLimit(pagination.pageSize);
   };
 
-  // const statusUpdateOptions = [
-  //   (NOT_CONFIRMED = "NOT CONFIRMED"),
-  //   (CONFIRMED = "CONFIRMED"),
-  //   (ON_RIDE = "ON RIDE"),
-  //   (CANCELLED = "CANCELLED"),
-  //   (COMPLETED = "COMPLETED"),
+  // const columns = [
+  //   {
+  //     title: "Pickup",
+  //     dataIndex: "pickUp",
+  //     key: "pickUp",
+  //     sorter: (a, b) => new Date(a.pickupTime) - new Date(b.pickupTime),
+  //     sortDirections: ["ascend", "descend"],
+  //     render: (text, record) => (
+  //       <div className="flex flex-col">
+  //         <span className="font-medium">{record.pickupTime}</span>
+  //         <span className="text-gray-600 text-sm">{record.pickupLocation}</span>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     title: "Return",
+  //     dataIndex: "return",
+  //     key: "return",
+  //     sorter: (a, b) => new Date(a.returnTime) - new Date(b.returnTime),
+  //     sortDirections: ["ascend", "descend"],
+  //     render: (text, record) => (
+  //       <div className="flex flex-col">
+  //         <span className="font-medium">{record.returnTime}</span>
+  //         <span className="text-gray-600 text-sm">{record.returnLocation}</span>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     title: "Car",
+  //     dataIndex: "car",
+  //     key: "car",
+  //     render: (_, record) => (
+  //       <div className="flex flex-col">
+  //         <span className="font-medium">{record.carName}</span>
+  //         <div className="flex text-gray-600 text-sm">
+  //           <span>{record.carSize}</span>
+  //           {record.carSize !== "N/A" && record.rentedDays !== 0 && (
+  //             <span>, </span>
+  //           )}
+  //         </div>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     title: "Rented for",
+  //     dataIndex: "rentedDays",
+  //     key: "rentedDays",
+  //     sorter: (a, b) => a.rentedDays - b.rentedDays,
+  //     sortDirections: ["ascend", "descend"],
+  //     width: "8%",
+  //     render: (_, record) => (
+  //       <div className="flex text-gray-600 text-sm">
+  //         <span className="text-black font-bold">{`${record.rentedDays} Days`}</span>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     title: "Client",
+  //     dataIndex: "client",
+  //     key: "client",
+  //     render: (text, record) => (
+  //       <div className="flex flex-col">
+  //         <span className="font-medium">{text}</span>
+  //         <span className="text-gray-600 text-sm">{record.clientPhone}</span>
+  //       </div>
+  //     ),
+  //   },
+  //   {
+  //     title: "Price",
+  //     dataIndex: "price",
+  //     key: "price",
+  //     sorter: (a, b) => parseFloat(a.price) - parseFloat(b.price),
+  //     sortDirections: ["ascend", "descend"],
+  //     render: (text) => (
+  //       <span className="font-medium text-green-600">{text}</span>
+  //     ),
+  //   },
+
+  //   {
+  //     title: "Status",
+  //     dataIndex: "status",
+  //     key: "status",
+  //     width: "20%",
+  //     render: (text, record) => {
+  //       const getStatusColor = (status) => {
+  //         const normalizedStatus = status?.toLowerCase().trim();
+  //         console.log("Status for color:", normalizedStatus); // Debug log
+
+  //         switch (normalizedStatus) {
+  //           case "confirmed":
+  //             return "bg-[#5AC5B6]";
+  //           case "not confirmed":
+  //             return "bg-[#F9C74F]";
+  //           case "canceled":
+  //           case "cancelled":
+  //             return "bg-[#F37272]";
+  //           case "completed":
+  //             return "bg-[#90BE6D]";
+  //           case "on ride":
+  //           case "on_ride":
+  //           case "onride":
+  //             return "bg-[#ef621e]";
+  //           default:
+  //             console.log("Using default color for status:", normalizedStatus); // Debug log
+  //             return "bg-[#F9C74F]";
+  //         }
+  //       };
+
+  //       // Check if status updates should be disabled
+  //       const isStatusUpdateDisabled = (currentStatus) => {
+  //         const status = currentStatus?.toLowerCase();
+  //         return status === "cancelled" || status === "completed";
+  //       };
+
+  //       // Get available status options based on current status
+  //       const getAvailableStatusOptions = (currentStatus) => {
+  //         const status = currentStatus?.toLowerCase();
+
+  //         switch (status) {
+  //           case "not confirmed":
+  //             return ["NOT CONFIRMED", "CONFIRMED", "CANCELLED"];
+  //           case "confirmed":
+  //             return ["CONFIRMED", "ON RIDE", "CANCELLED"];
+  //           case "on ride":
+  //             return ["ON RIDE", "COMPLETED", "CANCELLED"];
+  //           case "cancelled":
+  //           case "completed":
+  //             return []; // No options available
+  //           default:
+  //             return [
+  //               "NOT CONFIRMED",
+  //               "CONFIRMED",
+  //               "ON RIDE",
+  //               "CANCELLED",
+  //               "COMPLETED",
+  //             ];
+  //         }
+  //       };
+
+  //       const availableOptions = getAvailableStatusOptions(text);
+  //       const isDisabled = isStatusUpdateDisabled(text);
+
+  //       return (
+  //         <div className="flex items-center gap-1">
+  //           <span
+  //             className={`text-xs font-light text-white px-2 py-1 rounded h-[24px] flex items-center ${getStatusColor(
+  //               text
+  //             )}`}
+  //           >
+  //             {text}
+  //           </span>
+  //           {isDisabled ? (
+  //             <span className="text-xs text-gray-500 italic">
+  //               No further updates allowed
+  //             </span>
+  //           ) : (
+  //             <Select
+  //               className="h-[24px]"
+  //               size="small"
+  //               value={text}
+  //               onChange={(value) => handleStatusUpdate(record.id, value)}
+  //               placeholder="Update status"
+  //             >
+  //               {availableOptions.map((option) => (
+  //                 <Option key={option} value={option}>
+  //                   {option}
+  //                 </Option>
+  //               ))}
+  //             </Select>
+  //           )}
+  //         </div>
+  //       );
+  //     },
+  //   },
+  //   // {
+  //   //   title: "Action",
+  //   //   dataIndex: "action",
+  //   //   key: "action",
+  //   //   width: "15%",
+  //   //   render: (text, record) => (
+  //   //     <div className="flex gap-2">
+  //   //       <Select
+  //   //         className="w-[160px]"
+  //   //         placeholder="Assign Driver"
+  //   //         value={record.driverId || undefined}
+  //   //         onChange={(value) => handleAssignDriver(record.id, value)}
+  //   //       >
+  //   //         {driverData?.data?.map((driver) => (
+  //   //           <Option key={driver._id} value={driver._id}>
+  //   //             {driver.name}
+  //   //           </Option>
+  //   //         ))}
+  //   //       </Select>
+  //   //       <Button
+  //   //         danger
+  //   //         icon={<DeleteOutlined />}
+  //   //         onClick={() => {
+  //   //           confirm({
+  //   //             title: "Are you sure you want to delete this reservation?",
+  //   //             content: "This action cannot be undone.",
+  //   //             okText: "Yes, delete",
+  //   //             okType: "danger",
+  //   //             cancelText: "No",
+  //   //             onOk() {
+  //   //               return handleDeleteReservation(record.id);
+  //   //             },
+  //   //           });
+  //   //         }}
+  //   //       />
+  //   //     </div>
+  //   //   ),
+  //   // },
+
+  //   {
+  //     title: "Action",
+  //     dataIndex: "action",
+  //     key: "action",
+  //     width: "15%",
+  //     render: (text, record) => {
+  //       // Check if driver assignment should be disabled
+  //       const isDriverAssignmentDisabled =
+  //         record.status?.toLowerCase() === "on ride";
+
+  //       return (
+  //         <div className="flex gap-2">
+  //           <Select
+  //             className="w-[160px]"
+  //             placeholder="Assign Driver"
+  //             value={record.driverId || undefined}
+  //             onChange={(value) => handleAssignDriver(record.id, value)}
+  //             disabled={isDriverAssignmentDisabled}
+  //           >
+  //             {driverData?.data?.map((driver) => (
+  //               <Option key={driver._id} value={driver._id}>
+  //                 {driver.name}
+  //               </Option>
+  //             ))}
+  //           </Select>
+  //           <Button
+  //             danger
+  //             icon={<DeleteOutlined />}
+  //             onClick={() => {
+  //               confirm({
+  //                 title: "Are you sure you want to delete this reservation?",
+  //                 content: "This action cannot be undone.",
+  //                 okText: "Yes, delete",
+  //                 okType: "danger",
+  //                 cancelText: "No",
+  //                 onOk() {
+  //                   return handleDeleteReservation(record.id);
+  //                 },
+  //               });
+  //             }}
+  //           />
+  //         </div>
+  //       );
+  //     },
+  //   },
   // ];
+
+  // Replace your columns array with this fixed version:
 
   const columns = [
     {
       title: "Pickup",
       dataIndex: "pickUp",
       key: "pickUp",
+      sorter: (a, b) => {
+        // Parse the formatted date string back to Date object for comparison
+        const dateA = dayjs(a.pickupTime, "DD/MM/YYYY, h:mm A").toDate();
+        const dateB = dayjs(b.pickupTime, "DD/MM/YYYY, h:mm A").toDate();
+        return dateA - dateB;
+      },
+      sortDirections: ["ascend", "descend"],
       render: (text, record) => (
         <div className="flex flex-col">
           <span className="font-medium">{record.pickupTime}</span>
@@ -248,6 +510,13 @@ function Reservation() {
       title: "Return",
       dataIndex: "return",
       key: "return",
+      sorter: (a, b) => {
+        // Parse the formatted date string back to Date object for comparison
+        const dateA = dayjs(a.returnTime, "DD/MM/YYYY, h:mm A").toDate();
+        const dateB = dayjs(b.returnTime, "DD/MM/YYYY, h:mm A").toDate();
+        return dateA - dateB;
+      },
+      sortDirections: ["ascend", "descend"],
       render: (text, record) => (
         <div className="flex flex-col">
           <span className="font-medium">{record.returnTime}</span>
@@ -273,14 +542,18 @@ function Reservation() {
     },
     {
       title: "Rented for",
-      dataIndex: "car",
-      key: "car",
+      dataIndex: "rentedDays",
+      key: "rentedDays",
+      sorter: (a, b) => {
+        const daysA = a.rentedDays || 0;
+        const daysB = b.rentedDays || 0;
+        return daysA - daysB;
+      },
+      sortDirections: ["ascend", "descend"],
       width: "8%",
       render: (_, record) => (
         <div className="flex text-gray-600 text-sm">
-          <span className="text-black font-bold">
-            {`${record.rentedDays} Days`}{" "}
-          </span>
+          <span className="text-black font-bold">{`${record.rentedDays} Days`}</span>
         </div>
       ),
     },
@@ -288,6 +561,12 @@ function Reservation() {
       title: "Client",
       dataIndex: "client",
       key: "client",
+      sorter: (a, b) => {
+        const clientA = a.client || "";
+        const clientB = b.client || "";
+        return clientA.localeCompare(clientB);
+      },
+      sortDirections: ["ascend", "descend"],
       render: (text, record) => (
         <div className="flex flex-col">
           <span className="font-medium">{text}</span>
@@ -299,65 +578,28 @@ function Reservation() {
       title: "Price",
       dataIndex: "price",
       key: "price",
+      sorter: (a, b) => {
+        // Extract numeric value from price string (remove ₦ symbol)
+        const priceA = parseFloat(a.price?.replace(/[₦,]/g, "") || "0");
+        const priceB = parseFloat(b.price?.replace(/[₦,]/g, "") || "0");
+        return priceA - priceB;
+      },
+      sortDirections: ["ascend", "descend"],
       render: (text) => (
         <span className="font-medium text-green-600">{text}</span>
       ),
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   render: (text, record) => {
-    //     const getStatusColor = (status) => {
-    //       switch (status?.toLowerCase()) {
-    //         case "confirmed":
-    //           return "bg-[#5AC5B6]";
-    //         case "not confirmed":
-    //           return "bg-[#F9C74F]";
-    //         case "canceled":
-    //         case "cancelled":
-    //           return "bg-[#F37272]";
-    //         case "completed":
-    //           return "bg-[#90BE6D]";
-    //         case "on ride":
-    //           return "bg-[#6366F1]";
-    //         default:
-    //           return "bg-[#F9C74F]";
-    //       }
-    //     };
-
-    //     return (
-    //       <div className="flex flex-col gap-1">
-    //         <span
-    //           className={`text-xs font-light text-white px-2 py-0.5 rounded w-fit ${getStatusColor(
-    //             text
-    //           )}`}
-    //         >
-    //           {text}
-    //         </span>
-    //         <Select
-    //           className="w-full"
-    //           size="small"
-    //           value={text}
-    //           onChange={(value) => handleStatusUpdate(record.id, value)}
-    //           placeholder="Update status"
-    //         >
-    //           <Option value="NOT CONFIRMED">NOT CONFIRMED</Option>
-    //           <Option value="CONFIRMED">CONFIRMED</Option>
-    //           <Option value="ON RIDE">ON RIDE</Option>
-    //           <Option value="CANCELLED">CANCELLED</Option>
-    //           <Option value="COMPLETED">COMPLETED</Option>
-    //         </Select>
-    //       </div>
-    //     );
-    //   },
-    // },
-
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
       width: "20%",
+      sorter: (a, b) => {
+        const statusA = a.status || "";
+        const statusB = b.status || "";
+        return statusA.localeCompare(statusB);
+      },
+      sortDirections: ["ascend", "descend"],
       render: (text, record) => {
         const getStatusColor = (status) => {
           const normalizedStatus = status?.toLowerCase().trim();
@@ -449,45 +691,6 @@ function Reservation() {
         );
       },
     },
-    // {
-    //   title: "Action",
-    //   dataIndex: "action",
-    //   key: "action",
-    //   width: "15%",
-    //   render: (text, record) => (
-    //     <div className="flex gap-2">
-    //       <Select
-    //         className="w-[160px]"
-    //         placeholder="Assign Driver"
-    //         value={record.driverId || undefined}
-    //         onChange={(value) => handleAssignDriver(record.id, value)}
-    //       >
-    //         {driverData?.data?.map((driver) => (
-    //           <Option key={driver._id} value={driver._id}>
-    //             {driver.name}
-    //           </Option>
-    //         ))}
-    //       </Select>
-    //       <Button
-    //         danger
-    //         icon={<DeleteOutlined />}
-    //         onClick={() => {
-    //           confirm({
-    //             title: "Are you sure you want to delete this reservation?",
-    //             content: "This action cannot be undone.",
-    //             okText: "Yes, delete",
-    //             okType: "danger",
-    //             cancelText: "No",
-    //             onOk() {
-    //               return handleDeleteReservation(record.id);
-    //             },
-    //           });
-    //         }}
-    //       />
-    //     </div>
-    //   ),
-    // },
-
     {
       title: "Action",
       dataIndex: "action",
@@ -593,28 +796,40 @@ function Reservation() {
         </div>
       )}
 
-      <Table
-        rowSelection={rowSelection}
-        columns={columns}
-        dataSource={displayData}
-        loading={isLoading}
-        rowClassName={() => "text-black"}
+      <div className="max-h-[72vh] overflow-auto border rounded-md">
+        <Table
+          rowSelection={rowSelection}
+          columns={columns}
+          dataSource={displayData}
+          loading={isLoading}
+          rowClassName={() => "text-black"}
+          size="small"
+          // onChange={handleTableChange}
+          pagination={false}
+        />
+      </div>
+      <Pagination
+        current={page}
+        pageSize={limit}
+        total={reservationData?.data?.meta?.total || 0}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
         size="small"
-        onChange={handleTableChange}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: reservationData?.data?.meta?.total || 0,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomRight"],
-          size: "small",
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ["5", "10"],
+        align="end"
+        showSizeChanger={true}
+        showQuickJumper={true}
+        pageSizeOptions={["10", "20", "50"]}
+        onChange={(newPage, newPageSize) => {
+          setPage(newPage);
+          setLimit(newPageSize);
         }}
+        onShowSizeChange={(current, size) => {
+          setPage(1); // Reset to first page when changing page size
+          setLimit(size);
+        }}
+        className="mt-2 text-right" // Add some top margin and align to right
       />
-
       <ReservationAddModal
         isModalOpen={isModalOpen}
         handleOk={handleOk}
