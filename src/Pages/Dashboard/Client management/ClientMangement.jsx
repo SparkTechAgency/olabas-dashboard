@@ -2,10 +2,15 @@ import { useState } from "react";
 import { Table, Button, message, Pagination } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
 import GetPageName from "../../../components/common/GetPageName";
 import CustomSearch from "../../../components/common/CustomSearch";
 import { useGetClientQuery } from "../../../redux/apiSlices/clientMnanagement";
 import ClientInfoModal from "./clientInfoModal";
+
+// Extend dayjs with relative time plugin
+dayjs.extend(relativeTime);
 
 function ClientMangement() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,6 +65,7 @@ function ClientMangement() {
       title: "Client",
       dataIndex: "fullName",
       key: "fullName",
+      sorter: (a, b) => (a.fullName || "").localeCompare(b.fullName || ""),
     },
     {
       title: "Contact",
@@ -70,17 +76,19 @@ function ClientMangement() {
       title: "Phone",
       dataIndex: "phone",
       key: "phone",
+      sorter: (a, b) => (a.phone || "").localeCompare(b.phone || ""),
     },
     {
       title: "Total Rentals",
       dataIndex: "totalBookings",
       key: "totalBookings",
+      sorter: (a, b) => (a.totalBookings || 0) - (b.totalBookings || 0),
     },
     {
       title: "Total Spent",
       dataIndex: "totalSpend",
       key: "totalSpend",
-      sorter: (a, b) => a.totalSpend - b.totalSpend,
+      sorter: (a, b) => (a.totalSpend || 0) - (b.totalSpend || 0),
       render: (totalSpend) => (
         <p className="text-black font-medium">₦ {totalSpend || 0}</p>
       ),
@@ -89,11 +97,30 @@ function ClientMangement() {
       title: "Last Rental Date",
       dataIndex: "dateTime",
       key: "dateTime",
-      render: (_, record) => (
-        <div className="flex flex-col">
-          <span>{record.lastBooking?.createdAt || "N/A"}</span>
-        </div>
-      ),
+      sorter: (a, b) => {
+        const dateA = a.lastBooking?.createdAt
+          ? dayjs(a.lastBooking.createdAt)
+          : dayjs(0);
+        const dateB = b.lastBooking?.createdAt
+          ? dayjs(b.lastBooking.createdAt)
+          : dayjs(0);
+        return dateA.valueOf() - dateB.valueOf();
+      },
+      render: (_, record) => {
+        if (!record.lastBooking?.createdAt) {
+          return <span className="text-gray-400">N/A</span>;
+        }
+
+        const date = dayjs(record.lastBooking.createdAt);
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">
+              {date.format("MMM DD, YYYY")}
+            </span>
+            <span className="text-xs text-gray-500">{date.fromNow()}</span>
+          </div>
+        );
+      },
     },
     {
       title: "Actions",
@@ -171,7 +198,7 @@ export default ClientMangement;
 function Head({ onSearch, selectedRowKeys, handleDelete, filteredData }) {
   return (
     <div className="flex justify-between items-center py-5">
-      <h1 className="text-[20px] font-medium">Client Management</h1>
+      <h1 className="text-[20px] font-medium">{GetPageName()}</h1>
 
       <div className="flex gap-3 items-center">
         <CustomSearch
