@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Spin, Alert, message } from "antd";
+import { Table, Button, Spin, Alert, message, Pagination } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { AiOutlineEye } from "react-icons/ai";
 import { GrFormAdd } from "react-icons/gr";
@@ -16,13 +16,14 @@ import {
 } from "../../../redux/apiSlices/fleetManagement";
 import { IoTrashBinOutline } from "react-icons/io5";
 import DeleteModal from "../../../components/common/deleteModal";
+import dayjs from "dayjs";
 
 function FleetManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(50);
 
   const [editPanel, setEditPanel] = useState(null); // Track specific vehicle ID for edit panel
   const [hoveredRow, setHoveredRow] = useState(null); // Track hovered row
@@ -110,7 +111,7 @@ function FleetManagement() {
         carModel: vehicle.model || "Unknown Model",
         carType: vehicle.vehicleType || "Unknown Type",
         fuelType: vehicle.fuelType || "Unknown Fuel",
-        dailyRate: vehicle.dailyRate ? `$${vehicle.dailyRate}` : "N/A",
+        dailyRate: vehicle.dailyRate ? `${vehicle.dailyRate}` : "N/A",
         status: vehicle.status || "Available",
         lastMaintenanceDate: vehicle.lastMaintenanceDate || "N/A",
         originalData: vehicle,
@@ -262,36 +263,82 @@ function FleetManagement() {
       title: "Name",
       dataIndex: "name",
       key: "name",
+      sorter: (a, b) => (a.name || "").localeCompare(b.name || ""),
     },
     {
       title: "License Plate",
       dataIndex: "licensePlate",
       key: "licensePlate",
+      sorter: (a, b) =>
+        (a.licensePlate || "").localeCompare(b.licensePlate || ""),
     },
     {
       title: "Car Model",
       dataIndex: "carModel",
       key: "carModel",
+      sorter: (a, b) => (a.carModel || "").localeCompare(b.carModel || ""),
     },
     {
       title: "Car Type",
       dataIndex: "carType",
       key: "carType",
+      sorter: (a, b) => (a.carType || "").localeCompare(b.carType || ""),
+      filters: [
+        { text: "Sedan", value: "Sedan" },
+        { text: "SUV", value: "SUV" },
+        { text: "Hatchback", value: "Hatchback" },
+        { text: "Coupe", value: "Coupe" },
+        { text: "Convertible", value: "Convertible" },
+        { text: "Wagon", value: "Wagon" },
+        { text: "Pickup", value: "Pickup" },
+        { text: "Van", value: "Van" },
+        { text: "Truck", value: "Truck" },
+      ],
+      onFilter: (value, record) => (record.carType || "").includes(value),
+      filterSearch: true,
     },
     {
       title: "Fuel Type",
       dataIndex: "fuelType",
       key: "fuelType",
+      sorter: (a, b) => (a.fuelType || "").localeCompare(b.fuelType || ""),
+      filters: [
+        { text: "Petrol", value: "Petrol" },
+        { text: "Diesel", value: "Diesel" },
+        { text: "Electric", value: "Electric" },
+        { text: "Hybrid", value: "Hybrid" },
+        { text: "CNG", value: "CNG" },
+        { text: "LPG", value: "LPG" },
+      ],
+      onFilter: (value, record) => (record.fuelType || "").includes(value),
+      filterSearch: true,
     },
     {
       title: "Daily Rate",
       dataIndex: "dailyRate",
       key: "dailyRate",
+      sorter: (a, b) => {
+        const rateA = parseFloat(a.dailyRate) || 0;
+        const rateB = parseFloat(b.dailyRate) || 0;
+        return rateA - rateB;
+      },
+      render: (dailyRate) => {
+        const rate = parseFloat(dailyRate) || 0;
+        return <span>₦{dailyRate.toLocaleString()}</span>;
+      },
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      sorter: (a, b) => (a.status || "").localeCompare(b.status || ""),
+      filters: [
+        { text: "Available", value: "AVAILABLE" },
+        { text: "Under Maintenance", value: "UNDER MAINTENANCE" },
+        { text: "Rented", value: "RENTED" },
+      ],
+      onFilter: (value, record) =>
+        (record.status || "").toUpperCase() === value,
       render: (text, record) => {
         const getStatusColor = (status) => {
           switch (status.toUpperCase()) {
@@ -400,14 +447,41 @@ function FleetManagement() {
       title: "Last Maintenance Date",
       dataIndex: "lastMaintenanceDate",
       key: "lastMaintenanceDate",
+      sorter: (a, b) => {
+        const dateA = a.lastMaintenanceDate
+          ? dayjs(a.lastMaintenanceDate)
+          : dayjs(0);
+        const dateB = b.lastMaintenanceDate
+          ? dayjs(b.lastMaintenanceDate)
+          : dayjs(0);
+        return dateA.valueOf() - dateB.valueOf();
+      },
+      render: (date) => {
+        if (!date) {
+          return <span className="text-gray-400">N/A</span>;
+        }
+
+        const maintenanceDate = dayjs(date);
+        return (
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">
+              {maintenanceDate.format("MMM DD, YYYY")}
+            </span>
+            <span className="text-xs text-gray-500">
+              {maintenanceDate.fromNow()}
+            </span>
+          </div>
+        );
+      },
     },
     {
       title: "Actions",
       key: "action",
+      // No sorter for Actions column
       render: (_, record) => (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-2 border-smart"
             onClick={() => handleViewVehicle(record)}
             title="View Details"
           >
@@ -415,7 +489,7 @@ function FleetManagement() {
           </Button>
 
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-2 border-smart"
             onClick={() => handleEdit(record)}
             title="Edit Vehicle"
           >
@@ -423,7 +497,7 @@ function FleetManagement() {
           </Button>
 
           <Button
-            className="p-1 border-smart"
+            className="p-1 border-2 border-smart"
             onClick={() => {
               setVehicleToDelete(record);
               setIsDeleteModalVisible(true);
@@ -470,30 +544,42 @@ function FleetManagement() {
         showModal={handleAddNew}
       />
 
-      <Table
-        columns={columns}
-        rowSelection={rowSelection}
-        dataSource={filteredData}
-        size="default"
-        onChange={handleTableChange}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: fleetData?.data?.meta?.total || 0,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomRight"],
-          size: "small",
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ["5", "10"],
+      <div className="max-h-[72vh] overflow-auto border-rounded-md">
+        <Table
+          columns={columns}
+          rowSelection={rowSelection}
+          dataSource={filteredData}
+          size="default"
+          pagination={false}
+          showSorterTooltip={{ target: "sorter-icon" }}
+          loading={isLoading || isDeleting || isUpdatingStatus}
+          onRow={(record) => ({
+            onMouseEnter: () => setHoveredRow(record.originalData?.id),
+            onMouseLeave: () => setHoveredRow(null),
+          })}
+        />
+      </div>
+      <Pagination
+        current={page}
+        pageSize={limit}
+        total={fleetData?.data?.meta?.total || 0}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
+        size="small"
+        align="end"
+        showSizeChanger={true}
+        showQuickJumper={true}
+        pageSizeOptions={["1", "10", "20", "50"]}
+        onChange={(newPage, newPageSize) => {
+          setPage(newPage);
+          setLimit(newPageSize);
         }}
-        showSorterTooltip={{ target: "sorter-icon" }}
-        loading={isLoading || isDeleting || isUpdatingStatus}
-        onRow={(record) => ({
-          onMouseEnter: () => setHoveredRow(record.originalData?.id),
-          onMouseLeave: () => setHoveredRow(null),
-        })}
+        onShowSizeChange={(current, size) => {
+          setPage(1); // Reset to first page when changing page size
+          setLimit(size);
+        }}
+        className="mt-2 text-right" // Add some top margin and align to right
       />
 
       <VehicleModal
@@ -551,12 +637,6 @@ function FleetHeader({
               Delete ({selectedRowKeys.length})
             </Button>
           )}
-          {/* <Button
-            icon={<LuDownload />}
-            className="bg-smart hover:bg-smart text-white border-none h-8 flex items-center"
-          >
-            Export ({filteredData.length})
-          </Button> */}
         </div>
       </div>
     </div>
