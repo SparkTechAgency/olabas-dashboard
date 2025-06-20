@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Table, Button, message } from "antd";
+import { Table, Button, message, Pagination } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit3 } from "react-icons/fi";
@@ -160,9 +160,27 @@ function Team() {
           />
         ),
     },
-    { title: "Name", dataIndex: "name", key: "name" },
-    { title: "Role", dataIndex: "teamRole", key: "teamRole" },
-    { title: "Designation", dataIndex: "designation", key: "designation" },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      sorter: (a, b) => a.name.localeCompare(b.name),
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Role",
+      dataIndex: "teamRole",
+      key: "teamRole",
+      sorter: (a, b) => a.teamRole.localeCompare(b.teamRole),
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Designation",
+      dataIndex: "designation",
+      key: "designation",
+      sorter: (a, b) => a.designation.localeCompare(b.designation),
+      sortDirections: ["ascend", "descend"],
+    },
     {
       title: "Description",
       dataIndex: "teamDescription",
@@ -172,6 +190,8 @@ function Team() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      sorter: (a, b) => a.status.localeCompare(b.status),
+      sortDirections: ["ascend", "descend"],
       render: (text) => (
         <div className="flex justify-start">
           <span
@@ -273,25 +293,37 @@ function Team() {
         </div>
       </div>
 
-      <Table
-        columns={columns}
-        dataSource={transformedData || []}
-        rowSelection={rowSelection}
+      <div className="max-h-[72vh] overflow-auto border rounded-md">
+        <Table
+          columns={columns}
+          dataSource={transformedData || []}
+          rowSelection={rowSelection}
+          size="small"
+          pagination={false}
+          rowKey="key"
+        />
+      </div>
+      <Pagination
+        current={page}
+        pageSize={limit}
+        total={teamData?.data?.meta?.total || 0}
+        showTotal={(total, range) =>
+          `${range[0]}-${range[1]} of ${total} items`
+        }
         size="small"
-        onChange={handleTableChange}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total: teamData?.data?.meta?.total || 0,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} items`,
-          position: ["bottomRight"],
-          size: "small",
-          showSizeChanger: true,
-          showQuickJumper: true,
-          pageSizeOptions: ["5", "10"],
+        align="end"
+        showSizeChanger={true}
+        showQuickJumper={true}
+        pageSizeOptions={["1", "10", "20", "50"]}
+        onChange={(newPage, newPageSize) => {
+          setPage(newPage);
+          setLimit(newPageSize);
         }}
-        rowKey="key"
+        onShowSizeChange={(current, size) => {
+          setPage(1); // Reset to first page when changing page size
+          setLimit(size);
+        }}
+        className="mt-2 text-right" // Add some top margin and align to right
       />
 
       {/* Add Modal */}
