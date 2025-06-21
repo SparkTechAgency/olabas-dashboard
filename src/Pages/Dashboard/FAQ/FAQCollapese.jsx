@@ -1,4 +1,3 @@
-// import React, { useState } from "react";
 import {
   Collapse,
   Modal,
@@ -18,6 +17,20 @@ import {
   useUpdateFaqMutation,
 } from "../../../redux/apiSlices/faq";
 import { useState } from "react";
+
+// Utility function to extract error message from API response
+const getErrorMessage = (error) => {
+  if (error?.data?.message) {
+    return error.data.message;
+  }
+  if (error?.data?.errorMessages?.length > 0) {
+    return error.data.errorMessages[0].message;
+  }
+  if (error?.message) {
+    return error.message;
+  }
+  return "An unexpected error occurred";
+};
 
 export const HeadFaq = ({ showModal }) => (
   <div className="flex justify-between items-center py-5">
@@ -40,7 +53,13 @@ export default function FaqCollapse() {
   const [deleteFaq, setDeleteFaq] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { data: faqData, isLoading } = useGetFaqQuery();
+  const {
+    data: faqData,
+    isLoading,
+    isError,
+    error: fetchError,
+  } = useGetFaqQuery();
+
   const [createFAQ] = useCreateFaqMutation();
   const [updateFAQ] = useUpdateFaqMutation();
   const [deleteFAQ] = useDeleteFaqMutation();
@@ -70,40 +89,61 @@ export default function FaqCollapse() {
     try {
       if (editFaq) {
         console.log("editFaq", editFaq);
-        await updateFAQ({ id: editFaq.id, updatedData: values }).unwrap();
-        message.success("FAQ updated successfully!");
+        const res = await updateFAQ({
+          id: editFaq.id,
+          updatedData: values,
+        }).unwrap();
+
+        if (res.success) {
+          message.success("FAQ updated successfully!");
+        } else {
+          message.error(res.message || "Failed to update FAQ");
+        }
       } else {
-        await createFAQ(values).unwrap();
-        message.success("FAQ added successfully!");
+        const res = await createFAQ(values).unwrap();
+
+        if (res.success) {
+          message.success("FAQ added successfully!");
+        } else {
+          message.error(res.message || "Failed to create FAQ");
+        }
       }
       setIsModalOpen(false);
       form.resetFields();
     } catch (error) {
       console.error("Save error:", error);
-      message.error("Something went wrong.");
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
     }
   };
 
   const handleDelete = async () => {
     try {
-      console.log("Deleting FAQ with ID:", deleteFaq?.id); // Debug log
+      console.log("Deleting FAQ with ID:", deleteFaq?.id);
       if (!deleteFaq?.id) {
         message.error("FAQ ID is missing");
         return;
       }
-      await deleteFAQ(deleteFaq.id).unwrap();
-      message.success("FAQ deleted successfully!");
+
+      const res = await deleteFAQ(deleteFaq.id).unwrap();
+
+      if (res.success) {
+        message.success("FAQ deleted successfully!");
+      } else {
+        message.error(res.message || "Failed to delete FAQ");
+      }
       setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Delete error:", error);
-      message.error("Failed to delete FAQ.");
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
       setIsDeleteModalOpen(false);
     }
   };
 
   const getItems = () =>
     faqData?.data?.map((faq) => {
-      console.log("FAQ item:", faq); // Debug log to check data structure
+      console.log("FAQ item:", faq);
       const { _id, question, answer } = faq;
       return {
         key: _id,
@@ -120,31 +160,58 @@ export default function FaqCollapse() {
       };
     }) || [];
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="h-full">
+        <HeadFaq showModal={showAddModal} />
+        <div className="flex justify-center mt-10">
+          <Spin size="large" />
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state with specific error message
+  if (isError) {
+    const errorMessage = getErrorMessage(fetchError);
+    return (
+      <div className="h-full">
+        <HeadFaq showModal={showAddModal} />
+        <div className="flex flex-col items-center justify-center h-64 bg-white rounded-lg shadow-md">
+          <div className="text-red-500 text-lg mb-2 font-medium">
+            Failed to load FAQs
+          </div>
+          <div className="text-gray-600 text-sm text-center max-w-md">
+            {errorMessage}
+          </div>
+          <div className="text-xs text-gray-400 mt-2">
+            Please contact your administrator if this issue persists.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full">
       <HeadFaq showModal={showAddModal} />
 
-      {isLoading ? (
-        <div className="flex justify-center mt-10">
-          <Spin />
-        </div>
-      ) : (
-        <Collapse
-          bordered={false}
-          activeKey={activeKeys}
-          onChange={setActiveKeys}
-          expandIcon={({ isActive }) => (
-            <div
-              className="flex items-center justify-center w-6 h-6 transition-transform duration-300"
-              style={{ transform: `rotate(${isActive ? 180 : 0}deg)` }}
-            >
-              <PlusOutlined className="text-smart" />
-            </div>
-          )}
-          items={getItems()}
-          className="shadow-md bg-white"
-        />
-      )}
+      <Collapse
+        bordered={false}
+        activeKey={activeKeys}
+        onChange={setActiveKeys}
+        expandIcon={({ isActive }) => (
+          <div
+            className="flex items-center justify-center w-6 h-6 transition-transform duration-300"
+            style={{ transform: `rotate(${isActive ? 180 : 0}deg)` }}
+          >
+            <PlusOutlined className="text-smart" />
+          </div>
+        )}
+        items={getItems()}
+        className="shadow-md bg-white"
+      />
 
       {/* Add/Edit FAQ Modal */}
       <Modal
@@ -209,8 +276,17 @@ export default function FaqCollapse() {
         centered
         footer={null}
       >
-        <p>Are you sure you want to delete this FAQ?</p>
-        <div className="flex justify-center gap-4 mt-4">
+        <div className="py-4">
+          <p className="text-gray-700 mb-2">
+            Are you sure you want to delete this FAQ?
+          </p>
+          <div className="bg-gray-50 p-3 rounded-md">
+            <p className="font-medium text-sm text-gray-800">
+              Q: {deleteFaq?.question}
+            </p>
+          </div>
+        </div>
+        <div className="flex justify-center gap-4 mt-6">
           <ButtonEDU
             actionType="cancel"
             onClick={() => setIsDeleteModalOpen(false)}

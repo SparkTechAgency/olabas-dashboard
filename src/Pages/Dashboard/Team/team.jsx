@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Table, Button, message, Pagination } from "antd";
+import { useState, useEffect } from "react";
+import { Table, Button, message, Pagination, Alert } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FiEdit3 } from "react-icons/fi";
@@ -27,7 +27,44 @@ function Team() {
     data: teamData,
     isError,
     isLoading,
+    error,
   } = useGetTeamQuery({ page, limit, status: filter.toLowerCase() });
+
+  const [deleteTeam] = useDeleteTeamMutation();
+
+  // Handle API errors with proper message display
+  useEffect(() => {
+    if (isError && error) {
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
+    }
+  }, [isError, error]);
+
+  // Function to extract proper error message from API response
+  const getErrorMessage = (error) => {
+    // Check if it's an RTK Query error with data
+    if (error?.data) {
+      const errorData = error.data;
+
+      // If there's a specific message
+      if (errorData.message) {
+        return errorData.message;
+      }
+
+      // If there are errorMessages array
+      if (errorData.errorMessages && errorData.errorMessages.length > 0) {
+        return errorData.errorMessages.map((err) => err.message).join(", ");
+      }
+    }
+
+    // Check if it's a network error
+    if (error?.status === "FETCH_ERROR") {
+      return "Network error: Unable to connect to the server";
+    }
+
+    // Generic error message
+    return error?.message || "An unexpected error occurred";
+  };
 
   // Handle pagination change
   const handleTableChange = (pagination) => {
@@ -35,19 +72,16 @@ function Team() {
     setLimit(pagination.pageSize);
   };
 
-  const [deleteTeam] = useDeleteTeamMutation();
-
   // Show Add Modal
   const handleAdd = () => {
     setEditingRecord(null);
     setIsAddModalOpen(true);
   };
 
-  // Show Edit Modal with selected record - FIXED VERSION
+  // Show Edit Modal with selected record
   const handleEdit = (record) => {
-    console.log("Edit clicked for record:", record); // Debug log
+    console.log("Edit clicked for record:", record);
     setEditingRecord(record);
-    // Use setTimeout to ensure state is updated before opening modal
     setTimeout(() => {
       setIsEditModalOpen(true);
     }, 0);
@@ -56,7 +90,7 @@ function Team() {
   // Close Add Modal
   const closeAddModal = () => {
     setIsAddModalOpen(false);
-    setEditingRecord(null); // Clear edit data when closing add modal
+    setEditingRecord(null);
   };
 
   // Close Edit Modal
@@ -69,30 +103,28 @@ function Team() {
   const handleAddSubmit = () => {
     setIsAddModalOpen(false);
     setEditingRecord(null);
-    // Data will be refreshed via RTK Query invalidation
   };
 
   // Handle form submit for Edit
   const handleEditSubmit = () => {
     setIsEditModalOpen(false);
     setEditingRecord(null);
-    // Data will be refreshed via RTK Query invalidation
   };
 
-  // Delete single item
+  // Delete single item with enhanced error handling
   const handleDeleteSingle = async (id) => {
     try {
       const res = await deleteTeam(id).unwrap();
       message.success("Team member deleted successfully");
-      // Remove from selected keys if it was selected
       setSelectedRowKeys((prev) => prev.filter((key) => key !== id));
     } catch (err) {
       console.error("Delete failed:", err);
-      message.error("Failed to delete team member");
+      const errorMessage = getErrorMessage(err);
+      message.error(errorMessage);
     }
   };
 
-  // Delete multiple selected items
+  // Delete multiple selected items with enhanced error handling
   const handleDeleteMultiple = async () => {
     if (selectedRowKeys.length === 0) {
       message.warning("Please select items to delete");
@@ -105,7 +137,8 @@ function Team() {
       setSelectedRowKeys([]);
     } catch (err) {
       console.error("Delete failed:", err);
-      message.error("Failed to delete selected team members");
+      const errorMessage = getErrorMessage(err);
+      message.error(errorMessage);
     }
   };
 
@@ -117,13 +150,13 @@ function Team() {
 
   // Transform and filter data
   const transformedData = teamData?.data?.result?.map((item) => ({
-    key: item._id, // Use _id as key for API operations
+    key: item._id,
     _id: item._id,
-    id: item._id, // Add id field for the AddEditTeamMember component
+    id: item._id,
     image: item.image,
     name: item.name,
     designation: item.designation,
-    teamRole: item.teamRole, // Add role field
+    teamRole: item.teamRole,
     teamDescription: item.teamDescription,
     status: item.status === "active" ? "Active" : "Inactive",
   }));
@@ -211,7 +244,7 @@ function Team() {
         <div className="flex items-center gap-4">
           <Button
             onClick={() => handleEdit(record)}
-            className="p-1 border-2 border-smart rounded-full "
+            className="p-1 border-2 border-smart rounded-full"
           >
             <FiEdit3 size={20} className="text-black" />
           </Button>
@@ -236,7 +269,26 @@ function Team() {
     filter === key ? "text-white" : "text-gray-400 group-hover:text-white";
 
   if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Failed to fetch team data.</div>;
+
+  // Enhanced error display
+  if (isError) {
+    const errorMessage = getErrorMessage(error);
+    return (
+      <div className="p-4">
+        <Alert
+          message="Error Loading Team Data"
+          description={errorMessage}
+          type="error"
+          showIcon
+          action={
+            <Button size="small" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -303,6 +355,7 @@ function Team() {
           rowKey="key"
         />
       </div>
+
       <Pagination
         current={page}
         pageSize={limit}
@@ -320,10 +373,10 @@ function Team() {
           setLimit(newPageSize);
         }}
         onShowSizeChange={(current, size) => {
-          setPage(1); // Reset to first page when changing page size
+          setPage(1);
           setLimit(size);
         }}
-        className="mt-2 text-right" // Add some top margin and align to right
+        className="mt-2 text-right"
       />
 
       {/* Add Modal */}
@@ -332,10 +385,10 @@ function Team() {
         handleOk={handleAddSubmit}
         handleCancel={closeAddModal}
         isEdit={false}
-        editData={null} // Explicitly pass null for add mode
+        editData={null}
       />
 
-      {/* Edit Modal - Only render when we have editingRecord */}
+      {/* Edit Modal */}
       {editingRecord && (
         <AddEditTeamMember
           isModalOpen={isEditModalOpen}

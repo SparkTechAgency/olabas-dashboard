@@ -18,6 +18,20 @@ import { IoTrashBinOutline } from "react-icons/io5";
 import DeleteModal from "../../../components/common/deleteModal";
 import dayjs from "dayjs";
 
+// Utility function to extract error message from API response
+const getErrorMessage = (error) => {
+  if (error?.data?.message) {
+    return error.data.message;
+  }
+  if (error?.data?.errorMessages && error.data.errorMessages.length > 0) {
+    return error.data.errorMessages[0].message;
+  }
+  if (error?.message) {
+    return error.message;
+  }
+  return "An unexpected error occurred";
+};
+
 function FleetManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -46,7 +60,7 @@ function FleetManagement() {
   const [updateFleetStatus, { isLoading: isUpdatingStatus }] =
     useUpdateFleetStatusMutation();
 
-  // Fixed handleStatusUpdate function
+  // Fixed handleStatusUpdate function with improved error handling
   const handleStatusUpdate = async (vehicleId, status) => {
     try {
       const response = await updateFleetStatus({
@@ -70,11 +84,20 @@ function FleetManagement() {
           }, 1500);
         }, 200);
       } else {
-        message.error("Failed to update vehicle status");
+        const errorMsg = response.message || "Failed to update vehicle status";
+        message.error(errorMsg);
       }
     } catch (error) {
       console.error("Failed to update vehicle status:", error);
-      message.error("Error updating vehicle status");
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
+
+      // If it's a permission error, show a more specific message
+      if (errorMessage.toLowerCase().includes("permission")) {
+        message.warning(
+          "You don't have permission to update vehicle status. Please contact your administrator."
+        );
+      }
     }
   };
 
@@ -144,7 +167,7 @@ function FleetManagement() {
     setSelectedVehicleForEdit(null);
   };
 
-  // Delete Confirmation for single vehicle from row
+  // Delete Confirmation for single vehicle from row with improved error handling
   const handleConfirmDelete = async () => {
     if (vehicleToDelete?.originalData?.id) {
       try {
@@ -153,11 +176,20 @@ function FleetManagement() {
         if (res.success) {
           message.success("Fleet successfully deleted");
         } else {
-          message.error("Failed to delete fleet");
+          const errorMsg = res.message || "Failed to delete fleet";
+          message.error(errorMsg);
         }
       } catch (err) {
-        message.error("Failed to delete fleet");
         console.error("Failed to delete vehicle:", err);
+        const errorMessage = getErrorMessage(err);
+        message.error(errorMessage);
+
+        // If it's a permission error, show a more specific message
+        if (errorMessage.toLowerCase().includes("permission")) {
+          message.warning(
+            "You don't have permission to delete vehicles. Please contact your administrator."
+          );
+        }
       }
     }
     setIsDeleteModalVisible(false);
@@ -169,22 +201,65 @@ function FleetManagement() {
     setVehicleToDelete(null);
   };
 
-  // Delete multiple selected vehicles
+  // Delete multiple selected vehicles with improved error handling
   const handleDelete = async () => {
+    if (selectedRowKeys.length === 0) {
+      message.warning("Please select vehicles to delete");
+      return;
+    }
+
     try {
-      // For each selected vehicle key, find its ID and delete
-      await Promise.all(
-        selectedRowKeys.map(async (key) => {
-          const vehicle = data.find((item) => item.key === key);
-          if (vehicle?.originalData?.id) {
-            await deleteFleet(vehicle.originalData.id).unwrap();
+      const deletePromises = selectedRowKeys.map(async (key) => {
+        const vehicle = data.find((item) => item.key === key);
+        if (vehicle?.originalData?.id) {
+          return await deleteFleet(vehicle.originalData.id).unwrap();
+        }
+        return null;
+      });
+
+      const results = await Promise.allSettled(deletePromises);
+
+      let successCount = 0;
+      let errorCount = 0;
+      let permissionErrors = 0;
+
+      results.forEach((result, index) => {
+        if (result.status === "fulfilled" && result.value?.success) {
+          successCount++;
+        } else {
+          errorCount++;
+          if (
+            result.reason &&
+            getErrorMessage(result.reason).toLowerCase().includes("permission")
+          ) {
+            permissionErrors++;
           }
-        })
-      );
+        }
+      });
+
+      if (successCount > 0) {
+        message.success(`Successfully deleted ${successCount} vehicle(s)`);
+      }
+
+      if (errorCount > 0) {
+        if (permissionErrors > 0) {
+          message.warning(
+            `You don't have permission to delete ${permissionErrors} vehicle(s). Please contact your administrator.`
+          );
+        }
+        if (errorCount > permissionErrors) {
+          message.error(
+            `Failed to delete ${errorCount - permissionErrors} vehicle(s)`
+          );
+        }
+      }
+
       setSelectedRowKeys([]);
       refetch();
     } catch (err) {
       console.error("Failed to delete selected vehicles:", err);
+      const errorMessage = getErrorMessage(err);
+      message.error(errorMessage);
     }
   };
 
@@ -520,15 +595,31 @@ function FleetManagement() {
   }
 
   if (isError) {
+    const errorMessage = getErrorMessage(error);
+    const isPermissionError = errorMessage.toLowerCase().includes("permission");
+
     return (
       <div className="p-4">
         <Alert
-          message="Error Loading Fleet Data"
+          message={
+            isPermissionError ? "Access Denied" : "Error Loading Fleet Data"
+          }
           description={
-            error?.message || "Failed to load vehicle data. Please try again."
+            isPermissionError
+              ? "You don't have permission to access fleet data. Please contact your administrator to grant the necessary permissions."
+              : errorMessage
           }
           type="error"
           showIcon
+          action={
+            <Button
+              size="small"
+              onClick={() => refetch()}
+              className="border-red-400 text-red-600 hover:border-red-500 hover:text-red-700"
+            >
+              Retry
+            </Button>
+          }
         />
       </div>
     );

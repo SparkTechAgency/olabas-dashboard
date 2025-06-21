@@ -18,6 +18,20 @@ import {
 } from "../../../redux/apiSlices/extra";
 import { getImageUrl } from "../../../utils/baseUrl";
 
+// Utility function to extract error message from API response
+const getErrorMessage = (error) => {
+  if (error?.data?.message) {
+    return error.data.message;
+  }
+  if (error?.data?.errorMessages?.length > 0) {
+    return error.data.errorMessages[0].message;
+  }
+  if (error?.message) {
+    return error.message;
+  }
+  return "An unexpected error occurred";
+};
+
 function Extra() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -25,24 +39,26 @@ function Extra() {
   const [editingRecord, setEditingRecord] = useState(null);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
+
   const {
     data: extraData,
     isLoading,
     isError,
+    error: fetchError,
   } = useGetExtraQuery({ page, limit, status: filter.toUpperCase() });
+
   console.log("sss", extraData);
 
   const [addToProtection] = useAddToProtectionMutation();
+  const [createExtra] = useCreateExtraMutation();
+  const [updateExtra] = useUpdateExtraMutation();
+  const [deleteExtra] = useDeleteExtraMutation();
 
   // Handle pagination change
   const handleTableChange = (pagination) => {
     setPage(pagination.current);
     setLimit(pagination.pageSize);
   };
-
-  const [createExtra] = useCreateExtraMutation();
-  const [updateExtra] = useUpdateExtraMutation();
-  const [deleteExtra] = useDeleteExtraMutation();
 
   const showModal = () => setIsModalOpen(true);
   const handleOk = () => setIsModalOpen(false);
@@ -82,14 +98,14 @@ function Extra() {
         if (res.success) {
           message.success("Update Success");
         } else {
-          message.error("Update Failed");
+          message.error(res.message || "Update Failed");
         }
       } else {
         const res = await createExtra(formData).unwrap();
         if (res.success) {
           message.success("Create Success");
         } else {
-          message.error("Create Failed");
+          message.error(res.message || "Create Failed");
         }
       }
 
@@ -97,6 +113,8 @@ function Extra() {
       setIsModalOpen(false);
     } catch (error) {
       console.error("Failed to save extra:", error);
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
     }
   };
 
@@ -104,14 +122,24 @@ function Extra() {
     const idsToDelete = id ? [id] : selectedRowKeys;
 
     try {
-      await Promise.all(
+      const results = await Promise.allSettled(
         idsToDelete.map((itemId) => deleteExtra(itemId).unwrap())
       );
-      message.success("Deleted successfully");
-      setSelectedRowKeys([]);
+
+      const failures = results.filter((result) => result.status === "rejected");
+
+      if (failures.length === 0) {
+        message.success("Deleted successfully");
+        setSelectedRowKeys([]);
+      } else {
+        // Show specific error message from the first failure
+        const errorMessage = getErrorMessage(failures[0].reason);
+        message.error(errorMessage);
+      }
     } catch (error) {
       console.error("Delete failed:", error);
-      message.error("Failed to delete");
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
     }
   };
 
@@ -131,11 +159,12 @@ function Extra() {
           `Protection ${checked ? "enabled" : "disabled"} successfully`
         );
       } else {
-        message.error("Failed to update protection status");
+        message.error(res.message || "Failed to update protection status");
       }
-    } catch (err) {
-      console.error("Protection toggle failed:", err);
-      message.error("Failed to update protection status");
+    } catch (error) {
+      console.error("Protection toggle failed:", error);
+      const errorMessage = getErrorMessage(error);
+      message.error(errorMessage);
     }
   };
 
@@ -151,8 +180,8 @@ function Extra() {
     description: item.description,
     cost: `$${item.cost}`,
     status: item.status === "ACTIVE" ? "Active" : "Inactive",
-    isProtection: item.isProtection, // Add this field to track protection status
-    originalRecord: item, // Keep reference to original record
+    isProtection: item.isProtection,
+    originalRecord: item,
   }));
 
   const columns = [
@@ -227,7 +256,6 @@ function Extra() {
     {
       title: `Add to Protection`,
       key: "addToProtection",
-
       render: (_, record) => (
         <div className="flex items-center gap-4">
           <Checkbox
@@ -262,7 +290,16 @@ function Extra() {
   ];
 
   if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Failed to fetch data.</div>;
+
+  if (isError) {
+    const errorMessage = getErrorMessage(fetchError);
+    return (
+      <div className="flex flex-col items-center justify-center h-64">
+        <div className="text-red-500 text-lg mb-2">Failed to fetch data</div>
+        <div className="text-gray-600 text-sm">{errorMessage}</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -284,6 +321,7 @@ function Extra() {
           pagination={false}
         />
       </div>
+
       <Pagination
         current={page}
         pageSize={limit}
@@ -301,10 +339,10 @@ function Extra() {
           setLimit(newPageSize);
         }}
         onShowSizeChange={(current, size) => {
-          setPage(1); // Reset to first page when changing page size
+          setPage(1);
           setLimit(size);
         }}
-        className="mt-2 text-right" // Add some top margin and align to right
+        className="mt-2 text-right"
       />
 
       <AddNewExtraModal
