@@ -30,6 +30,8 @@ function Team() {
     error,
   } = useGetTeamQuery({ page, limit, status: filter.toLowerCase() });
 
+  console.log("ddddd", teamData?.data);
+
   const [deleteTeam] = useDeleteTeamMutation();
 
   // Handle API errors with proper message display
@@ -158,6 +160,7 @@ function Team() {
     designation: item.designation,
     teamRole: item.teamRole,
     teamDescription: item.teamDescription,
+    phone: item.phone, // Add this line
     status: item.status === "active" ? "Active" : "Inactive",
   }));
 
@@ -199,6 +202,11 @@ function Team() {
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
       sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "Phone",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
       title: "Role",

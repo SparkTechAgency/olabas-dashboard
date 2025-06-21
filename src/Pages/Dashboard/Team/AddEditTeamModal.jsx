@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Form, Input, Modal, Upload, Button, Radio, message } from "antd";
+import {
+  Form,
+  Input,
+  Modal,
+  Upload,
+  Button,
+  Radio,
+  message,
+  InputNumber,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import {
   useCreateTeamMutation,
@@ -36,6 +45,7 @@ function AddEditTeamMember({
         designation: editData.designation,
         teamRole: roleValue, // Use lowercase value for form
         description: editData.teamDescription || editData.description,
+        phone: editData.phone,
       });
       // Set the local state for role
       setSelectedRole(roleValue);
@@ -46,72 +56,6 @@ function AddEditTeamMember({
       setSelectedRole("authority");
     }
   }, [isEdit, editData, form]);
-
-  // const onFinish = async (values) => {
-  //   setLoading(true);
-
-  //   try {
-  //     const formData = new FormData();
-
-  //     // Prepare the data object
-  //     const data = {
-  //       name: values.name,
-  //       designation: values.designation,
-  //       teamRole: values.teamRole.toUpperCase(), // Convert to uppercase and use teamRole
-  //       teamDescription: values.description || "",
-  //     };
-
-  //     // Append the JSON string under the 'data' key
-  //     formData.append("data", JSON.stringify(data));
-
-  //     // Handle file upload
-  //     const fileList = values.image;
-  //     if (fileList && fileList.length > 0) {
-  //       // Check if it's a new file upload or existing file
-  //       const file = fileList[0];
-  //       if (file.originFileObj) {
-  //         // New file upload
-  //         formData.append("image", file.originFileObj);
-  //       }
-  //     }
-
-  //     let res;
-  //     if (isEdit) {
-  //       // Update existing team member
-  //       res = await updateTeam({ id: editData.id, data: formData }).unwrap();
-  //     } else {
-  //       // Create new team member
-  //       res = await createTeam(formData).unwrap();
-  //     }
-
-  //     if (res.success) {
-  //       message.success(
-  //         isEdit
-  //           ? "Team member updated successfully"
-  //           : "Team member added successfully"
-  //       );
-  //       form.resetFields();
-  //       setSelectedRole("authority");
-  //       handleOk(); // Close modal and refresh data
-  //     } else {
-  //       message.error(
-  //         isEdit ? "Failed to update team member" : "Failed to add team member"
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.error(
-  //       isEdit
-  //         ? "Failed to update team member:"
-  //         : "Failed to create team member:",
-  //       error
-  //     );
-  //     message.error(
-  //       isEdit ? "Failed to update team member" : "Failed to add team member"
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -124,6 +68,7 @@ function AddEditTeamMember({
         designation: values.designation,
         teamRole: values.teamRole.toUpperCase(),
         teamDescription: values.description || "",
+        phone: values.phone.toString(),
       };
 
       formData.append("data", JSON.stringify(data));
@@ -262,7 +207,13 @@ function AddEditTeamMember({
         >
           <Input placeholder="Enter designation" />
         </Form.Item>
-
+        <Form.Item
+          label="Phone"
+          name="phone"
+          rules={[{ required: true, message: "Please enter Phone Number" }]}
+        >
+          <Input placeholder="+3557 000 447" className="min-w-60" />
+        </Form.Item>
         <Form.Item
           label="Image"
           name="image"
