@@ -3,10 +3,10 @@ import { api } from "../api/baseApi";
 const conactSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     updateContact: builder.mutation({
-      query: ({ updatedData }) => ({
+      query: (data) => ({
         url: `/company-cms/contact`,
         method: "PATCH",
-        body: updatedData,
+        body: data,
       }),
       invalidatesTags: ["Contact"],
     }),

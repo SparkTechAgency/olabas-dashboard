@@ -710,7 +710,7 @@ function Reservation() {
               onChange={(value) => handleAssignDriver(record.id, value)}
               disabled={isDriverAssignmentDisabled}
             >
-              {driverData?.data?.map((driver) => (
+              {driverData?.data?.driversWithStatus.map((driver) => (
                 <Option key={driver._id} value={driver._id}>
                   {driver.name}
                 </Option>

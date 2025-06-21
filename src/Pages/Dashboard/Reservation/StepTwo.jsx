@@ -27,33 +27,69 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
   });
   console.log("Vehicle Data:", vehicleData);
 
-  const data = [
-    {
-      key: "largePremium",
-      carSize: "Large: Premium",
-      price: "$840.00",
-    },
-    {
-      key: "largeStationWagon",
-      carSize: "Large: Station wagon",
-      price: "$840.00",
-    },
-    {
-      key: "mediumLowEmission",
-      carSize: "Medium: Low emission",
-      price: "$840.00",
-    },
-    {
-      key: "smallEconomy",
-      carSize: "Small: Economy",
-      price: "$840.00",
-    },
-    {
-      key: "smallMini",
-      carSize: "Small: Mini",
-      price: "$840.00",
-    },
-  ];
+  // Get selected vehicle's daily rates
+  const selectedVehicleData = vehicleData?.data?.result?.find(
+    (v) => v._id === vehicle?.vehicleId
+  );
+
+  // Create dynamic data based on selected vehicle's daily rates
+  const getDynamicData = () => {
+    const baseData = [
+      {
+        key: "largePremium",
+        carSize: "Large: Premium",
+        vehicleType: "LARGE PREMIUM",
+        defaultPrice: "$840.00",
+      },
+      {
+        key: "largeStationWagon",
+        carSize: "Large: Station wagon",
+        vehicleType: "LARGE STATION WAGON",
+        defaultPrice: "$840.00",
+      },
+      {
+        key: "mediumLowEmission",
+        carSize: "Medium: Low emission",
+        vehicleType: "MEDIUM LOW EMISSION",
+        defaultPrice: "$840.00",
+      },
+      {
+        key: "smallEconomy",
+        carSize: "Small: Economy",
+        vehicleType: "SMALL ECONOMY",
+        defaultPrice: "$840.00",
+      },
+      {
+        key: "smallMini",
+        carSize: "Small: Mini",
+        vehicleType: "SMALL MINI",
+        defaultPrice: "$840.00",
+      },
+    ];
+
+    // If a vehicle is selected, update prices from its dailyRates
+    if (selectedVehicleData?.dailyRates) {
+      return baseData.map((item) => {
+        const dailyRate = selectedVehicleData.dailyRates.find(
+          (rate) => rate.vehicleType === item.vehicleType
+        );
+        return {
+          ...item,
+          price: dailyRate
+            ? `$${dailyRate.rate.toFixed(2)}`
+            : item.defaultPrice,
+        };
+      });
+    }
+
+    // Return default data if no vehicle selected
+    return baseData.map((item) => ({
+      ...item,
+      price: item.defaultPrice,
+    }));
+  };
+
+  const data = getDynamicData();
 
   // Function to validate required fields - IMPROVED VERSION
   const validateRequiredFields = () => {
@@ -120,11 +156,19 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
 
       const mappedCarSize = vehicleTypeMapping[selectedVehicle.vehicleType];
 
+      // Get the rate for the current vehicle type from dailyRates
+      const currentRate =
+        selectedVehicle.dailyRates?.find(
+          (rate) => rate.vehicleType === selectedVehicle.vehicleType
+        )?.rate ||
+        selectedVehicle.dailyRate ||
+        vehiclePrice;
+
       // Update Redux state with complete vehicle object
       const vehicleData = {
         vehicleId: selectedVehicle._id,
         vehicleType: selectedVehicle.vehicleType,
-        rate: selectedVehicle.dailyRate || vehiclePrice,
+        rate: currentRate,
       };
 
       console.log("Dispatching vehicle data:", vehicleData);
@@ -132,6 +176,8 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
 
       if (mappedCarSize) {
         dispatch(setSelectedCarSize(mappedCarSize));
+        dispatch(setVehiclePrice(currentRate));
+        dispatch(setVehicleRate(currentRate));
       }
 
       // Update form field value - this is important!
@@ -297,30 +343,6 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
           </Select>
         </Form.Item>
       </div>
-
-      {/* Debug info - you can remove this in production */}
-      {/* <div className="mt-4 p-4 bg-gray-100 rounded text-sm">
-        <h4>Debug Info:</h4>
-        <p>
-          <strong>Redux Vehicle ID:</strong> {vehicle?.vehicleId || "None"}
-        </p>
-        <p>
-          <strong>Form Vehicle Value:</strong>{" "}
-          {form.getFieldValue("vehicle") || "None"}
-        </p>
-        <p>
-          <strong>Vehicle Type:</strong> {vehicle?.vehicleType || "None"}
-        </p>
-        <p>
-          <strong>Rate:</strong> {vehicle?.rate || vehiclePrice || 0}
-        </p>
-        <p>
-          <strong>Has Error:</strong> {String(!!vehicle?.vehicleId === false)}
-        </p>
-        <p>
-          <strong>Is Clicked:</strong> {String(isClicked)}
-        </p>
-      </div> */}
     </Form>
   );
 };

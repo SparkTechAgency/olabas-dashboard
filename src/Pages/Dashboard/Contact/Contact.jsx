@@ -43,9 +43,11 @@ const Contact = () => {
 
   const handleUpdate = async (values) => {
     try {
-      await updateContact({ updatedData: values }).unwrap();
-      message.success("Contact info updated successfully");
-      setIsModalOpen(false);
+      const res = await updateContact(values).unwrap();
+      if (res.success) {
+        message.success("Contact info updated successfully");
+        setIsModalOpen(false);
+      }
     } catch (err) {
       message.error("Failed to update contact info");
     }

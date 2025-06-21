@@ -7,21 +7,24 @@ import TotalUserChart from "./TotalUserChart";
 import PieChartAnalytics from "./PieChart";
 import { useDashboardQuery } from "../../../redux/apiSlices/homeApi";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 dayjs.extend(customParseFormat);
 
 export const Card = ({ item }) => {
   return (
-    <div
-      className={`flex flex-col w-full items-start justify-center h-32 rounded-lg border bg-white p-12 ${item.bg}`}
-    >
-      <p className="text-sm text-gray-500">{item.label}</p>
-      <div className="w-full flex items-center justify-between mt-2">
-        <p className="text-3xl font-bold">{item.value}</p>
-        <div className="h-10 flex items-center justify-end w-16">
-          <TinyChart color={item.color} />
+    <Link to={item.links} className="w-full">
+      <div
+        className={`flex flex-col w-full items-start justify-center h-32 rounded-lg border bg-white p-12 cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-105 ${item.bg}`}
+      >
+        <p className="text-sm text-gray-500">{item.label}</p>
+        <div className="w-full flex items-center justify-between mt-2">
+          <p className="text-3xl font-bold">{item.value}</p>
+          <div className="h-10 flex items-center justify-end w-16">
+            <TinyChart color={item.color} />
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
@@ -53,6 +56,7 @@ const Home = () => {
       value: cardData.totalReservations,
       percent: +2.6,
       color: "#00a76f",
+      links: "/reservation",
       icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
     },
     {
@@ -60,6 +64,7 @@ const Home = () => {
       value: cardData.activeCars,
       percent: +2.6,
       color: "#00b8d9",
+      links: "/fleet-management",
       icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
     },
     {
@@ -67,6 +72,7 @@ const Home = () => {
       value: cardData.totalRevenue,
       percent: +2.6,
       color: "#18a0fb",
+      links: "/transaction",
       icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
     },
   ];

@@ -468,7 +468,7 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
         .filter((protect) => protect.includeStatus && protect._id)
         .forEach((protect) => {
           services.push({
-            protectionId: protect._id,
+            serviceId: protect._id,
             qty: protect.qty || 1,
           });
         });

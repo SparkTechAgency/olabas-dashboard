@@ -42,24 +42,88 @@ const Social = () => {
 
   const handleUpdate = async (values) => {
     try {
-      await updateContact({ updatedData: values }).unwrap();
-      message.success("Contact info updated successfully");
-      setIsModalOpen(false);
+      const res = await updateContact(values).unwrap();
+      if (res.success) {
+        message.success("Contact info updated successfully");
+        setIsModalOpen(false);
+      }
     } catch (err) {
       message.error("Failed to update contact info");
     }
   };
 
   const contactFields = [
-    { key: "facebook", label: "Facebook", type: "text", icon: <FaFacebook /> },
-    { key: "whatsapp", label: "WhatsApp", type: "text", icon: <FaWhatsapp /> },
+    {
+      key: "facebook",
+      label: "Facebook",
+      type: "text",
+      icon: <FaFacebook />,
+      rules: [
+        {
+          required: true,
+          message: "Please enter the Facebook link",
+        },
+        {
+          pattern: /^https?:\/\/.+/,
+          message:
+            "Please enter a valid URL (starting with http:// or https://)",
+        },
+      ],
+      placeholder: "Enter your Facebook link",
+    },
+    {
+      key: "whatsapp",
+      label: "WhatsApp",
+      type: "tel",
+      icon: <FaWhatsapp />,
+      rules: [
+        {
+          required: true,
+          message: "Please enter the WhatsApp number",
+        },
+        {
+          pattern: /^[\+]?[1-9][\d]{0,15}$/,
+          message: "Please enter a valid phone number (e.g., +1234567890)",
+        },
+      ],
+      placeholder: "Enter your WhatsApp number (e.g., +1234567890)",
+    },
     {
       key: "instagram",
       label: "Instagram",
       type: "text",
       icon: <FaInstagram />,
+      rules: [
+        {
+          required: true,
+          message: "Please enter the Instagram link",
+        },
+        {
+          pattern: /^https?:\/\/.+/,
+          message:
+            "Please enter a valid URL (starting with http:// or https://)",
+        },
+      ],
+      placeholder: "Enter your Instagram link",
     },
-    { key: "tiktok", label: "TikTok", type: "text", icon: <FaTiktok /> },
+    {
+      key: "tiktok",
+      label: "TikTok",
+      type: "text",
+      icon: <FaTiktok />,
+      rules: [
+        {
+          required: true,
+          message: "Please enter the TikTok link",
+        },
+        {
+          pattern: /^https?:\/\/.+/,
+          message:
+            "Please enter a valid URL (starting with http:// or https://)",
+        },
+      ],
+      placeholder: "Enter your TikTok link",
+    },
   ];
 
   return (
@@ -139,21 +203,11 @@ const Social = () => {
                   </div>
                 }
                 name={field.key}
-                rules={[
-                  {
-                    required: true,
-                    message: `Please enter the ${field.label.toLowerCase()} link`,
-                  },
-                  {
-                    pattern: /^https?:\/\/.+/,
-                    message:
-                      "Please enter a valid URL (starting with http:// or https://)",
-                  },
-                ]}
+                rules={field.rules}
               >
                 <Input
                   type={field.type}
-                  placeholder={`Enter your ${field.label.toLowerCase()} link`}
+                  placeholder={field.placeholder}
                   className="h-12 rounded-xl"
                 />
               </Form.Item>

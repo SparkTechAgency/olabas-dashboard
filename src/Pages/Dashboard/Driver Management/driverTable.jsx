@@ -18,7 +18,7 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
     isError,
   } = useGetDriverQuery({ page, limit });
 
-  console.log("driver", driverData?.data);
+  console.log("driver", driverData?.data?.driversWithStatus);
 
   const [deleteDriver, { isLoading: deleteLoading }] =
     useDeleteDriverMutation();
@@ -183,7 +183,7 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
 
   const driverTableData = useMemo(() => {
     return (
-      driverData?.data?.map((driver) => ({
+      driverData?.data?.driversWithStatus.map((driver) => ({
         ...driver,
         key: driver._id,
       })) || []
@@ -203,7 +203,8 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
         <div className="mb-8">
           <div className="mb-4 flex justify-between items-center">
             <h3 className="text-lg font-semibold">
-              Driver Management ({driverData?.data?.length || 0} drivers)
+              Driver Management (
+              {driverData?.data?.driversWithStatus.length || 0} drivers)
             </h3>
           </div>
           <div className="max-h-[62vh] overflow-auto border rounded-md">
