@@ -37,10 +37,18 @@ const reservationSlice = api.injectEndpoints({
     }),
 
     updateReservationStatus: builder.mutation({
-      query: ({id,data}) => ({
+      query: ({ id, data }) => ({
         url: `/booking/status/${id}`,
         method: "PATCH",
         body: data,
+      }),
+      providesTags: ["RESERVATION"],
+    }),
+
+    getExportData: builder.query({
+      query: ({ startDate, endDate }) => ({
+        url: `/booking/export?createdAt[gte]=${startDate}&createdAt[lte]=${endDate}`,
+        method: "GET",
       }),
       providesTags: ["RESERVATION"],
     }),
@@ -52,5 +60,6 @@ export const {
   useDeleteReservationMutation,
   useGetReservationQuery,
   useCreateReservationMutation,
-  useUpdateReservationStatusMutation
+  useUpdateReservationStatusMutation,
+  useLazyGetExportDataQuery,
 } = reservationSlice;

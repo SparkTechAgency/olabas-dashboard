@@ -1,3 +1,645 @@
+// import { useState } from "react";
+// import { Table, Button, Select, message, Modal, Pagination } from "antd";
+// import { AlignCenterOutlined, DeleteOutlined } from "@ant-design/icons";
+// import { LuDownload } from "react-icons/lu";
+// import { GrFormAdd } from "react-icons/gr";
+// import { CSVLink } from "react-csv";
+// import dayjs from "dayjs";
+// import CustomSearch from "../../../components/common/CustomSearch";
+// import GetPageName from "../../../components/common/GetPageName";
+// import ReservationAddModal from "./ReservationAddModal";
+
+// import {
+//   useAssignDreiverMutation,
+//   useGetReservationQuery,
+//   useDeleteReservationMutation,
+//   useUpdateReservationStatusMutation,
+//   useLazyGetExportDataQuery, // Changed to lazy query
+// } from "../../../redux/apiSlices/reservation";
+// import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi";
+// import ExportModal from "./ExportModal";
+
+// const { Option } = Select;
+// const { confirm } = Modal;
+
+// function Reservation() {
+//   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+//   const [page, setPage] = useState(1);
+//   const [limit, setLimit] = useState(50);
+//   const [csvData, setCsvData] = useState([]);
+//   const [exportLoading, setExportLoading] = useState(false);
+//   const [csvLinkRef, setCsvLinkRef] = useState(null);
+
+//   const [updateStatus] = useUpdateReservationStatusMutation();
+
+//   // API hooks
+//   const {
+//     data: reservationData,
+//     isLoading,
+//     refetch,
+//   } = useGetReservationQuery({ page, limit });
+
+//   console.log("reservationData:", reservationData);
+
+//   // Use lazy query for export data - this allows us to trigger it manually
+//   const [
+//     getExportData,
+//     { isLoading: exportDataLoading, isError: exportDataError },
+//   ] = useLazyGetExportDataQuery();
+
+//   const [assignDriver, { isLoading: assignDriverLoading }] =
+//     useAssignDreiverMutation();
+//   const [deleteReservation] = useDeleteReservationMutation();
+//   const { data: driverData } = useGetDriverQuery({ page: null, limit: null });
+
+//   const showModal = () => setIsModalOpen(true);
+//   const handleOk = () => setIsModalOpen(false);
+
+//   const rowSelection = {
+//     selectedRowKeys,
+//     onChange: setSelectedRowKeys,
+//   };
+
+//   const onSearch = (value) => {
+//     console.log("Search value:", value);
+//     // Add filtering logic if needed
+//   };
+
+//   const handleAssignDriver = async (reservationId, driverId) => {
+//     console.log("reservationId:", reservationId);
+//     console.log("driverId:", driverId);
+//     try {
+//       await assignDriver({ rID: reservationId, driverId }).unwrap();
+//       message.success("Driver assigned successfully");
+//       refetch();
+//     } catch (error) {
+//       console.error("Driver assignment failed", error);
+//       message.error(error.data?.message || "Failed to assign driver");
+//     }
+//   };
+
+//   const handleDeleteReservation = async (id) => {
+//     try {
+//       await deleteReservation(id).unwrap();
+//       message.success("Reservation deleted successfully");
+//       refetch();
+//       setSelectedRowKeys(selectedRowKeys.filter((key) => key !== id));
+//     } catch (error) {
+//       console.error("Deletion failed", error);
+//       message.error(error.data?.message || "Failed to delete reservation");
+//     }
+//   };
+
+//   const handleDeleteSelected = () => {
+//     confirm({
+//       title: "Are you sure you want to delete these reservations?",
+//       content: "This action cannot be undone.",
+//       okText: "Yes, delete",
+//       okType: "danger",
+//       cancelText: "No",
+//       onOk() {
+//         return Promise.all(
+//           selectedRowKeys.map((id) => handleDeleteReservation(id))
+//         )
+//           .then(() => {
+//             message.success("Selected reservations deleted successfully");
+//           })
+//           .catch(() => {
+//             message.error("Some reservations could not be deleted");
+//           });
+//       },
+//     });
+//   };
+
+//   const handleStatusUpdate = async (reservationId, newStatus) => {
+//     console.log("Updating status:", { reservationId, newStatus });
+
+//     try {
+//       const result = await updateStatus({
+//         id: reservationId,
+//         data: { status: newStatus },
+//       }).unwrap();
+
+//       console.log("Status update result:", result);
+//       message.success("Status updated successfully");
+//       refetch();
+//     } catch (error) {
+//       console.error("Status update failed:", error);
+//       message.error(
+//         error?.data?.message || error?.message || "Failed to update status"
+//       );
+//     }
+//   };
+
+//   const formatReservationData = (data) => {
+//     if (!Array.isArray(data)) return [];
+
+//     return data?.map((item, index) => ({
+//       key: item?._id || index,
+//       id: item?._id,
+//       pickupTime: dayjs(item?.pickupTime).format("DD/MM/YYYY, h:mm A"),
+//       pickupLocation: item?.pickupLocation?.location || "N/A",
+//       returnTime: dayjs(item?.returnTime).format("DD/MM/YYYY, h:mm A"),
+//       returnLocation: item?.returnLocation?.location || "N/A",
+//       carName: item?.vehicle?.name || "N/A",
+//       carSize: item?.vehicleType || "N/A",
+//       rentedDays: item?.carRentedForInDays || 0,
+//       carNumberPlate: item?.vehicle?.plateNumber || "N/A",
+//       carModel: item?.vehicle?.model || "N/A",
+//       client:
+//         `${item?.clientId?.firstName || ""} ${
+//           item?.clientId?.lastName || ""
+//         }`.trim() || "N/A",
+//       clientPhone:
+//         item?.clientId?.phoneNumber || item?.clientId?.email || "N/A",
+//       price: `₦${item?.amount || 0}`,
+//       status: item?.status || "NOT CONFIRMED",
+//       driverId: item?.driverId?._id || null,
+//       driverName: item?.driverId?.name || "Not Assigned",
+//       // Additional fields for CSV export
+//       rawAmount: item?.amount || 0,
+//       clientEmail: item?.clientId?.email || "N/A",
+//       clientFirstName: item?.clientId?.firstName || "N/A",
+//       clientLastName: item?.clientId?.lastName || "N/A",
+//       vehicleBrand: item?.vehicle?.brand || "N/A",
+//       pickupDate: dayjs(item?.pickupTime).format("DD/MM/YYYY"),
+//       pickupTimeOnly: dayjs(item?.pickupTime).format("h:mm A"),
+//       returnDate: dayjs(item?.returnTime).format("DD/MM/YYYY"),
+//       returnTimeOnly: dayjs(item?.returnTime).format("h:mm A"),
+//       originalPickupTime: item?.pickupTime,
+//     }));
+//   };
+
+//   const displayData = formatReservationData(
+//     reservationData?.data?.result || []
+//   );
+
+//   // CSV Export Configuration
+//   const csvHeaders = [
+//     { label: "Reservation ID", key: "id" },
+//     { label: "Client Name", key: "client" },
+//     { label: "Client First Name", key: "clientFirstName" },
+//     { label: "Client Last Name", key: "clientLastName" },
+//     { label: "Client Phone", key: "clientPhone" },
+//     { label: "Client Email", key: "clientEmail" },
+//     { label: "Pickup Date", key: "pickupDate" },
+//     { label: "Pickup Time", key: "pickupTimeOnly" },
+//     { label: "Pickup Location", key: "pickupLocation" },
+//     { label: "Return Date", key: "returnDate" },
+//     { label: "Return Time", key: "returnTimeOnly" },
+//     { label: "Return Location", key: "returnLocation" },
+//     { label: "Vehicle Name", key: "carSize" },
+//     { label: "Vehicle Model", key: "carModel" },
+//     { label: "Vehicle Brand", key: "vehicleBrand" },
+//     { label: "License Plate", key: "carNumberPlate" },
+//     { label: "Amount (₦)", key: "rawAmount" },
+//     { label: "Status", key: "status" },
+//     { label: "Assigned Driver", key: "driverName" },
+//   ];
+
+//   // Updated export function to handle date filtering and API call
+//   const handleExportWithDateRange = async ({ startDate, endDate }) => {
+//     console.log(startDate, endDate);
+//     setExportLoading(true);
+
+//     try {
+//       // First, fetch data from the API using lazy query
+//       console.log("=== FETCHING EXPORT DATA FROM API ===");
+//       console.log("Date Range:", {
+//         startDate: startDate.toISOString(),
+//         endDate: endDate.toISOString(),
+//       });
+
+//       // Trigger the lazy query with date parameters
+//       const apiResponse = await getExportData({
+//         startDate: startDate.toISOString(),
+//         endDate: endDate.toISOString(),
+//       }).unwrap();
+
+//       console.log("=== API RESPONSE ===");
+//       console.log("Full API Response:", apiResponse);
+//       console.log("API Data:", apiResponse?.data);
+//       console.log("API Data Length:", apiResponse?.data?.length || 0);
+//       console.log("===================");
+
+//       // Now handle the local data filtering for CSV
+//       let dataToExport = displayData;
+
+//       // Filter by date range
+//       dataToExport = dataToExport.filter((item) => {
+//         const pickupDate = dayjs(item.originalPickupTime);
+//         return pickupDate.isBetween(startDate, endDate, null, "[]");
+//       });
+
+//       // If there are selected rows, filter those within the date range
+//       if (selectedRowKeys.length > 0) {
+//         dataToExport = dataToExport.filter((item) =>
+//           selectedRowKeys.includes(item.key)
+//         );
+//       }
+
+//       console.log("=== LOCAL DATA FOR CSV EXPORT ===");
+//       console.log("Filtered Local Data:", dataToExport);
+//       console.log("CSV Export Count:", dataToExport.length);
+//       console.log("================================");
+
+//       if (dataToExport.length === 0) {
+//         message.warning("No reservations found in the selected date range");
+//         setExportLoading(false);
+//         setIsExportModalOpen(false);
+//         return;
+//       }
+
+//       setCsvData(dataToExport);
+//       setIsExportModalOpen(false);
+
+//       // Trigger CSV download
+//       setTimeout(() => {
+//         if (csvLinkRef) {
+//           csvLinkRef.link.click();
+//         }
+//         setExportLoading(false);
+//         message.success(
+//           `Exported ${dataToExport.length} reservation(s) successfully!`
+//         );
+//       }, 500);
+//     } catch (error) {
+//       console.error("=== EXPORT ERROR ===");
+//       console.error("Error fetching export data:", error);
+//       console.error("Error details:", error?.data || error?.message);
+//       console.error("===================");
+
+//       message.error("Failed to fetch export data from server");
+//       setExportLoading(false);
+//       setIsExportModalOpen(false);
+//     }
+//   };
+
+//   // Generate filename with current date and date range
+//   const generateFilename = () => {
+//     const currentDate = dayjs().format("YYYY-MM-DD_HH-mm");
+//     const recordCount = csvData.length;
+//     return `reservations_${currentDate}_${recordCount}records.csv`;
+//   };
+
+//   // Handle pagination change
+//   const handleTableChange = (pagination) => {
+//     setPage(pagination.current);
+//     setLimit(pagination.pageSize);
+//   };
+
+//   const columns = [
+//     {
+//       title: "Pickup",
+//       dataIndex: "pickUp",
+//       key: "pickUp",
+//       sorter: (a, b) => {
+//         const dateA = dayjs(a.pickupTime, "DD/MM/YYYY, h:mm A").toDate();
+//         const dateB = dayjs(b.pickupTime, "DD/MM/YYYY, h:mm A").toDate();
+//         return dateA - dateB;
+//       },
+//       sortDirections: ["ascend", "descend"],
+//       render: (text, record) => (
+//         <div className="flex flex-col">
+//           <span className="font-medium">{record.pickupTime}</span>
+//           <span className="text-gray-600 text-sm">{record.pickupLocation}</span>
+//         </div>
+//       ),
+//     },
+//     {
+//       title: "Return",
+//       dataIndex: "return",
+//       key: "return",
+//       sorter: (a, b) => {
+//         const dateA = dayjs(a.returnTime, "DD/MM/YYYY, h:mm A").toDate();
+//         const dateB = dayjs(b.returnTime, "DD/MM/YYYY, h:mm A").toDate();
+//         return dateA - dateB;
+//       },
+//       sortDirections: ["ascend", "descend"],
+//       render: (text, record) => (
+//         <div className="flex flex-col">
+//           <span className="font-medium">{record.returnTime}</span>
+//           <span className="text-gray-600 text-sm">{record.returnLocation}</span>
+//         </div>
+//       ),
+//     },
+//     {
+//       title: "Car",
+//       dataIndex: "car",
+//       key: "car",
+//       render: (_, record) => (
+//         <div className="flex flex-col">
+//           <span className="font-medium">{record.carName}</span>
+//           <div className="flex text-gray-600 text-sm">
+//             <span>{record.carSize}</span>
+//             {record.carSize !== "N/A" && record.rentedDays !== 0 && (
+//               <span>, </span>
+//             )}
+//           </div>
+//         </div>
+//       ),
+//     },
+//     {
+//       title: "Rented for",
+//       dataIndex: "rentedDays",
+//       key: "rentedDays",
+//       sorter: (a, b) => {
+//         const daysA = a.rentedDays || 0;
+//         const daysB = b.rentedDays || 0;
+//         return daysA - daysB;
+//       },
+//       sortDirections: ["ascend", "descend"],
+//       width: "8%",
+//       render: (_, record) => (
+//         <div className="flex text-gray-600 text-sm">
+//           <span className="text-black font-bold">{`${record.rentedDays} Days`}</span>
+//         </div>
+//       ),
+//     },
+//     {
+//       title: "Client",
+//       dataIndex: "client",
+//       key: "client",
+//       sorter: (a, b) => {
+//         const clientA = a.client || "";
+//         const clientB = b.client || "";
+//         return clientA.localeCompare(clientB);
+//       },
+//       sortDirections: ["ascend", "descend"],
+//       render: (text, record) => (
+//         <div className="flex flex-col">
+//           <span className="font-medium">{text}</span>
+//           <span className="text-gray-600 text-sm">{record.clientPhone}</span>
+//         </div>
+//       ),
+//     },
+//     {
+//       title: "Price",
+//       dataIndex: "price",
+//       key: "price",
+//       sorter: (a, b) => {
+//         const priceA = parseFloat(a.price?.replace(/[₦,]/g, "") || "0");
+//         const priceB = parseFloat(b.price?.replace(/[₦,]/g, "") || "0");
+//         return priceA - priceB;
+//       },
+//       sortDirections: ["ascend", "descend"],
+//       render: (text) => (
+//         <span className="font-medium text-green-600">{text}</span>
+//       ),
+//     },
+//     {
+//       title: "Status",
+//       dataIndex: "status",
+//       key: "status",
+//       width: "20%",
+//       sorter: (a, b) => {
+//         const statusA = a.status || "";
+//         const statusB = b.status || "";
+//         return statusA.localeCompare(statusB);
+//       },
+//       sortDirections: ["ascend", "descend"],
+//       render: (text, record) => {
+//         const getStatusColor = (status) => {
+//           const normalizedStatus = status?.toLowerCase().trim();
+//           console.log("Status for color:", normalizedStatus);
+
+//           switch (normalizedStatus) {
+//             case "confirmed":
+//               return "bg-[#5AC5B6]";
+//             case "not confirmed":
+//               return "bg-[#F9C74F]";
+//             case "canceled":
+//             case "cancelled":
+//               return "bg-[#F37272]";
+//             case "completed":
+//               return "bg-[#90BE6D]";
+//             case "on ride":
+//             case "on_ride":
+//             case "onride":
+//               return "bg-[#ef621e]";
+//             default:
+//               console.log("Using default color for status:", normalizedStatus);
+//               return "bg-[#F9C74F]";
+//           }
+//         };
+
+//         const isStatusUpdateDisabled = (currentStatus) => {
+//           const status = currentStatus?.toLowerCase();
+//           return status === "cancelled" || status === "completed";
+//         };
+
+//         const getAvailableStatusOptions = (currentStatus) => {
+//           const status = currentStatus?.toLowerCase();
+
+//           switch (status) {
+//             case "not confirmed":
+//               return ["NOT CONFIRMED", "CONFIRMED", "CANCELLED"];
+//             case "confirmed":
+//               return ["CONFIRMED", "ON RIDE", "CANCELLED"];
+//             case "on ride":
+//               return ["ON RIDE", "COMPLETED", "CANCELLED"];
+//             case "cancelled":
+//             case "completed":
+//               return [];
+//             default:
+//               return [
+//                 "NOT CONFIRMED",
+//                 "CONFIRMED",
+//                 "ON RIDE",
+//                 "CANCELLED",
+//                 "COMPLETED",
+//               ];
+//           }
+//         };
+
+//         const availableOptions = getAvailableStatusOptions(text);
+//         const isDisabled = isStatusUpdateDisabled(text);
+
+//         return (
+//           <div className="flex items-center gap-1">
+//             <span
+//               className={`text-xs font-light text-white px-2 py-1 rounded h-[24px] flex items-center ${getStatusColor(
+//                 text
+//               )}`}
+//             >
+//               {text}
+//             </span>
+//             {isDisabled ? (
+//               <span className="text-xs text-gray-500 italic">
+//                 No further updates allowed
+//               </span>
+//             ) : (
+//               <Select
+//                 className="h-[24px]"
+//                 size="small"
+//                 value={text}
+//                 onChange={(value) => handleStatusUpdate(record.id, value)}
+//                 placeholder="Update status"
+//               >
+//                 {availableOptions.map((option) => (
+//                   <Option key={option} value={option}>
+//                     {option}
+//                   </Option>
+//                 ))}
+//               </Select>
+//             )}
+//           </div>
+//         );
+//       },
+//     },
+//     {
+//       title: "Action",
+//       dataIndex: "action",
+//       key: "action",
+//       width: "15%",
+//       render: (text, record) => {
+//         const isDriverAssignmentDisabled =
+//           record.status?.toLowerCase() === "on ride";
+
+//         return (
+//           <div className="flex gap-2">
+//             <Select
+//               className="w-[160px]"
+//               placeholder="Assign Driver"
+//               value={record.driverId || undefined}
+//               onChange={(value) => handleAssignDriver(record.id, value)}
+//               disabled={isDriverAssignmentDisabled}
+//             >
+//               {driverData?.data?.driversWithStatus.map((driver) => (
+//                 <Option key={driver._id} value={driver._id}>
+//                   {driver.name}
+//                 </Option>
+//               ))}
+//             </Select>
+//             <Button
+//               danger
+//               icon={<DeleteOutlined />}
+//               onClick={() => {
+//                 confirm({
+//                   title: "Are you sure you want to delete this reservation?",
+//                   content: "This action cannot be undone.",
+//                   okText: "Yes, delete",
+//                   okType: "danger",
+//                   cancelText: "No",
+//                   onOk() {
+//                     return handleDeleteReservation(record.id);
+//                   },
+//                 });
+//               }}
+//             />
+//           </div>
+//         );
+//       },
+//     },
+//   ];
+
+//   return (
+//     <>
+//       <h1 className="text-[20px] font-medium">{GetPageName()}</h1>
+//       <div className="flex justify-between items-center py-5">
+//         <Button
+//           icon={<GrFormAdd size={25} />}
+//           onClick={showModal}
+//           className="bg-smart hover:bg-smart text-white border-none h-8"
+//         >
+//           Add reservation
+//         </Button>
+//         <div className="flex gap-3">
+//           <CustomSearch onSearch={onSearch} placeholder="search..." />
+//           {selectedRowKeys.length > 0 && (
+//             <Button
+//               icon={<DeleteOutlined />}
+//               className="bg-smart hover:bg-smart text-white border-none h-8"
+//               onClick={handleDeleteSelected}
+//             >
+//               Delete Selected
+//             </Button>
+//           )}
+
+//           <Button
+//             icon={<LuDownload size={20} />}
+//             className="bg-smart hover:bg-smart text-white border-none h-8"
+//             onClick={() => setIsExportModalOpen(true)}
+//           >
+//             Export{" "}
+//             {selectedRowKeys.length > 0 ? `(${selectedRowKeys.length})` : ""}
+//           </Button>
+
+//           <CSVLink
+//             data={csvData}
+//             headers={csvHeaders}
+//             filename={generateFilename()}
+//             ref={(r) => setCsvLinkRef(r)}
+//             style={{ display: "none" }}
+//           />
+//         </div>
+//       </div>
+
+//       {selectedRowKeys.length > 0 && (
+//         <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+//           <span className="font-medium">Export Mode:</span>{" "}
+//           {selectedRowKeys.length} selected reservation(s) will be exported.
+//           Deselect all to export all reservations.
+//         </div>
+//       )}
+
+//       <div className="max-h-[72vh] overflow-auto border rounded-md">
+//         <Table
+//           rowSelection={rowSelection}
+//           columns={columns}
+//           dataSource={displayData}
+//           loading={isLoading}
+//           rowClassName={() => "text-black"}
+//           size="small"
+//           pagination={false}
+//         />
+//       </div>
+//       <Pagination
+//         current={page}
+//         pageSize={limit}
+//         total={reservationData?.data?.meta?.total || 0}
+//         showTotal={(total, range) =>
+//           `${range[0]}-${range[1]} of ${total} items`
+//         }
+//         size="small"
+//         align="end"
+//         showSizeChanger={true}
+//         showQuickJumper={true}
+//         pageSizeOptions={["10", "20", "50"]}
+//         onChange={(newPage, newPageSize) => {
+//           setPage(newPage);
+//           setLimit(newPageSize);
+//         }}
+//         onShowSizeChange={(current, size) => {
+//           setPage(1);
+//           setLimit(size);
+//         }}
+//         className="mt-2 text-right"
+//       />
+
+//       <ReservationAddModal
+//         isModalOpen={isModalOpen}
+//         handleOk={handleOk}
+//         setIsModalOpen={setIsModalOpen}
+//         handleCancel={() => setIsModalOpen(false)}
+//         refetch={refetch}
+//       />
+
+//       <ExportModal
+//         isModalOpen={isExportModalOpen}
+//         setIsModalOpen={setIsExportModalOpen}
+//         onExport={handleExportWithDateRange}
+//         exportLoading={exportLoading}
+//         selectedCount={selectedRowKeys.length}
+//       />
+//     </>
+//   );
+// }
+
+// export default Reservation;
+
 import { useState } from "react";
 import { Table, Button, Select, message, Modal, Pagination } from "antd";
 import { AlignCenterOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -8,13 +650,16 @@ import dayjs from "dayjs";
 import CustomSearch from "../../../components/common/CustomSearch";
 import GetPageName from "../../../components/common/GetPageName";
 import ReservationAddModal from "./ReservationAddModal";
+
 import {
   useAssignDreiverMutation,
   useGetReservationQuery,
   useDeleteReservationMutation,
   useUpdateReservationStatusMutation,
+  useLazyGetExportDataQuery,
 } from "../../../redux/apiSlices/reservation";
 import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi";
+import ExportModal from "./ExportModal";
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -22,14 +667,16 @@ const { confirm } = Modal;
 function Reservation() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
   const [csvData, setCsvData] = useState([]);
   const [exportLoading, setExportLoading] = useState(false);
+  const [csvLinkRef, setCsvLinkRef] = useState(null);
 
   const [updateStatus] = useUpdateReservationStatusMutation();
 
-  // API hooks - now passing page and limit parameters
+  // API hooks
   const {
     data: reservationData,
     isLoading,
@@ -37,6 +684,12 @@ function Reservation() {
   } = useGetReservationQuery({ page, limit });
 
   console.log("reservationData:", reservationData);
+
+  // Use lazy query for export data - this allows us to trigger it manually
+  const [
+    getExportData,
+    { isLoading: exportDataLoading, isError: exportDataError },
+  ] = useLazyGetExportDataQuery();
 
   const [assignDriver, { isLoading: assignDriverLoading }] =
     useAssignDreiverMutation();
@@ -62,7 +715,7 @@ function Reservation() {
     try {
       await assignDriver({ rID: reservationId, driverId }).unwrap();
       message.success("Driver assigned successfully");
-      refetch(); // Refresh the data after assignment
+      refetch();
     } catch (error) {
       console.error("Driver assignment failed", error);
       message.error(error.data?.message || "Failed to assign driver");
@@ -73,7 +726,7 @@ function Reservation() {
     try {
       await deleteReservation(id).unwrap();
       message.success("Reservation deleted successfully");
-      refetch(); // Refresh the data after deletion
+      refetch();
       setSelectedRowKeys(selectedRowKeys.filter((key) => key !== id));
     } catch (error) {
       console.error("Deletion failed", error);
@@ -102,9 +755,8 @@ function Reservation() {
     });
   };
 
-  //Status Update
   const handleStatusUpdate = async (reservationId, newStatus) => {
-    console.log("Updating status:", { reservationId, newStatus }); // Debug log
+    console.log("Updating status:", { reservationId, newStatus });
 
     try {
       const result = await updateStatus({
@@ -112,11 +764,11 @@ function Reservation() {
         data: { status: newStatus },
       }).unwrap();
 
-      console.log("Status update result:", result); // Debug log
+      console.log("Status update result:", result);
       message.success("Status updated successfully");
-      refetch(); // Refresh the data after status update
+      refetch();
     } catch (error) {
-      console.error("Status update failed:", error); // Enhanced error logging
+      console.error("Status update failed:", error);
       message.error(
         error?.data?.message || error?.message || "Failed to update status"
       );
@@ -158,6 +810,40 @@ function Reservation() {
       pickupTimeOnly: dayjs(item?.pickupTime).format("h:mm A"),
       returnDate: dayjs(item?.returnTime).format("DD/MM/YYYY"),
       returnTimeOnly: dayjs(item?.returnTime).format("h:mm A"),
+      originalPickupTime: item?.pickupTime,
+    }));
+  };
+
+  // New function to format export data specifically for CSV
+  const formatExportDataForCSV = (data) => {
+    if (!Array.isArray(data)) return [];
+
+    return data?.map((item, index) => ({
+      key: item?._id || index,
+      id: item?._id,
+      client:
+        `${item?.clientId?.firstName || ""} ${
+          item?.clientId?.lastName || ""
+        }`.trim() || "N/A",
+      clientFirstName: item?.clientId?.firstName || "N/A",
+      clientLastName: item?.clientId?.lastName || "N/A",
+      clientPhone: item?.clientId?.phoneNumber || "N/A",
+      clientEmail: item?.clientId?.email || "N/A",
+      pickupDate: dayjs(item?.pickupTime).format("DD/MM/YYYY"),
+      pickupTimeOnly: dayjs(item?.pickupTime).format("h:mm A"),
+      pickupLocation: item?.pickupLocation?.location || "N/A",
+      returnDate: dayjs(item?.returnTime).format("DD/MM/YYYY"),
+      returnTimeOnly: dayjs(item?.returnTime).format("h:mm A"),
+      returnLocation: item?.returnLocation?.location || "N/A",
+      carSize: item?.vehicleType || "N/A",
+      carModel: item?.vehicle?.model || "N/A",
+      vehicleBrand: item?.vehicle?.brand || "N/A",
+      carNumberPlate: item?.vehicle?.plateNumber || "N/A",
+      rawAmount: item?.amount || 0,
+      status: item?.status || "NOT CONFIRMED",
+      driverName: item?.driverId?.name || "Not Assigned",
+      // Keep original pickup time for filtering
+      originalPickupTime: item?.pickupTime,
     }));
   };
 
@@ -179,7 +865,7 @@ function Reservation() {
     { label: "Return Date", key: "returnDate" },
     { label: "Return Time", key: "returnTimeOnly" },
     { label: "Return Location", key: "returnLocation" },
-    { label: "Vehicle Name", key: "carSize" },
+    { label: "Vehicle Type", key: "carSize" },
     { label: "Vehicle Model", key: "carModel" },
     { label: "Vehicle Brand", key: "vehicleBrand" },
     { label: "License Plate", key: "carNumberPlate" },
@@ -188,34 +874,100 @@ function Reservation() {
     { label: "Assigned Driver", key: "driverName" },
   ];
 
-  // Prepare CSV data - use all data or only selected rows
-  const prepareCsvData = () => {
+  // Updated export function to handle date filtering and API call
+  const handleExportWithDateRange = async ({ startDate, endDate }) => {
+    console.log(
+      "Export date range:",
+      startDate.format("YYYY-MM-DD"),
+      "to",
+      endDate.format("YYYY-MM-DD")
+    );
     setExportLoading(true);
 
-    let dataToExport = displayData;
+    try {
+      // Fetch data from the API using lazy query
+      console.log("=== FETCHING EXPORT DATA FROM API ===");
+      console.log("Date Range:", {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      });
 
-    // If there are selected rows, export only those
-    if (selectedRowKeys.length > 0) {
-      dataToExport = displayData.filter((item) =>
-        selectedRowKeys.includes(item.key)
-      );
-    } else {
-      dataToExport = displayData;
-    }
+      // Trigger the lazy query with date parameters
+      const apiResponse = await getExportData({
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      }).unwrap();
 
-    setCsvData(dataToExport);
+      console.log("=== API RESPONSE ===");
+      console.log("Full API Response:", apiResponse);
+      console.log("API Data:", apiResponse?.data);
+      console.log("API Data Result:", apiResponse?.data?.result);
+      console.log("API Data Length:", apiResponse?.data?.result?.length || 0);
+      console.log("===================");
 
-    // Set loading to false after a brief delay to show loading state
-    setTimeout(() => {
+      // Get the export data from API response
+      const exportData = apiResponse?.data?.result || [];
+
+      if (exportData.length === 0) {
+        message.warning("No reservations found in the selected date range");
+        setExportLoading(false);
+        setIsExportModalOpen(false);
+        return;
+      }
+
+      // Format the export data for CSV
+      let formattedExportData = formatExportDataForCSV(exportData);
+
+      // If there are selected rows, filter only those from the export data
+      if (selectedRowKeys.length > 0) {
+        formattedExportData = formattedExportData.filter((item) =>
+          selectedRowKeys.includes(item.key)
+        );
+
+        if (formattedExportData.length === 0) {
+          message.warning(
+            "None of the selected reservations are in the specified date range"
+          );
+          setExportLoading(false);
+          setIsExportModalOpen(false);
+          return;
+        }
+      }
+
+      console.log("=== FINAL CSV DATA ===");
+      console.log("CSV Export Data:", formattedExportData);
+      console.log("CSV Export Count:", formattedExportData.length);
+      console.log("======================");
+
+      setCsvData(formattedExportData);
+      setIsExportModalOpen(false);
+
+      // Trigger CSV download
+      setTimeout(() => {
+        if (csvLinkRef) {
+          csvLinkRef.link.click();
+        }
+        setExportLoading(false);
+        message.success(
+          `Exported ${formattedExportData.length} reservation(s) successfully!`
+        );
+      }, 500);
+    } catch (error) {
+      console.error("=== EXPORT ERROR ===");
+      console.error("Error fetching export data:", error);
+      console.error("Error details:", error?.data || error?.message);
+      console.error("===================");
+
+      message.error("Failed to fetch export data from server");
       setExportLoading(false);
-    }, 500);
+      setIsExportModalOpen(false);
+    }
   };
 
-  // Generate filename with current date
+  // Generate filename with current date and date range
   const generateFilename = () => {
     const currentDate = dayjs().format("YYYY-MM-DD_HH-mm");
-    const recordCount =
-      selectedRowKeys.length > 0 ? selectedRowKeys.length : displayData.length;
+    const recordCount = csvData.length;
     return `reservations_${currentDate}_${recordCount}records.csv`;
   };
 
@@ -225,275 +977,12 @@ function Reservation() {
     setLimit(pagination.pageSize);
   };
 
-  // const columns = [
-  //   {
-  //     title: "Pickup",
-  //     dataIndex: "pickUp",
-  //     key: "pickUp",
-  //     sorter: (a, b) => new Date(a.pickupTime) - new Date(b.pickupTime),
-  //     sortDirections: ["ascend", "descend"],
-  //     render: (text, record) => (
-  //       <div className="flex flex-col">
-  //         <span className="font-medium">{record.pickupTime}</span>
-  //         <span className="text-gray-600 text-sm">{record.pickupLocation}</span>
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     title: "Return",
-  //     dataIndex: "return",
-  //     key: "return",
-  //     sorter: (a, b) => new Date(a.returnTime) - new Date(b.returnTime),
-  //     sortDirections: ["ascend", "descend"],
-  //     render: (text, record) => (
-  //       <div className="flex flex-col">
-  //         <span className="font-medium">{record.returnTime}</span>
-  //         <span className="text-gray-600 text-sm">{record.returnLocation}</span>
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     title: "Car",
-  //     dataIndex: "car",
-  //     key: "car",
-  //     render: (_, record) => (
-  //       <div className="flex flex-col">
-  //         <span className="font-medium">{record.carName}</span>
-  //         <div className="flex text-gray-600 text-sm">
-  //           <span>{record.carSize}</span>
-  //           {record.carSize !== "N/A" && record.rentedDays !== 0 && (
-  //             <span>, </span>
-  //           )}
-  //         </div>
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     title: "Rented for",
-  //     dataIndex: "rentedDays",
-  //     key: "rentedDays",
-  //     sorter: (a, b) => a.rentedDays - b.rentedDays,
-  //     sortDirections: ["ascend", "descend"],
-  //     width: "8%",
-  //     render: (_, record) => (
-  //       <div className="flex text-gray-600 text-sm">
-  //         <span className="text-black font-bold">{`${record.rentedDays} Days`}</span>
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     title: "Client",
-  //     dataIndex: "client",
-  //     key: "client",
-  //     render: (text, record) => (
-  //       <div className="flex flex-col">
-  //         <span className="font-medium">{text}</span>
-  //         <span className="text-gray-600 text-sm">{record.clientPhone}</span>
-  //       </div>
-  //     ),
-  //   },
-  //   {
-  //     title: "Price",
-  //     dataIndex: "price",
-  //     key: "price",
-  //     sorter: (a, b) => parseFloat(a.price) - parseFloat(b.price),
-  //     sortDirections: ["ascend", "descend"],
-  //     render: (text) => (
-  //       <span className="font-medium text-green-600">{text}</span>
-  //     ),
-  //   },
-
-  //   {
-  //     title: "Status",
-  //     dataIndex: "status",
-  //     key: "status",
-  //     width: "20%",
-  //     render: (text, record) => {
-  //       const getStatusColor = (status) => {
-  //         const normalizedStatus = status?.toLowerCase().trim();
-  //         console.log("Status for color:", normalizedStatus); // Debug log
-
-  //         switch (normalizedStatus) {
-  //           case "confirmed":
-  //             return "bg-[#5AC5B6]";
-  //           case "not confirmed":
-  //             return "bg-[#F9C74F]";
-  //           case "canceled":
-  //           case "cancelled":
-  //             return "bg-[#F37272]";
-  //           case "completed":
-  //             return "bg-[#90BE6D]";
-  //           case "on ride":
-  //           case "on_ride":
-  //           case "onride":
-  //             return "bg-[#ef621e]";
-  //           default:
-  //             console.log("Using default color for status:", normalizedStatus); // Debug log
-  //             return "bg-[#F9C74F]";
-  //         }
-  //       };
-
-  //       // Check if status updates should be disabled
-  //       const isStatusUpdateDisabled = (currentStatus) => {
-  //         const status = currentStatus?.toLowerCase();
-  //         return status === "cancelled" || status === "completed";
-  //       };
-
-  //       // Get available status options based on current status
-  //       const getAvailableStatusOptions = (currentStatus) => {
-  //         const status = currentStatus?.toLowerCase();
-
-  //         switch (status) {
-  //           case "not confirmed":
-  //             return ["NOT CONFIRMED", "CONFIRMED", "CANCELLED"];
-  //           case "confirmed":
-  //             return ["CONFIRMED", "ON RIDE", "CANCELLED"];
-  //           case "on ride":
-  //             return ["ON RIDE", "COMPLETED", "CANCELLED"];
-  //           case "cancelled":
-  //           case "completed":
-  //             return []; // No options available
-  //           default:
-  //             return [
-  //               "NOT CONFIRMED",
-  //               "CONFIRMED",
-  //               "ON RIDE",
-  //               "CANCELLED",
-  //               "COMPLETED",
-  //             ];
-  //         }
-  //       };
-
-  //       const availableOptions = getAvailableStatusOptions(text);
-  //       const isDisabled = isStatusUpdateDisabled(text);
-
-  //       return (
-  //         <div className="flex items-center gap-1">
-  //           <span
-  //             className={`text-xs font-light text-white px-2 py-1 rounded h-[24px] flex items-center ${getStatusColor(
-  //               text
-  //             )}`}
-  //           >
-  //             {text}
-  //           </span>
-  //           {isDisabled ? (
-  //             <span className="text-xs text-gray-500 italic">
-  //               No further updates allowed
-  //             </span>
-  //           ) : (
-  //             <Select
-  //               className="h-[24px]"
-  //               size="small"
-  //               value={text}
-  //               onChange={(value) => handleStatusUpdate(record.id, value)}
-  //               placeholder="Update status"
-  //             >
-  //               {availableOptions.map((option) => (
-  //                 <Option key={option} value={option}>
-  //                   {option}
-  //                 </Option>
-  //               ))}
-  //             </Select>
-  //           )}
-  //         </div>
-  //       );
-  //     },
-  //   },
-  //   // {
-  //   //   title: "Action",
-  //   //   dataIndex: "action",
-  //   //   key: "action",
-  //   //   width: "15%",
-  //   //   render: (text, record) => (
-  //   //     <div className="flex gap-2">
-  //   //       <Select
-  //   //         className="w-[160px]"
-  //   //         placeholder="Assign Driver"
-  //   //         value={record.driverId || undefined}
-  //   //         onChange={(value) => handleAssignDriver(record.id, value)}
-  //   //       >
-  //   //         {driverData?.data?.map((driver) => (
-  //   //           <Option key={driver._id} value={driver._id}>
-  //   //             {driver.name}
-  //   //           </Option>
-  //   //         ))}
-  //   //       </Select>
-  //   //       <Button
-  //   //         danger
-  //   //         icon={<DeleteOutlined />}
-  //   //         onClick={() => {
-  //   //           confirm({
-  //   //             title: "Are you sure you want to delete this reservation?",
-  //   //             content: "This action cannot be undone.",
-  //   //             okText: "Yes, delete",
-  //   //             okType: "danger",
-  //   //             cancelText: "No",
-  //   //             onOk() {
-  //   //               return handleDeleteReservation(record.id);
-  //   //             },
-  //   //           });
-  //   //         }}
-  //   //       />
-  //   //     </div>
-  //   //   ),
-  //   // },
-
-  //   {
-  //     title: "Action",
-  //     dataIndex: "action",
-  //     key: "action",
-  //     width: "15%",
-  //     render: (text, record) => {
-  //       // Check if driver assignment should be disabled
-  //       const isDriverAssignmentDisabled =
-  //         record.status?.toLowerCase() === "on ride";
-
-  //       return (
-  //         <div className="flex gap-2">
-  //           <Select
-  //             className="w-[160px]"
-  //             placeholder="Assign Driver"
-  //             value={record.driverId || undefined}
-  //             onChange={(value) => handleAssignDriver(record.id, value)}
-  //             disabled={isDriverAssignmentDisabled}
-  //           >
-  //             {driverData?.data?.map((driver) => (
-  //               <Option key={driver._id} value={driver._id}>
-  //                 {driver.name}
-  //               </Option>
-  //             ))}
-  //           </Select>
-  //           <Button
-  //             danger
-  //             icon={<DeleteOutlined />}
-  //             onClick={() => {
-  //               confirm({
-  //                 title: "Are you sure you want to delete this reservation?",
-  //                 content: "This action cannot be undone.",
-  //                 okText: "Yes, delete",
-  //                 okType: "danger",
-  //                 cancelText: "No",
-  //                 onOk() {
-  //                   return handleDeleteReservation(record.id);
-  //                 },
-  //               });
-  //             }}
-  //           />
-  //         </div>
-  //       );
-  //     },
-  //   },
-  // ];
-
-  // Replace your columns array with this fixed version:
-
   const columns = [
     {
       title: "Pickup",
       dataIndex: "pickUp",
       key: "pickUp",
       sorter: (a, b) => {
-        // Parse the formatted date string back to Date object for comparison
         const dateA = dayjs(a.pickupTime, "DD/MM/YYYY, h:mm A").toDate();
         const dateB = dayjs(b.pickupTime, "DD/MM/YYYY, h:mm A").toDate();
         return dateA - dateB;
@@ -511,7 +1000,6 @@ function Reservation() {
       dataIndex: "return",
       key: "return",
       sorter: (a, b) => {
-        // Parse the formatted date string back to Date object for comparison
         const dateA = dayjs(a.returnTime, "DD/MM/YYYY, h:mm A").toDate();
         const dateB = dayjs(b.returnTime, "DD/MM/YYYY, h:mm A").toDate();
         return dateA - dateB;
@@ -579,7 +1067,6 @@ function Reservation() {
       dataIndex: "price",
       key: "price",
       sorter: (a, b) => {
-        // Extract numeric value from price string (remove ₦ symbol)
         const priceA = parseFloat(a.price?.replace(/[₦,]/g, "") || "0");
         const priceB = parseFloat(b.price?.replace(/[₦,]/g, "") || "0");
         return priceA - priceB;
@@ -603,7 +1090,7 @@ function Reservation() {
       render: (text, record) => {
         const getStatusColor = (status) => {
           const normalizedStatus = status?.toLowerCase().trim();
-          console.log("Status for color:", normalizedStatus); // Debug log
+          console.log("Status for color:", normalizedStatus);
 
           switch (normalizedStatus) {
             case "confirmed":
@@ -620,18 +1107,16 @@ function Reservation() {
             case "onride":
               return "bg-[#ef621e]";
             default:
-              console.log("Using default color for status:", normalizedStatus); // Debug log
+              console.log("Using default color for status:", normalizedStatus);
               return "bg-[#F9C74F]";
           }
         };
 
-        // Check if status updates should be disabled
         const isStatusUpdateDisabled = (currentStatus) => {
           const status = currentStatus?.toLowerCase();
           return status === "cancelled" || status === "completed";
         };
 
-        // Get available status options based on current status
         const getAvailableStatusOptions = (currentStatus) => {
           const status = currentStatus?.toLowerCase();
 
@@ -644,7 +1129,7 @@ function Reservation() {
               return ["ON RIDE", "COMPLETED", "CANCELLED"];
             case "cancelled":
             case "completed":
-              return []; // No options available
+              return [];
             default:
               return [
                 "NOT CONFIRMED",
@@ -697,7 +1182,6 @@ function Reservation() {
       key: "action",
       width: "15%",
       render: (text, record) => {
-        // Check if driver assignment should be disabled
         const isDriverAssignmentDisabled =
           record.status?.toLowerCase() === "on ride";
 
@@ -761,33 +1245,25 @@ function Reservation() {
             </Button>
           )}
 
-          {/* Export Button with CSV functionality */}
+          <Button
+            icon={<LuDownload size={20} />}
+            className="bg-smart hover:bg-smart text-white border-none h-8"
+            onClick={() => setIsExportModalOpen(true)}
+          >
+            Export{" "}
+            {selectedRowKeys.length > 0 ? `(${selectedRowKeys.length})` : ""}
+          </Button>
+
           <CSVLink
             data={csvData}
             headers={csvHeaders}
             filename={generateFilename()}
-            className="ant-btn bg-smart hover:bg-smart text-white border-none h-8 flex items-center gap-2 px-4 rounded"
-            onClick={prepareCsvData}
-            style={{ textDecoration: "none", color: "white" }}
-          >
-            <Button
-              icon={<LuDownload size={20} />}
-              className="bg-smart hover:bg-smart text-white border-none h-8 p-0"
-              loading={exportLoading}
-              style={{
-                border: "none",
-                boxShadow: "none",
-                background: "transparent",
-              }}
-            >
-              Export{" "}
-              {selectedRowKeys.length > 0 ? `(${selectedRowKeys.length})` : ""}
-            </Button>
-          </CSVLink>
+            ref={(r) => setCsvLinkRef(r)}
+            style={{ display: "none" }}
+          />
         </div>
       </div>
 
-      {/* Export Status Message */}
       {selectedRowKeys.length > 0 && (
         <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
           <span className="font-medium">Export Mode:</span>{" "}
@@ -804,7 +1280,6 @@ function Reservation() {
           loading={isLoading}
           rowClassName={() => "text-black"}
           size="small"
-          // onChange={handleTableChange}
           pagination={false}
         />
       </div>
@@ -825,17 +1300,26 @@ function Reservation() {
           setLimit(newPageSize);
         }}
         onShowSizeChange={(current, size) => {
-          setPage(1); // Reset to first page when changing page size
+          setPage(1);
           setLimit(size);
         }}
-        className="mt-2 text-right" // Add some top margin and align to right
+        className="mt-2 text-right"
       />
+
       <ReservationAddModal
         isModalOpen={isModalOpen}
         handleOk={handleOk}
         setIsModalOpen={setIsModalOpen}
         handleCancel={() => setIsModalOpen(false)}
         refetch={refetch}
+      />
+
+      <ExportModal
+        isModalOpen={isExportModalOpen}
+        setIsModalOpen={setIsExportModalOpen}
+        onExport={handleExportWithDateRange}
+        exportLoading={exportLoading}
+        selectedCount={selectedRowKeys.length}
       />
     </>
   );

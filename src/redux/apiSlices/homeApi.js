@@ -5,7 +5,7 @@ const homeSlice = api.injectEndpoints({
     dashboard: builder.query({
       query: () => {
         return {
-          url: `/dashboard`,
+          url: `/dashboard/2025-06`,
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
