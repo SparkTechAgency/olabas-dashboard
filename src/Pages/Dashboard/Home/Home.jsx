@@ -30,7 +30,30 @@ export const Card = ({ item }) => {
 
 const Home = () => {
   const [year, setYear] = useState(dayjs().format("YYYY"));
-  const { data: overViewData, isLoading, isError } = useDashboardQuery();
+  const [currentMonth, setCurrentMonth] = useState("");
+  const {
+    data: overViewData,
+    isLoading,
+    isError,
+  } = useDashboardQuery(currentMonth);
+
+  // Get current month in YYYY-MM format and update it dynamically
+  useEffect(() => {
+    const updateCurrentMonth = () => {
+      const getCurrentMonth = dayjs().format("YYYY-MM");
+      setCurrentMonth(getCurrentMonth);
+      console.log("Current month:", getCurrentMonth);
+    };
+
+    // Set initial month
+    updateCurrentMonth();
+
+    // Update every hour to catch month changes
+    const interval = setInterval(updateCurrentMonth, 3600000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
+  }, []);
 
   console.log("dashboard", overViewData);
 
@@ -76,6 +99,7 @@ const Home = () => {
       icon: [<IoTrendingUp size={20} />, <IoTrendingDown size={20} />],
     },
   ];
+
   return (
     <div className="">
       {/* Stat Cards */}

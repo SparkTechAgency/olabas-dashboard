@@ -3,9 +3,9 @@ import { api } from "../api/baseApi";
 const homeSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     dashboard: builder.query({
-      query: () => {
+      query: (currentMonth) => {
         return {
-          url: `/dashboard/2025-06`,
+          url: `/dashboard/${currentMonth}`,
           method: "GET",
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
