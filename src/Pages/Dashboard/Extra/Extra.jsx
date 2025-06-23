@@ -13,7 +13,7 @@ import {
   useAddToProtectionMutation,
   useCreateExtraMutation,
   useDeleteExtraMutation,
-  useGetExtraQuery,
+  useGetAllServicesQuery,
   useUpdateExtraMutation,
 } from "../../../redux/apiSlices/extra";
 import { getImageUrl } from "../../../utils/baseUrl";
@@ -45,7 +45,7 @@ function Extra() {
     isLoading,
     isError,
     error: fetchError,
-  } = useGetExtraQuery({ page, limit, status: filter.toUpperCase() });
+  } = useGetAllServicesQuery({ page, limit, status: filter.toUpperCase() });
 
   console.log("sss", extraData);
 

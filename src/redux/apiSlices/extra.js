@@ -35,7 +35,16 @@ const extraSlice = api.injectEndpoints({
     }),
     getExtra: builder.query({
       query: ({ page, limit, status }) => ({
-        url: `extra-service/non-protection?page=${page}&limit=${limit}${
+        url: `/extra-service/non-protection?page=${page}&limit=${limit}${
+          status && status !== "ALL" ? `&status=${status}` : ""
+        }`,
+        method: "GET",
+      }),
+      providesTags: ["Extra"],
+    }),
+    getAllServices: builder.query({
+      query: ({ page, limit, status }) => ({
+        url: `/extra-service?page=${page}&limit=${limit}${
           status && status !== "ALL" ? `&status=${status}` : ""
         }`,
         method: "GET",
@@ -55,6 +64,7 @@ const extraSlice = api.injectEndpoints({
 
 export const {
   useGetExtraQuery,
+  useGetAllServicesQuery,
   useCreateExtraMutation,
   useUpdateExtraMutation,
   useDeleteExtraMutation,

@@ -8,6 +8,7 @@ const initialExtras = [
     qty: 1,
     price: 20,
     total: 0,
+    isPerDay: true,
   },
   {
     includeStatus: false,
@@ -15,6 +16,7 @@ const initialExtras = [
     qty: 1,
     price: 0,
     total: 0,
+    isPerDay: true,
   },
   {
     includeStatus: true,
@@ -22,6 +24,7 @@ const initialExtras = [
     qty: 1,
     price: 50,
     total: 50,
+    isPerDay: true,
   },
   {
     includeStatus: false,
@@ -29,6 +32,7 @@ const initialExtras = [
     qty: 1,
     price: 25,
     total: 0,
+    isPerDay: true,
   },
 ];
 
@@ -207,6 +211,7 @@ const carRentalSlice = createSlice({
         status: item.status,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
+        isPerDay: item.isPerDay,
       }));
       state.extrasInitialized = true;
       state.selectedExtraIds = []; // Reset selected IDs when initializing
@@ -353,6 +358,7 @@ const carRentalSlice = createSlice({
         total: 0, // Default total
         status: item.status,
         isProtection: item.isProtection,
+        isPerDay: item.isPerDay,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
       }));
