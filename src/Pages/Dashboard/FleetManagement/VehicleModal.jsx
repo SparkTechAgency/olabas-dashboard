@@ -32,6 +32,8 @@
 //   // Store the actual file separately for better control
 //   const [uploadedFile, setUploadedFile] = useState(null);
 //   const [fileList, setFileList] = useState([]);
+//   const [submitLoading, setSubmitLoading] = useState(false);
+//   const [errorMessages, setErrorMessages] = useState([]);
 
 //   const carType = [
 //     { label: "Large: Premium", value: "LARGE PREMIUM" },
@@ -58,6 +60,8 @@
 //     if (!isModalOpen) {
 //       setUploadedFile(null);
 //       setFileList([]);
+//       setErrorMessages([]);
+//       setSubmitLoading(false);
 //     }
 //   }, [isModalOpen]);
 
@@ -90,8 +94,58 @@
 //     }
 //   }, [mode, vehicleData, isModalOpen, form]);
 
+//   // Helper function to parse and format error messages
+//   const parseErrorMessages = (error) => {
+//     console.log("Parsing error:", error);
+
+//     // Clear previous errors
+//     setErrorMessages([]);
+
+//     // Check if it's a validation error with errorMessages array
+//     if (error?.data?.errorMessages && Array.isArray(error.data.errorMessages)) {
+//       const formattedErrors = error.data.errorMessages.map((err) => {
+//         if (err.path && err.message) {
+//           return `${err.path}: ${err.message}`;
+//         }
+//         return err.message || JSON.stringify(err);
+//       });
+//       setErrorMessages(formattedErrors);
+//       return formattedErrors;
+//     }
+
+//     // Check if there's a stack message (like the one in your screenshot)
+//     if (error?.data?.stack) {
+//       // Extract the meaningful part of the stack message
+//       const stackMessage = error.data.stack;
+//       const match = stackMessage.match(
+//         /ValidationError: Vehicle validation failed: (.+?) at/
+//       );
+//       if (match) {
+//         const errorPart = match[1];
+//         // Split by field names and clean up
+//         const fieldErrors = errorPart
+//           .split(/(?=\w+:)/)
+//           .map((err) => err.trim())
+//           .filter(Boolean);
+//         setErrorMessages(fieldErrors);
+//         return fieldErrors;
+//       }
+//       setErrorMessages([stackMessage]);
+//       return [stackMessage];
+//     }
+
+//     // Fallback to generic message
+//     const fallbackMessage =
+//       error?.data?.message || error?.message || "Something went wrong";
+//     setErrorMessages([fallbackMessage]);
+//     return [fallbackMessage];
+//   };
+
 //   const onFinish = async (values) => {
 //     try {
+//       setSubmitLoading(true);
+//       setErrorMessages([]); // Clear previous errors
+
 //       console.log("=== FORM SUBMISSION DEBUG ===");
 //       console.log("Form values:", values);
 //       console.log("Uploaded file state:", uploadedFile);
@@ -181,15 +235,33 @@
 //         form.resetFields();
 //         setUploadedFile(null);
 //         setFileList([]);
+//         setErrorMessages([]);
 //         handleOk();
 //       } else {
-//         message.error(
-//           mode === "add" ? "Failed to create fleet" : "Failed to update fleet"
-//         );
+//         const errorMsg =
+//           res.message ||
+//           (mode === "add"
+//             ? "Failed to create fleet"
+//             : "Failed to update fleet");
+//         message.error(errorMsg);
+//         if (res.errorMessages) {
+//           setErrorMessages(res.errorMessages.map((err) => err.message || err));
+//         }
 //       }
 //     } catch (err) {
 //       console.error("API Error:", err);
-//       message.error(err?.data?.message || "Something went wrong");
+
+//       // Parse and display detailed error messages
+//       const errorMessages = parseErrorMessages(err);
+
+//       // Show the first error as a toast message
+//       if (errorMessages.length > 0) {
+//         message.error(errorMessages[0]);
+//       } else {
+//         message.error("Something went wrong");
+//       }
+//     } finally {
+//       setSubmitLoading(false);
 //     }
 //   };
 
@@ -278,6 +350,7 @@
 //         handleCancel();
 //         setUploadedFile(null);
 //         setFileList([]);
+//         setErrorMessages([]);
 //       }}
 //       centered
 //       footer={null}
@@ -351,6 +424,12 @@
 //             name="numberOfSeats"
 //             rules={[
 //               { required: true, message: "Please enter number of seats" },
+//               {
+//                 type: "number",
+//                 min: 1,
+//                 max: 7,
+//                 message: "Number of seats must be between 1 and 7",
+//               },
 //             ]}
 //           >
 //             <InputNumber
@@ -359,35 +438,51 @@
 //               className="w-full"
 //               controls={false}
 //               placeholder="1-7"
-//               type="number"
 //             />
 //           </Form.Item>
 //           <Form.Item
 //             label="Number of Door"
 //             name="numberOfDoors"
-//             rules={[{ required: true }]}
+//             rules={[
+//               { required: true, message: "Please enter number of doors" },
+//               {
+//                 type: "number",
+//                 min: 1,
+//                 max: 10,
+//                 message: "Number of doors must be between 1 and 10",
+//               },
+//             ]}
 //           >
 //             <InputNumber
 //               min={1}
 //               max={10}
 //               className="w-full"
 //               controls={false}
-//               placeholder="0"
-//               type="number"
+//               placeholder="2-4"
 //             />
 //           </Form.Item>
 //           <Form.Item
 //             label="Number of Luggage"
 //             name="numberOfLuggage"
-//             rules={[{ required: true }]}
+//             rules={[
+//               {
+//                 required: true,
+//                 message: "Please enter number of luggage spaces",
+//               },
+//               {
+//                 type: "number",
+//                 min: 0,
+//                 max: 20,
+//                 message: "Number of luggage spaces must be between 0 and 20",
+//               },
+//             ]}
 //           >
 //             <InputNumber
 //               min={0}
 //               max={20}
 //               className="w-full"
-//               placeholder="0"
+//               placeholder="0-5"
 //               controls={false}
-//               type="number"
 //             />
 //           </Form.Item>
 //         </div>
@@ -400,7 +495,7 @@
 //               {mode === "add" && <span className="text-red-500"> *</span>}
 //             </label>
 
-//             <Upload {...uploadProps}>
+//             <Upload {...uploadProps} maxCount={10} multiple={true}>
 //               <Button>
 //                 {mode === "edit" ? "Upload New Image" : "Choose File"}
 //               </Button>
@@ -444,13 +539,20 @@
 //             <Form.Item
 //               label="Daily Rate"
 //               name="dailyRate"
-//               rules={[{ required: true }]}
+//               rules={[
+//                 { required: true, message: "Please enter daily rate" },
+//                 {
+//                   type: "number",
+//                   min: 0,
+//                   message: "Daily rate must be a positive number",
+//                 },
+//               ]}
 //             >
 //               <InputNumber
 //                 addonBefore="₦"
 //                 placeholder="0"
 //                 controls={false}
-//                 type="number"
+//                 min={0}
 //               />
 //             </Form.Item>
 //             <Form.Item
@@ -491,14 +593,17 @@
 //                 handleCancel();
 //                 setUploadedFile(null);
 //                 setFileList([]);
+//                 setErrorMessages([]);
 //               }}
+//               disabled={submitLoading}
 //             >
 //               Cancel
 //             </Button>
 //             <Button
 //               htmlType="submit"
 //               className="bg-smart text-white"
-//               disabled={mode === "add" && !uploadedFile}
+//               disabled={(mode === "add" && !uploadedFile) || submitLoading}
+//               loading={submitLoading}
 //             >
 //               {mode === "add" ? "Save" : "Update"}
 //             </Button>
@@ -521,7 +626,6 @@ import {
   Radio,
   Select,
   Upload,
-  Alert,
 } from "antd";
 import {
   useCreateFleetMutation,
@@ -543,8 +647,8 @@ function VehicleModal({
   const [updateFleet] = useUpdateFleetMutation();
   const [deleteFleet] = useDeleteFleetMutation();
 
-  // Store the actual file separately for better control
-  const [uploadedFile, setUploadedFile] = useState(null);
+  // Store multiple files for better control
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [fileList, setFileList] = useState([]);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [errorMessages, setErrorMessages] = useState([]);
@@ -572,7 +676,7 @@ function VehicleModal({
   // Reset states when modal opens/closes
   useEffect(() => {
     if (!isModalOpen) {
-      setUploadedFile(null);
+      setUploadedFiles([]);
       setFileList([]);
       setErrorMessages([]);
       setSubmitLoading(false);
@@ -599,11 +703,11 @@ function VehicleModal({
         status: vehicleData.status,
       });
       // Reset file states for edit mode
-      setUploadedFile(null);
+      setUploadedFiles([]);
       setFileList([]);
     } else if (mode === "add") {
       form.resetFields();
-      setUploadedFile(null);
+      setUploadedFiles([]);
       setFileList([]);
     }
   }, [mode, vehicleData, isModalOpen, form]);
@@ -662,7 +766,7 @@ function VehicleModal({
 
       console.log("=== FORM SUBMISSION DEBUG ===");
       console.log("Form values:", values);
-      console.log("Uploaded file state:", uploadedFile);
+      console.log("Uploaded files state:", uploadedFiles);
       console.log("File list state:", fileList);
       console.log("Mode:", mode);
 
@@ -694,20 +798,24 @@ function VehicleModal({
 
       formData.append("data", JSON.stringify(vehiclePayload));
 
-      // Handle image upload
+      // Handle multiple image uploads
       if (mode === "add") {
-        if (!uploadedFile) {
-          message.error("Please upload a vehicle image");
+        if (uploadedFiles.length === 0) {
+          message.error("Please upload at least one vehicle image");
           return;
         }
-        console.log("Adding image for CREATE:", uploadedFile);
-        formData.append("image", uploadedFile);
+        console.log("Adding images for CREATE:", uploadedFiles);
+        uploadedFiles.forEach((file, index) => {
+          formData.append("image", file);
+        });
       } else if (mode === "edit") {
-        if (uploadedFile) {
-          console.log("Adding NEW image for UPDATE:", uploadedFile);
-          formData.append("image", uploadedFile);
+        if (uploadedFiles.length > 0) {
+          console.log("Adding NEW images for UPDATE:", uploadedFiles);
+          uploadedFiles.forEach((file, index) => {
+            formData.append("image", file);
+          });
         } else {
-          console.log("No new image uploaded for UPDATE, keeping existing");
+          console.log("No new images uploaded for UPDATE, keeping existing");
         }
       }
 
@@ -747,7 +855,7 @@ function VehicleModal({
             : "Fleet updated successfully"
         );
         form.resetFields();
-        setUploadedFile(null);
+        setUploadedFiles([]);
         setFileList([]);
         setErrorMessages([]);
         handleOk();
@@ -781,9 +889,10 @@ function VehicleModal({
 
   // Custom upload props
   const uploadProps = {
-    name: "vehicleImage",
+    name: "vehicleImages",
     listType: "picture",
-    maxCount: 1,
+    maxCount: 10,
+    multiple: true,
     fileList: fileList,
     beforeUpload: (file) => {
       console.log("=== BEFORE UPLOAD DEBUG ===");
@@ -801,27 +910,32 @@ function VehicleModal({
         return Upload.LIST_IGNORE;
       }
 
-      const isLt5M = file.size / 1024 / 1024 < 5;
-      if (!isLt5M) {
-        message.error("Image must be smaller than 5MB!");
+      const isLt15M = file.size / 1024 / 1024 < 15;
+      if (!isLt15M) {
+        message.error("Image must be smaller than 15MB!");
         return Upload.LIST_IGNORE;
       }
 
-      // Store the actual file
-      setUploadedFile(file);
-      console.log("File stored in state:", file);
+      // Check if adding this file would exceed the limit
+      if (uploadedFiles.length >= 10) {
+        message.error("Maximum 10 images allowed!");
+        return Upload.LIST_IGNORE;
+      }
+
+      // Add file to uploaded files array
+      setUploadedFiles((prev) => [...prev, file]);
+      console.log("File added to uploaded files array");
 
       // Update file list for display
-      const newFileList = [
-        {
-          uid: file.uid || Date.now().toString(),
-          name: file.name,
-          status: "done",
-          originFileObj: file,
-        },
-      ];
-      setFileList(newFileList);
-      console.log("Updated file list:", newFileList);
+      const newFileItem = {
+        uid: file.uid || `${Date.now()}-${Math.random()}`,
+        name: file.name,
+        status: "done",
+        originFileObj: file,
+      };
+
+      setFileList((prev) => [...prev, newFileItem]);
+      console.log("Updated file list with new file");
 
       // Prevent automatic upload
       return false;
@@ -834,17 +948,24 @@ function VehicleModal({
       // Sync the fileList state
       setFileList(info.fileList);
 
-      // If file is removed, clear the uploaded file
-      if (info.fileList.length === 0) {
-        setUploadedFile(null);
-        console.log("File removed, cleared uploaded file state");
-      }
+      // Update uploaded files based on file list
+      const validFiles = info.fileList
+        .map((item) => item.originFileObj)
+        .filter(Boolean);
+      setUploadedFiles(validFiles);
     },
     onRemove: (file) => {
       console.log("=== FILE REMOVE DEBUG ===");
       console.log("Removing file:", file);
-      setUploadedFile(null);
-      setFileList([]);
+
+      // Remove from uploaded files
+      setUploadedFiles((prev) =>
+        prev.filter((f) => f.uid !== file.uid && f.name !== file.name)
+      );
+
+      // Remove from file list
+      setFileList((prev) => prev.filter((f) => f.uid !== file.uid));
+
       return true;
     },
     accept: "image/*",
@@ -862,7 +983,7 @@ function VehicleModal({
       open={isModalOpen}
       onCancel={() => {
         handleCancel();
-        setUploadedFile(null);
+        setUploadedFiles([]);
         setFileList([]);
         setErrorMessages([]);
       }}
@@ -870,27 +991,6 @@ function VehicleModal({
       footer={null}
       width={1000}
     >
-      {/* Display validation errors
-      {errorMessages.length > 0 && (
-        <Alert
-          message="Validation Errors"
-          description={
-            <ul className="list-disc list-inside">
-              {errorMessages.map((error, index) => (
-                <li key={index} className="text-sm">
-                  {error}
-                </li>
-              ))}
-            </ul>
-          }
-          type="error"
-          showIcon
-          closable
-          onClose={() => setErrorMessages([])}
-          className="mb-4"
-        />
-      )} */}
-
       <Form form={form} layout="vertical" onFinish={onFinish}>
         {/* Car Type Section */}
         <Form.Item
@@ -1022,50 +1122,57 @@ function VehicleModal({
           </Form.Item>
         </div>
 
-        {/* Vehicle Image and Daily Rate */}
+        {/* Vehicle Images and Daily Rate */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium mb-2">
-              Vehicle Image {mode === "edit" ? "(Upload to change)" : ""}
+              Vehicle Images (Max 10){" "}
+              {mode === "edit" ? "(Upload to change)" : ""}
               {mode === "add" && <span className="text-red-500"> *</span>}
             </label>
 
             <Upload {...uploadProps}>
               <Button>
-                {mode === "edit" ? "Upload New Image" : "Choose File"}
+                {mode === "edit" ? "Upload New Images" : "Choose Files"}
               </Button>
             </Upload>
 
-            {/* Show current image for edit mode */}
-            {mode === "edit" && vehicleData?.image && !uploadedFile && (
-              <div className="mt-3">
-                <label className="block text-sm font-medium mb-2">
-                  Current Image:
-                </label>
-                <img
-                  src={`${getImageUrl}${vehicleData.image}`}
-                  alt="Current vehicle"
-                  className="w-20 h-20 object-cover rounded border"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Upload a new image above to replace this one
-                </p>
-              </div>
-            )}
+            {/* Show current images for edit mode */}
+            {mode === "edit" &&
+              vehicleData?.image &&
+              uploadedFiles.length === 0 && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium mb-2">
+                    Current Images:
+                  </label>
+                  <img
+                    src={`${getImageUrl}${vehicleData.image}`}
+                    alt="Current vehicle"
+                    className="w-20 h-20 object-cover rounded border"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Upload new images above to replace existing ones
+                  </p>
+                </div>
+              )}
 
             {/* Show upload status */}
-            {uploadedFile && (
+            {uploadedFiles.length > 0 && (
               <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded">
                 <p className="text-sm text-green-700">
-                  ✓ New image ready: {uploadedFile.name}
+                  ✓ {uploadedFiles.length} image(s) ready to upload
+                </p>
+                <p className="text-xs text-gray-500">
+                  Max 15MB per image, up to 10 images total
                 </p>
               </div>
             )}
 
             {/* Validation message for add mode */}
-            {mode === "add" && !uploadedFile && (
+            {mode === "add" && uploadedFiles.length === 0 && (
               <p className="text-xs text-gray-500 mt-1">
-                Please upload a vehicle image
+                Please upload at least one vehicle image (Max 10 images, 15MB
+                each)
               </p>
             )}
           </div>
@@ -1115,9 +1222,9 @@ function VehicleModal({
           {process.env.NODE_ENV === "development" && (
             <div className="text-xs text-gray-500">
               Debug:{" "}
-              {uploadedFile
-                ? `File ready: ${uploadedFile.name}`
-                : "No file selected"}
+              {uploadedFiles.length > 0
+                ? `${uploadedFiles.length} file(s) ready`
+                : "No files selected"}
             </div>
           )}
 
@@ -1126,7 +1233,7 @@ function VehicleModal({
             <Button
               onClick={() => {
                 handleCancel();
-                setUploadedFile(null);
+                setUploadedFiles([]);
                 setFileList([]);
                 setErrorMessages([]);
               }}
@@ -1137,7 +1244,9 @@ function VehicleModal({
             <Button
               htmlType="submit"
               className="bg-smart text-white"
-              disabled={(mode === "add" && !uploadedFile) || submitLoading}
+              disabled={
+                (mode === "add" && uploadedFiles.length === 0) || submitLoading
+              }
               loading={submitLoading}
             >
               {mode === "add" ? "Save" : "Update"}

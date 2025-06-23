@@ -282,7 +282,8 @@ function FleetManagement() {
       numberOfLuggage: record.originalData?.noOfLuggages || "N/A",
       dailyRate: record.dailyRate,
       brand: record.originalData?.brand || "Unknown Brand",
-      image: record.originalData?.image,
+      // Updated to handle image array properly
+      image: record.originalData?.image || [], // This will now be an array
     });
     setVehicleModalVisible(true);
   };
