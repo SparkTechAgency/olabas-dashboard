@@ -14,60 +14,65 @@ import { DeleteFilled, EditFilled } from "@ant-design/icons";
 
 import ButtonEDU from "../../../components/common/ButtonEDU";
 import { MdMoreVert } from "react-icons/md";
-import AdminModal from "./AdminModal";
 import {
-  useCreateAdminMutation,
-  useDeleteAdminMutation,
-  useGetAdminQuery,
-  useUpdateAdminMutation,
-} from "../../../redux/apiSlices/adminManagementApi";
+  useCreateManagerMutation,
+  useDeleteManagerMutation,
+  useGetManagerQuery,
+  useUpdateManagerMutation,
+} from "../../../redux/apiSlices/managerManagementApi";
+import ManagerModal from "./ManagerModal";
 
-const AdminList = () => {
-  const { data: adminData, isLoading, isError, refetch } = useGetAdminQuery();
-  const [createAdmin, { isLoading: isCreating }] = useCreateAdminMutation();
-  const [updateAdmin, { isLoading: isUpdating }] = useUpdateAdminMutation();
-  const [deleteAdmin, { isLoading: isDeleting }] = useDeleteAdminMutation();
+const ManagerList = () => {
+  const {
+    data: managerData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetManagerQuery();
+  const [createManager, { isLoading: isCreating }] = useCreateManagerMutation();
+  const [updateManager, { isLoading: isUpdating }] = useUpdateManagerMutation();
+  const [deleteManager, { isLoading: isDeleting }] = useDeleteManagerMutation();
 
-  console.log("Admin Data:", adminData?.data);
+  console.log("Manager Data:", managerData?.data);
 
   const [searchText, setSearchText] = useState("");
-  const [admins, setAdmins] = useState([]);
+  const [managers, setManagers] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
 
   // Update local state when API data changes
   useEffect(() => {
-    if (adminData?.data) {
+    if (managerData?.data) {
       // Transform API data to match table structure
-      const transformedData = adminData.data.map((admin, index) => ({
-        key: admin.id || admin._id || index + 1,
-        id: admin.id || admin._id,
-        name: admin.name || "",
-        email: admin.email || "",
-        role: admin.role || "Admin",
-        creationdate: admin.createdAt
-          ? new Date(admin.createdAt).toLocaleDateString()
+      const transformedData = managerData.data.map((manager, index) => ({
+        key: manager.id || manager._id || index + 1,
+        id: manager.id || manager._id,
+        name: manager.name || "",
+        email: manager.email || "",
+        role: manager.role || "Manager",
+        creationdate: manager.createdAt
+          ? new Date(manager.createdAt).toLocaleDateString()
           : new Date().toLocaleDateString(),
       }));
 
-      setAdmins(transformedData);
+      setManagers(transformedData);
       setFilteredData(transformedData);
     }
-  }, [adminData]);
+  }, [managerData]);
 
-  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [isManagerModalOpen, setIsManagerModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
-  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [selectedManager, setSelectedManager] = useState(null);
 
-  // Check if maximum admins reached (5)
-  const isMaxAdminsReached = admins.length >= 5;
+  // Check if maximum managers reached (10)
+  const isMaxManagersReached = managers.length >= 10;
 
   // Search functionality
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchText(value);
 
-    const filtered = admins.filter(
+    const filtered = managers.filter(
       (item) =>
         item.name.toLowerCase().includes(value) ||
         item.email.toLowerCase().includes(value)
@@ -90,7 +95,7 @@ const AdminList = () => {
     return (
       <div className="w-full bg-white rounded-lg shadow-lg p-5 flex justify-center items-center min-h-96">
         <div className="text-red-500 text-center">
-          <p>Error loading admin data</p>
+          <p>Error loading manager data</p>
           <p className="text-sm text-gray-500">
             Please try refreshing the page
           </p>
@@ -99,92 +104,92 @@ const AdminList = () => {
     );
   }
 
-  // Add Admin functionality
+  // Add Manager functionality
   const showAddModal = () => {
-    if (isMaxAdminsReached) {
-      message.warning("Maximum 5 admins allowed!");
+    if (isMaxManagersReached) {
+      message.warning("Maximum 10 managers allowed!");
       return;
     }
     setModalMode("add");
-    setSelectedAdmin(null);
-    setIsAdminModalOpen(true);
+    setSelectedManager(null);
+    setIsManagerModalOpen(true);
   };
 
-  // Edit Admin functionality
+  // Edit Manager functionality
   const showEditModal = (record) => {
     setModalMode("edit");
-    setSelectedAdmin(record);
-    setIsAdminModalOpen(true);
+    setSelectedManager(record);
+    setIsManagerModalOpen(true);
   };
 
-  const handleCloseAdminModal = () => {
-    setIsAdminModalOpen(false);
-    setSelectedAdmin(null);
+  const handleCloseManagerModal = () => {
+    setIsManagerModalOpen(false);
+    setSelectedManager(null);
   };
 
-  const handleSubmitAdmin = async (adminData) => {
+  const handleSubmitManager = async (managerData) => {
     try {
       if (modalMode === "add") {
         // Check again before creating
-        if (isMaxAdminsReached) {
-          message.warning("Maximum 5 admins allowed!");
+        if (isMaxManagersReached) {
+          message.warning("Maximum 10 managers allowed!");
           return;
         }
 
-        const result = await createAdmin(adminData).unwrap();
-        message.success("Admin created successfully!");
+        const result = await createManager(managerData).unwrap();
+        message.success("Manager created successfully!");
 
         // Refetch data to get updated list
         refetch();
       } else {
         // Edit mode
-        const result = await updateAdmin({
-          id: selectedAdmin.id,
-          updatedData: adminData,
+        const result = await updateManager({
+          id: selectedManager.id,
+          updatedData: managerData,
         }).unwrap();
-        message.success("Admin updated successfully!");
+        message.success("Manager updated successfully!");
 
         // Refetch data to get updated list
         refetch();
       }
 
-      setIsAdminModalOpen(false);
-      setSelectedAdmin(null);
+      setIsManagerModalOpen(false);
+      setSelectedManager(null);
     } catch (error) {
-      console.error("Error saving admin:", error);
+      console.error("Error saving manager:", error);
       const errorMessage =
         error?.data?.message || error?.message || "An error occurred";
       message.error(
         `Failed to ${
           modalMode === "add" ? "create" : "update"
-        } admin: ${errorMessage}`
+        } manager: ${errorMessage}`
       );
     }
   };
 
-  // Delete Admin functionality
+  // Delete Manager functionality
   const showDeleteModal = (record) => {
-    setSelectedAdmin(record);
+    setSelectedManager(record);
     setIsDeleteModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!selectedAdmin) return;
+    if (!selectedManager) return;
 
     try {
-      await deleteAdmin(selectedAdmin.id).unwrap();
-      message.success("Admin deleted successfully!");
+      await deleteManager(selectedManager.id).unwrap();
+      message.success("Manager deleted successfully!");
 
       // Refetch data to get updated list
       refetch();
 
       setIsDeleteModalOpen(false);
-      setSelectedAdmin(null);
+      setSelectedManager(null);
     } catch (error) {
-      console.error("Error deleting admin:", error);
+      console.error("Error deleting manager:", error);
       const errorMessage =
         error?.data?.message || error?.message || "An error occurred";
-      message.error(`Failed to delete admin: ${errorMessage}`);
+      message.error(`Failed to delete manager: ${errorMessage}`);
     }
   };
 
@@ -194,8 +199,8 @@ const AdminList = () => {
         searchText={searchText}
         handleSearch={handleSearch}
         onAdd={showAddModal}
-        isMaxAdminsReached={isMaxAdminsReached}
-        currentAdminCount={admins.length}
+        isMaxManagersReached={isMaxManagersReached}
+        currentManagerCount={managers.length}
       />
       <TableBody
         filteredData={filteredData}
@@ -204,19 +209,19 @@ const AdminList = () => {
         isDeleting={isDeleting}
       />
 
-      {/* Admin Modal (Add/Edit) */}
-      <AdminModal
-        isOpen={isAdminModalOpen}
-        onClose={handleCloseAdminModal}
-        onSubmit={handleSubmitAdmin}
-        selectedAdmin={selectedAdmin}
+      {/* Manager Modal (Add/Edit) */}
+      <ManagerModal
+        isOpen={isManagerModalOpen}
+        onClose={handleCloseManagerModal}
+        onSubmit={handleSubmitManager}
+        selectedManager={selectedManager}
         mode={modalMode}
         isLoading={isCreating || isUpdating}
       />
 
-      {/* Delete Admin Modal */}
+      {/* Delete Manager Modal */}
       <Modal
-        title="Delete Admin"
+        title="Delete Manager"
         open={isDeleteModalOpen}
         onCancel={() => setIsDeleteModalOpen(false)}
         footer={null}
@@ -224,8 +229,8 @@ const AdminList = () => {
         className="z-50"
         confirmLoading={isDeleting}
       >
-        <DeleteAdmin
-          name={selectedAdmin?.name}
+        <DeleteManager
+          name={selectedManager?.name}
           onConfirm={handleConfirmDelete}
           onCancel={() => setIsDeleteModalOpen(false)}
           isLoading={isDeleting}
@@ -239,25 +244,25 @@ const TableHead = ({
   searchText,
   handleSearch,
   onAdd,
-  isMaxAdminsReached,
-  currentAdminCount,
+  isMaxManagersReached,
+  currentManagerCount,
 }) => {
   return (
     <div className="flex justify-between items-center mb-4">
       <Input
-        placeholder="Search admins..."
+        placeholder="Search managers..."
         value={searchText}
         onChange={handleSearch}
         className="w-1/3 h-8"
         allowClear
       />
       <div className="flex items-center gap-3">
-        {isMaxAdminsReached && (
+        {isMaxManagersReached && (
           <span className="text-sm text-gray-500">
-            Maximum admins reached ({currentAdminCount}/5)
+            Maximum managers reached ({currentManagerCount}/10)
           </span>
         )}
-        {!isMaxAdminsReached && (
+        {!isMaxManagersReached && (
           <ButtonEDU actionType="add" onClick={onAdd}>
             <div className="flex items-center justify-center gap-2">
               <FaPlus size={15} /> Add new
@@ -280,7 +285,7 @@ const TableBody = ({ filteredData, onEdit, onDelete, isDeleting }) => (
   />
 );
 
-const DeleteAdmin = ({ name, onConfirm, onCancel, isLoading }) => (
+const DeleteManager = ({ name, onConfirm, onCancel, isLoading }) => (
   <Flex
     vertical
     justify="space-between"
@@ -317,7 +322,7 @@ const columns = (onEdit, onDelete, isDeleting) => [
             <Button
               onClick={() => onEdit(record)}
               disabled={isDeleting}
-              title="Edit Admin"
+              title="Edit Manager"
             >
               <EditFilled />
             </Button>
@@ -325,7 +330,7 @@ const columns = (onEdit, onDelete, isDeleting) => [
               onClick={() => onDelete(record)}
               className="text-red-500 hover:text-white"
               disabled={isDeleting}
-              title="Delete Admin"
+              title="Delete Manager"
             >
               <DeleteFilled />
             </Button>
@@ -339,4 +344,4 @@ const columns = (onEdit, onDelete, isDeleting) => [
   },
 ];
 
-export default AdminList;
+export default ManagerList;
