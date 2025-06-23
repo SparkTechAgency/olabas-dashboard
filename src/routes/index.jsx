@@ -30,6 +30,7 @@ import ProtectedRoute from "./ProtectedRoute.jsx";
 import ContactList from "../Pages/Dashboard/ContactList/contactList.jsx";
 import DriverManagementSchedule from "../Pages/Dashboard/Driver Management/DriverManagementSchedule.jsx";
 import ContactSegment from "../Pages/Dashboard/Contact/ContactSegment.jsx";
+import Ratings from "../Pages/Dashboard/Ratings/Ratings.jsx";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <DriverManagement />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/star-rating",
+        element: (
+          <ProtectedRoute>
+            <Ratings />
           </ProtectedRoute>
         ),
       },

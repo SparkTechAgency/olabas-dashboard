@@ -1,4 +1,4 @@
-import { FaQuoteRight, FaUserNurse } from "react-icons/fa6";
+import { FaQuoteRight, FaStar, FaUserNurse } from "react-icons/fa6";
 import { CgTemplate } from "react-icons/cg";
 import { Menu } from "antd";
 import React, { useEffect, useState } from "react";
@@ -140,6 +140,15 @@ const Sidebar = ({ isCollapsed }) => {
         <Link to="/extra">Extra</Link>
       ) : (
         <Link to="/extra">Extra</Link>
+      ),
+    },
+    {
+      key: "/ratings",
+      icon: <FaStar size={25} />,
+      label: isCollapsed ? (
+        <Link to="/star-rating">Raings</Link>
+      ) : (
+        <Link to="/star-rating">Ratings</Link>
       ),
     },
     {
