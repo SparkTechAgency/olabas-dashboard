@@ -74,16 +74,32 @@ function AddNewExtraModal({
             prefix={<FaMoneyBillAlt style={{ color: "#999" }} />}
           />
         </Form.Item>
-        <Form.Item
-          label="Status"
-          name="status"
-          rules={[{ required: true, message: "Please select status!" }]}
-        >
-          <Radio.Group>
-            <Radio value="Active">Active</Radio>
-            <Radio value="Inactive">Inactive</Radio>
-          </Radio.Group>
-        </Form.Item>
+        <div className="w-full border flex gap-40">
+          {" "}
+          <Form.Item
+            label="Status"
+            name="status"
+            rules={[{ required: true, message: "Please select status!" }]}
+          >
+            <Radio.Group>
+              <Radio value="Active">Active</Radio>
+              <Radio value="Inactive">Inactive</Radio>
+            </Radio.Group>
+          </Form.Item>
+          <Form.Item
+            label="Service Duration"
+            name="serviceDuration"
+            rules={[
+              { required: true, message: "Please select Service Duration!" },
+            ]}
+          >
+            <Radio.Group>
+              <Radio value={false}>One Time</Radio>
+              <Radio value={true}>Per Day</Radio>
+            </Radio.Group>
+          </Form.Item>
+        </div>
+
         <Form.Item
           label="Image"
           name="image"

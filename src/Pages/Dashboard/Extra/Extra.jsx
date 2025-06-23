@@ -77,6 +77,7 @@ function Extra() {
       description: values.description,
       cost: parseFloat(values.cost),
       status: values.status.toUpperCase(),
+      isPerDay: values.serviceDuration === true ? true : false,
     };
 
     // Append the JSON string under the 'data' key
@@ -182,6 +183,7 @@ function Extra() {
     status: item.status === "ACTIVE" ? "Active" : "Inactive",
     isProtection: item.isProtection,
     originalRecord: item,
+    serviceDuration: item.isPerDay,
   }));
 
   const columns = [
