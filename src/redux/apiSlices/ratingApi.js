@@ -4,7 +4,7 @@ const ratingSlice = api.injectEndpoints({
   endpoints: (builder) => ({
     createRating: builder.mutation({
       query: (data) => ({
-        url: "review/admin",
+        url: "/review/admin",
         method: "POST",
         body: data,
       }),

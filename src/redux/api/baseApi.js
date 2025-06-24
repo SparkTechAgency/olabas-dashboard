@@ -14,7 +14,21 @@ export const api = createApi({
     },
   }),
   endpoints: () => ({}),
-  tagTypes: ["RESERVATION", "DRIVER", "VEHICLE", "USER", "PAYMENT"],
+  tagTypes: [
+    "RESERVATION",
+    "DRIVER",
+    "VEHICLE",
+    "USER",
+    "PAYMENT",
+    "CONTACT",
+    "EXTRA",
+    "FAQ",
+    "FLEET",
+    "MANAGER",
+    "NOTIFICATION",
+    "TEAM",
+    "REVIEW",
+  ],
 });
 
 export const imageUrl = getBaseUrl();

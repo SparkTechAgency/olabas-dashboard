@@ -8,7 +8,7 @@ const teamSlice = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Team"],
+      invalidatesTags: ["TEAM"],
     }),
     updateTeam: builder.mutation({
       query: ({ id, updatedData }) => ({
@@ -16,14 +16,14 @@ const teamSlice = api.injectEndpoints({
         method: "PATCH",
         body: updatedData,
       }),
-      invalidatesTags: ["Team"],
+      invalidatesTags: ["TEAM"],
     }),
     deleteTeam: builder.mutation({
       query: (id) => ({
         url: `/user/team-member/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Team"],
+      invalidatesTags: ["TEAM"],
     }),
     getTeam: builder.query({
       query: ({ page, limit, status }) => ({
@@ -32,7 +32,7 @@ const teamSlice = api.injectEndpoints({
         }`,
         method: "GET",
       }),
-      providesTags: ["Team"],
+      providesTags: ["TEAM"],
     }),
   }),
 });

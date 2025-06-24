@@ -8,7 +8,7 @@ const conactSlice = api.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["Contact"],
+      invalidatesTags: ["CONTACT"],
     }),
 
     getContact: builder.query({
@@ -16,7 +16,7 @@ const conactSlice = api.injectEndpoints({
         url: `/company-cms/contact`,
         method: "GET",
       }),
-      providesTags: ["Contact"],
+      providesTags: ["CONTACT"],
     }),
 
     getContactList: builder.query({
@@ -24,7 +24,7 @@ const conactSlice = api.injectEndpoints({
         url: `/contact?page=${page}&limit=${limit}`,
         method: "GET",
       }),
-      providesTags: ["Contact"],
+      providesTags: ["CONTACT"],
     }),
   }),
 });

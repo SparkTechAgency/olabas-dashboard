@@ -40,7 +40,7 @@ const extraSlice = api.injectEndpoints({
         }`,
         method: "GET",
       }),
-      providesTags: ["Extra"],
+      providesTags: ["EXTRA"],
     }),
     getAllServices: builder.query({
       query: ({ page, limit, status }) => ({
@@ -49,7 +49,7 @@ const extraSlice = api.injectEndpoints({
         }`,
         method: "GET",
       }),
-      providesTags: ["Extra"],
+      providesTags: ["EXTRA"],
     }),
 
     getAllProtections: builder.query({
@@ -57,7 +57,7 @@ const extraSlice = api.injectEndpoints({
         url: `/extra-service/protection`,
         method: "GET",
       }),
-      providesTags: ["Extra"],
+      providesTags: ["EXTRA"],
     }),
   }),
 });

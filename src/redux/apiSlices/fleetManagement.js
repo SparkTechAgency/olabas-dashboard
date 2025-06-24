@@ -8,7 +8,7 @@ const fleetManagementSlice = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Fleet"],
+      invalidatesTags: ["FLEET"],
     }),
     updateFleet: builder.mutation({
       query: ({ id, updatedData }) => ({
@@ -16,7 +16,7 @@ const fleetManagementSlice = api.injectEndpoints({
         method: "PATCH",
         body: updatedData,
       }),
-      invalidatesTags: ["Fleet"],
+      invalidatesTags: ["FLEET"],
     }),
     updateFleetStatus: builder.mutation({
       query: ({ id, status }) => ({
@@ -24,27 +24,27 @@ const fleetManagementSlice = api.injectEndpoints({
         method: "PATCH",
         body: { status },
       }),
-      invalidatesTags: ["Fleet"],
+      invalidatesTags: ["FLEET"],
     }),
     deleteFleet: builder.mutation({
       query: (id) => ({
         url: `/vehicle/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Fleet"],
+      invalidatesTags: ["FLEET"],
     }),
     getFleet: builder.query({
       query: ({ page, limit }) => `/vehicle/admin?page=${page}&limit=${limit}`,
-      providesTags: ["Fleet"],
+      providesTags: ["FLEET"],
     }),
     getAvailableFleet: builder.query({
       query: ({ page, limit }) => `/vehicle?page=${page}&limit=${limit}`,
-      providesTags: ["Fleet"],
+      providesTags: ["FLEET"],
     }),
 
     getFleetById: builder.query({
       query: ({ id }) => `/vehicle/${id}`,
-      providesTags: ["Fleet"],
+      providesTags: ["FLEET"],
     }),
   }),
 });

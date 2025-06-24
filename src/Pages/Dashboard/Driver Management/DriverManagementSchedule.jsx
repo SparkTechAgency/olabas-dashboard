@@ -1,7 +1,13 @@
 import { Select, Table } from "antd";
 import React, { useMemo } from "react";
+import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi";
 
-function DriverManagementSchedule({ driverData }) {
+function DriverManagementSchedule() {
+  const {
+    data: driverData,
+    isLoading,
+    isError,
+  } = useGetDriverQuery({ page: 1, limit: 50 });
   console.log("Schedule", driverData?.data?.driversWithStatus);
 
   // Transform data for schedule table

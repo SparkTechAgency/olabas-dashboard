@@ -6,478 +6,325 @@ import {
   Button,
   Card,
   Avatar,
-  Statistic,
+  Modal,
   Row,
   Col,
-  Space,
-  Divider,
-  Empty,
-  Progress,
-  Typography,
-  Modal,
+  Upload,
   message,
+  Popconfirm,
+  Empty,
 } from "antd";
 import {
-  UserOutlined,
-  DeleteOutlined,
   PlusOutlined,
-  MailOutlined,
+  UserOutlined,
   StarFilled,
-  CommentOutlined,
+  UploadOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
+import {
+  useGetRatingQuery,
+  useCreateRatingMutation,
+  useDeleteRatingMutation,
+} from "../../../redux/apiSlices/ratingApi";
 
-const { Title, Text, Paragraph } = Typography;
 const { TextArea } = Input;
 
-// Mock data based on your structure
-const mockRatings = [
-  {
-    id: 1,
-    rating: 5,
-    comment:
-      "Absolutely amazing service! The team went above and beyond my expectations. Highly recommended for anyone looking for quality work.",
-    clientEmail: "beingsazzad@gmail.com",
-  },
-  {
-    id: 2,
-    rating: 4,
-    comment:
-      "Great experience overall. Professional team and timely delivery. Would definitely work with them again.",
-    clientEmail: "john.doe@example.com",
-  },
-  {
-    id: 3,
-    rating: 5,
-    comment:
-      "Outstanding quality and attention to detail. The final product exceeded what I had in mind.",
-    clientEmail: "sarah.wilson@gmail.com",
-  },
-  {
-    id: 4,
-    rating: 3,
-    comment:
-      "Good service but there's room for improvement in communication during the project.",
-    clientEmail: "mike.johnson@yahoo.com",
-  },
-];
-
-function Ratings() {
-  const [ratings, setRatings] = useState(mockRatings);
-  const [showAddForm, setShowAddForm] = useState(false);
+const Ratings = () => {
   const [form] = Form.useForm();
+  const [visible, setVisible] = useState(false);
+  const [hoveredCard, setHoveredCard] = useState(null);
 
-  const handleAddRating = (values) => {
-    const newRating = {
-      id: Date.now(),
-      ...values,
-    };
-    setRatings([newRating, ...ratings]);
-    form.resetFields();
-    setShowAddForm(false);
-    message.success("Rating submitted successfully!");
+  // API hooks
+  const { data: ratingData, isLoading: isLoadingRatings } = useGetRatingQuery({
+    page: 1,
+    limit: 50,
+  });
+  const [createRating, { isLoading: isCreating }] = useCreateRatingMutation();
+  const [deleteRating, { isLoading: isDeleting }] = useDeleteRatingMutation();
+
+  // Get reviews from API data
+  const reviews = ratingData?.data?.reviews || [];
+
+  const onFinish = async (values) => {
+    try {
+      const formData = {
+        rating: values.rating,
+        comment: values.comment,
+        clientEmail: values.name, // Using name as clientEmail based on your API structure
+        // Add image handling if needed
+      };
+
+      await createRating(formData).unwrap();
+      message.success("Rating added successfully!");
+      form.resetFields();
+      setVisible(false);
+    } catch (error) {
+      console.error("Error creating rating:", error);
+
+      // Handle different types of error responses
+      let errorMessage = "Failed to add rating. Please try again.";
+
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (
+        error?.data?.errorMessages &&
+        error.data.errorMessages.length > 0
+      ) {
+        errorMessage = error.data.errorMessages
+          .map((err) => err.message)
+          .join(", ");
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      message.error(errorMessage);
+    }
   };
 
-  const handleDeleteRating = (id) => {
-    Modal.confirm({
-      title: "Delete Rating",
-      content: "Are you sure you want to delete this rating?",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk() {
-        setRatings(ratings.filter((rating) => rating.id !== id));
-        message.success("Rating deleted successfully!");
-      },
-    });
+  const handleDelete = async (id) => {
+    try {
+      await deleteRating(id).unwrap();
+      message.success("Rating deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting rating:", error);
+
+      // Handle different types of error responses
+      let errorMessage = "Failed to delete rating. Please try again.";
+
+      if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (
+        error?.data?.errorMessages &&
+        error.data.errorMessages.length > 0
+      ) {
+        errorMessage = error.data.errorMessages
+          .map((err) => err.message)
+          .join(", ");
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
+      message.error(errorMessage);
+    }
   };
 
-  const getAverageRating = () => {
-    if (ratings.length === 0) return 0;
-    const total = ratings.reduce((sum, rating) => sum + rating.rating, 0);
-    return (total / ratings.length).toFixed(1);
+  const normFile = (e) => {
+    if (Array.isArray(e)) {
+      return e;
+    }
+    return e?.fileList;
   };
 
-  const getRatingDistribution = () => {
-    const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-    ratings.forEach((rating) => {
-      distribution[rating.rating]++;
-    });
-    return distribution;
-  };
-
-  const distribution = getRatingDistribution();
-
-  const getProgressColor = (rating) => {
-    const colors = {
-      5: "#52c41a",
-      4: "#87d068",
-      3: "#faad14",
-      2: "#ff7a45",
-      1: "#ff4d4f",
-    };
-    return colors[rating];
+  // Format date for display
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        padding: "24px",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* Header Section */}
-        <div style={{ textAlign: "center", marginBottom: "48px" }}>
-          <Title
-            level={1}
-            style={{
-              fontSize: "3rem",
-              background: "linear-gradient(45deg, #fff, #e0e7ff)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              marginBottom: "16px",
-            }}
-          >
-            Customer Ratings
-          </Title>
-          <Text style={{ fontSize: "18px", color: "rgba(255,255,255,0.8)" }}>
-            See what our clients are saying about us
-          </Text>
-        </div>
+    <div style={{ padding: "24px", maxWidth: "1200px", margin: "0 auto" }}>
+      <div style={{ textAlign: "center", marginBottom: 24 }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setVisible(true)}
+          style={{
+            background: "linear-gradient(135deg, #52c41a, #73d13d)",
+            border: "none",
+            height: 40,
+            padding: "0 24px",
+            borderRadius: 8,
+            fontWeight: 500,
+          }}
+        >
+          Add Rating
+        </Button>
+      </div>
 
-        {/* Stats Overview */}
-        <Row gutter={[24, 24]} style={{ marginBottom: "48px" }}>
-          <Col xs={24} md={8}>
-            <Card
-              style={{
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.95)",
-                backdropFilter: "blur(10px)",
-                border: "none",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-              }}
-            >
+      {/* Rating Cards Grid */}
+      <div className="w-full p-2 border-b-2 border-[#6dd037]  rounded-md max-h-[75vh] overflow-y-scroll">
+        <Row gutter={[16, 16]}>
+          {reviews.map((review) => (
+            <Col xs={24} sm={12} md={8} key={review._id}>
               <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
+                style={{ position: "relative", height: "100%" }}
+                onMouseEnter={() => setHoveredCard(review._id)}
+                onMouseLeave={() => setHoveredCard(null)}
               >
-                <div>
-                  <Text type="secondary">Average Rating</Text>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
-                    <Title level={2} style={{ margin: 0, color: "#1890ff" }}>
-                      {getAverageRating()}
-                    </Title>
-                    <Rate
-                      disabled
-                      value={Math.round(getAverageRating())}
-                      style={{ fontSize: "20px" }}
-                    />
-                  </div>
-                </div>
-                <StarFilled style={{ fontSize: "32px", color: "#faad14" }} />
-              </div>
-            </Card>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Card
-              style={{
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.95)",
-                backdropFilter: "blur(10px)",
-                border: "none",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-              }}
-            >
-              <Statistic
-                title="Total Reviews"
-                value={ratings.length}
-                prefix={<CommentOutlined />}
-                valueStyle={{ color: "#52c41a", fontSize: "2rem" }}
-              />
-            </Card>
-          </Col>
-
-          <Col xs={24} md={8}>
-            <Card
-              style={{
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.95)",
-                backdropFilter: "blur(10px)",
-                border: "none",
-                boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-              }}
-            >
-              <Text
-                type="secondary"
-                style={{ marginBottom: "16px", display: "block" }}
-              >
-                Rating Distribution
-              </Text>
-              <Space direction="vertical" style={{ width: "100%" }}>
-                {[5, 4, 3, 2, 1].map((star) => (
-                  <div
-                    key={star}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <Text style={{ minWidth: "12px" }}>{star}</Text>
-                    <StarFilled
-                      style={{ color: "#faad14", fontSize: "14px" }}
-                    />
-                    <Progress
-                      percent={
-                        ratings.length > 0
-                          ? (distribution[star] / ratings.length) * 100
-                          : 0
-                      }
-                      showInfo={false}
-                      strokeColor={getProgressColor(star)}
-                      style={{ flex: 1 }}
-                    />
-                    <Text
-                      type="secondary"
-                      style={{ minWidth: "20px", textAlign: "center" }}
-                    >
-                      {distribution[star]}
-                    </Text>
-                  </div>
-                ))}
-              </Space>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Add Rating Button */}
-        <div style={{ textAlign: "center", marginBottom: "32px" }}>
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            onClick={() => setShowAddForm(!showAddForm)}
-            style={{
-              borderRadius: "24px",
-              height: "48px",
-              fontSize: "16px",
-              background: "linear-gradient(45deg, #1890ff, #722ed1)",
-              border: "none",
-              boxShadow: "0 4px 16px rgba(24,144,255,0.3)",
-            }}
-          >
-            Add New Rating
-          </Button>
-        </div>
-
-        {/* Add Rating Form */}
-        {showAddForm && (
-          <Card
-            style={{
-              borderRadius: "16px",
-              background: "rgba(255,255,255,0.95)",
-              backdropFilter: "blur(10px)",
-              border: "none",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-              marginBottom: "32px",
-            }}
-          >
-            <Title level={3} style={{ color: "#1890ff", marginBottom: "24px" }}>
-              Add New Rating
-            </Title>
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={handleAddRating}
-              initialValues={{ rating: 5 }}
-            >
-              <Form.Item
-                name="rating"
-                label="Rating"
-                rules={[{ required: true, message: "Please select a rating!" }]}
-              >
-                <Rate style={{ fontSize: "32px" }} />
-              </Form.Item>
-
-              <Form.Item
-                name="clientEmail"
-                label="Email"
-                rules={[
-                  { required: true, message: "Please enter your email!" },
-                  { type: "email", message: "Please enter a valid email!" },
-                ]}
-              >
-                <Input
-                  prefix={<MailOutlined />}
-                  placeholder="your.email@example.com"
-                  style={{ borderRadius: "8px" }}
-                />
-              </Form.Item>
-
-              <Form.Item
-                name="comment"
-                label="Comment"
-                rules={[
-                  { required: true, message: "Please enter your comment!" },
-                ]}
-              >
-                <TextArea
-                  rows={4}
-                  placeholder="Share your experience..."
-                  style={{ borderRadius: "8px" }}
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Space>
-                  <Button
-                    type="primary"
-                    htmlType="submit"
-                    style={{
-                      borderRadius: "8px",
-                      background: "linear-gradient(45deg, #52c41a, #73d13d)",
-                      border: "none",
-                    }}
-                  >
-                    Submit Rating
-                  </Button>
-                  <Button
-                    onClick={() => setShowAddForm(false)}
-                    style={{ borderRadius: "8px" }}
-                  >
-                    Cancel
-                  </Button>
-                </Space>
-              </Form.Item>
-            </Form>
-          </Card>
-        )}
-
-        {/* Ratings Grid */}
-        <Row gutter={[24, 24]}>
-          {ratings.map((rating) => (
-            <Col xs={24} lg={12} key={rating.id}>
-              <Card
-                style={{
-                  borderRadius: "16px",
-                  background: "rgba(255,255,255,0.95)",
-                  backdropFilter: "blur(10px)",
-                  border: "none",
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
-                  transition: "all 0.3s ease",
-                  ":hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 12px 40px rgba(0,0,0,0.15)",
-                  },
-                }}
-                actions={[
-                  <Button
-                    type="text"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => handleDeleteRating(rating.id)}
-                    style={{ color: "#ff4d4f" }}
-                  >
-                    Delete
-                  </Button>,
-                ]}
-              >
-                <Card.Meta
-                  avatar={
-                    <Avatar
-                      size={48}
-                      style={{
-                        background: "linear-gradient(45deg, #1890ff, #722ed1)",
-                        fontSize: "18px",
-                        fontWeight: "bold",
-                      }}
-                      icon={<UserOutlined />}
-                    >
-                      {rating.clientEmail.charAt(0).toUpperCase()}
-                    </Avatar>
-                  }
-                  title={
-                    <div>
-                      <Rate
-                        disabled
-                        value={rating.rating}
-                        style={{ fontSize: "16px" }}
+                <Card
+                  style={{
+                    borderRadius: 8,
+                    transition: "all 0.3s",
+                    transform:
+                      hoveredCard === review._id ? "translateY(-4px)" : "none",
+                    boxShadow:
+                      hoveredCard === review._id
+                        ? "0 4px 12px rgba(0,0,0,0.1)"
+                        : "none",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  cover={
+                    <div style={{ height: 160, overflow: "hidden" }}>
+                      <img
+                        alt="rating"
+                        src={
+                          review.image || "https://picsum.photos/id/239/300/200"
+                        }
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          backgroundColor: "#f0f0f0", // Fallback color
+                        }}
                       />
-                      <div style={{ marginTop: "4px" }}>
-                        <Text type="secondary" style={{ fontSize: "14px" }}>
-                          <MailOutlined style={{ marginRight: "4px" }} />
-                          {rating.clientEmail}
-                        </Text>
-                      </div>
                     </div>
                   }
-                  description={
-                    <div style={{ marginTop: "16px" }}>
-                      <div
-                        style={{
-                          background: "#f5f5f5",
-                          padding: "16px",
-                          borderRadius: "8px",
-                          marginBottom: "12px",
-                        }}
-                      >
-                        <Paragraph style={{ margin: 0, fontStyle: "italic" }}>
-                          "{rating.comment}"
-                        </Paragraph>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Text type="secondary" style={{ fontSize: "12px" }}>
-                          Rating: {rating.rating}/5
-                        </Text>
-                        <Text type="secondary" style={{ fontSize: "12px" }}>
-                          Verified Review
-                        </Text>
-                      </div>
-                    </div>
-                  }
-                />
-              </Card>
+                >
+                  <div style={{ flex: 1 }}>
+                    <Card.Meta
+                      avatar={<Avatar icon={<UserOutlined />} />}
+                      title={
+                        <div>
+                          <Rate
+                            disabled
+                            value={review.rating}
+                            character={<StarFilled />}
+                            style={{ fontSize: 16, color: "#52c41a" }}
+                          />
+                        </div>
+                      }
+                      description={
+                        <div>
+                          <p style={{ marginTop: 8 }}>{review.comment}</p>
+                          <div
+                            style={{ color: "rgba(0,0,0,0.45)", marginTop: 8 }}
+                          >
+                            <p>- {review.clientEmail}</p>
+                            <p style={{ fontSize: "12px" }}>
+                              {formatDate(review.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                      }
+                    />
+                  </div>
+                </Card>
+
+                {/* Delete Button (appears on hover) */}
+                {hoveredCard === review._id && (
+                  <Popconfirm
+                    title="Delete this rating?"
+                    description="Are you sure you want to delete this rating?"
+                    onConfirm={() => handleDelete(review._id)}
+                    okText="Yes"
+                    cancelText="No"
+                    placement="topRight"
+                  >
+                    <Button
+                      danger
+                      type="primary"
+                      shape="circle"
+                      icon={<DeleteOutlined />}
+                      loading={isDeleting}
+                      style={{
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        zIndex: 1,
+                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                      }}
+                    />
+                  </Popconfirm>
+                )}
+              </div>
             </Col>
           ))}
         </Row>
-
-        {ratings.length === 0 && (
-          <div style={{ textAlign: "center", padding: "48px" }}>
-            <Empty
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              description={
-                <div>
-                  <Title level={4} style={{ color: "rgba(255,255,255,0.8)" }}>
-                    No ratings yet
-                  </Title>
-                  <Text style={{ color: "rgba(255,255,255,0.6)" }}>
-                    Be the first to leave a rating!
-                  </Text>
-                </div>
-              }
-            />
-          </div>
-        )}
       </div>
+      {reviews.length === 0 && !isLoadingRatings && (
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <Empty description="No ratings yet. Be the first to add one!" />
+        </div>
+      )}
+
+      {/* Add Rating Modal */}
+      <Modal
+        title="Add Your Rating"
+        visible={visible}
+        onCancel={() => setVisible(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" onFinish={onFinish}>
+          <Form.Item
+            name="rating"
+            label="Rating"
+            rules={[{ required: true, message: "Please rate!" }]}
+          >
+            <Rate
+              character={<StarFilled />}
+              style={{ color: "#52c41a", fontSize: 24 }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="name"
+            label="Your Email"
+            rules={[
+              { required: true, message: "Please input your email!" },
+              { type: "email", message: "Please enter a valid email!" },
+            ]}
+          >
+            <Input placeholder="john@example.com" />
+          </Form.Item>
+
+          <Form.Item
+            name="comment"
+            label="Comment"
+            rules={[{ required: true, message: "Please input your comment!" }]}
+          >
+            <TextArea rows={4} placeholder="Share your experience..." />
+          </Form.Item>
+
+          <Form.Item
+            name="image"
+            label="Upload Image"
+            valuePropName="fileList"
+            getValueFromEvent={normFile}
+          >
+            <Upload
+              listType="picture"
+              beforeUpload={() => false}
+              maxCount={1}
+              accept="image/*"
+            >
+              <Button icon={<UploadOutlined />}>Click to upload</Button>
+            </Upload>
+          </Form.Item>
+
+          <Form.Item>
+            <div
+              style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}
+            >
+              <Button onClick={() => setVisible(false)}>Cancel</Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={isCreating}
+                style={{
+                  background: "linear-gradient(135deg, #52c41a, #73d13d)",
+                  border: "none",
+                }}
+              >
+                Submit
+              </Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
-}
+};
 
 export default Ratings;
