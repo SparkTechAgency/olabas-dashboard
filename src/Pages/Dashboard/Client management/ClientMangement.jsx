@@ -71,6 +71,7 @@ function ClientMangement() {
       title: "Contact",
       dataIndex: "email",
       key: "email",
+      sorter: (a, b) => (a.email || "").localeCompare(b.email || ""),
     },
     {
       title: "Phone",

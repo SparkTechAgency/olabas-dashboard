@@ -287,7 +287,7 @@ const Ratings = () => {
             <TextArea rows={4} placeholder="Share your experience..." />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             name="image"
             label="Upload Image"
             valuePropName="fileList"
@@ -301,7 +301,7 @@ const Ratings = () => {
             >
               <Button icon={<UploadOutlined />}>Click to upload</Button>
             </Upload>
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item>
             <div
