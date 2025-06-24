@@ -7,9 +7,7 @@ const homeSlice = api.injectEndpoints({
         return {
           url: `/dashboard/${currentMonth}`,
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+          
         };
       },
     }),
@@ -18,9 +16,7 @@ const homeSlice = api.injectEndpoints({
         return {
           url: `/dashboard/booking/${year}`,
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+         
         };
       },
     }),
@@ -29,9 +25,7 @@ const homeSlice = api.injectEndpoints({
         return {
           url: `/dashboard/revenue/${year}`,
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+         
         };
       },
     }),

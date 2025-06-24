@@ -74,7 +74,7 @@ const initialState = {
   vehicle: {
     vehicleId: "",
     vehicleType: "",
-    rate: 840.0,
+    rate: 0,
   },
   // Keep legacy fields for backward compatibility
   // vehiclePrice: 840.0,

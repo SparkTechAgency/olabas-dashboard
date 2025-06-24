@@ -312,8 +312,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
         scroll={{ x: 800 }}
       />
 
-      {/* Summary */}
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+      {/* <div className="mt-4 p-4 bg-gray-50 rounded-lg">
         <div className="flex justify-between items-center">
           <div className="text-sm text-gray-600">
             <span className="font-medium">{selectedExtrasCount}</span> extra
@@ -324,7 +323,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
           </div>
         </div>
 
-        {/* Show breakdown of per-day vs one-time charges */}
+       
         {selectedExtrasCount > 0 && (
           <div className="mt-2 text-xs text-gray-500">
             <div className="flex flex-wrap gap-4">
@@ -355,14 +354,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
             </div>
           </div>
         )}
-
-        {/* Debug Info - Selected IDs */}
-        {selectedExtraIds.length > 0 && (
-          <div className="mt-2 text-xs text-gray-500">
-            {/* <strong>Selected IDs (Redux):</strong> {selectedExtraIds.join(", ")} */}
-          </div>
-        )}
-      </div>
+      </div> */}
     </div>
   );
 };
