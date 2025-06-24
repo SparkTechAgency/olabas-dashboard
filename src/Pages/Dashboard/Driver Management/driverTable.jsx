@@ -197,7 +197,7 @@ const DriverTable = ({ onEditDriver, refetch, selectedSegment }) => {
   if (isError) return <div className="p-4">Error loading driver data.</div>;
 
   return (
-    <div className="w-full p-4">
+    <div className="w-full">
       {/* Conditional rendering based on selected segment */}
       {selectedSegment === "drivers" && (
         <div className="mb-8">

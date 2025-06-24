@@ -323,7 +323,7 @@ const Header = ({
   return (
     <div className="flex flex-col justify-between items-start py-5">
       {/* Segmented Control */}
-      <div className="mb-4">
+      <div className="mb-2">
         <Segmented
           options={segmentOptions}
           value={selectedSegment}

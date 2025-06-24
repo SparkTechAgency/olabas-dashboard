@@ -1,4 +1,4 @@
-import { Table } from "antd";
+import { Select, Table } from "antd";
 import React, { useMemo } from "react";
 
 function DriverManagementSchedule({ driverData }) {
@@ -98,16 +98,26 @@ function DriverManagementSchedule({ driverData }) {
           <div className="space-y-1">
             {bookings.map((booking, index) => {
               const [vehicleName, status] = booking.split("|");
-              const isCompleted = status?.toUpperCase() === "COMPLETED";
+              const statusUpper = status?.toUpperCase();
+              const isCompleted = statusUpper === "COMPLETED";
+              const isOnRide = statusUpper === "ON RIDE";
+
+              let bgColor, textColor;
+              if (isCompleted) {
+                bgColor = "bg-green-400";
+                textColor = "text-black font-semibold";
+              } else if (isOnRide) {
+                bgColor = "bg-[#ef621e]";
+                textColor = "text-white";
+              } else {
+                bgColor = "bg-yellow-500";
+                textColor = "text-black";
+              }
 
               return (
                 <div
                   key={index}
-                  className={`${
-                    isCompleted
-                      ? "bg-green-400 text-black font-semibold"
-                      : "bg-yellow-500 text-black"
-                  } px-2 py-1 rounded-md text-xs`}
+                  className={`${bgColor} ${textColor} px-2 py-1 rounded-md text-xs`}
                 >
                   {vehicleName} ({status})
                 </div>
@@ -139,12 +149,26 @@ function DriverManagementSchedule({ driverData }) {
 
   return (
     <div>
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold">Driver Booking Schedule</h3>
-        <div className="text-sm text-gray-600 mt-2">
+      <div className="mb-4 flex items-center justify-between">
+        <div className="text-sm text-gray-600">
+          <h3 className="text-lg font-semibold">Driver Booking Schedule</h3>
           {debugInfo.totalDrivers} drivers | {debugInfo.driversWithBookings}{" "}
           with bookings | {debugInfo.totalBookings} total bookings
         </div>
+        <Select className="w-32" placeholder="--Month--">
+          <Option value="jan">January</Option>
+          <Option value="feb">February</Option>
+          <Option value="mar">March</Option>
+          <Option value="apr">April</Option>
+          <Option value="may">May</Option>
+          <Option value="jun">June</Option>
+          <Option value="jul">July</Option>
+          <Option value="aug">August</Option>
+          <Option value="sep">September</Option>
+          <Option value="oct">October</Option>
+          <Option value="nov">November</Option>
+          <Option value="dec">December</Option>
+        </Select>
       </div>
 
       {transformedData.length === 0 ? (
