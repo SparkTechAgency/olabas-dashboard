@@ -143,7 +143,7 @@ const Sidebar = ({ isCollapsed }) => {
       ),
     },
     {
-      key: "/ratings",
+      key: "/star-rating",
       icon: <FaStar size={25} />,
       label: isCollapsed ? (
         <Link to="/star-rating">Raings</Link>

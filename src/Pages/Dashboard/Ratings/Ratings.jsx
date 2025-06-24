@@ -28,7 +28,7 @@ import {
 } from "../../../redux/apiSlices/ratingApi";
 
 const { TextArea } = Input;
-
+import ratings from "../../../assets/ratings.png";
 const Ratings = () => {
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
@@ -168,9 +168,7 @@ const Ratings = () => {
                     <div style={{ height: 160, overflow: "hidden" }}>
                       <img
                         alt="rating"
-                        src={
-                          review.image || "https://picsum.photos/id/239/300/200"
-                        }
+                        src={review.image || ratings}
                         style={{
                           width: "100%",
                           height: "100%",
