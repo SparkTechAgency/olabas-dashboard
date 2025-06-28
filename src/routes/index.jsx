@@ -25,7 +25,7 @@ import Location from "../Pages/Dashboard/Location/Location.jsx";
 import Extra from "../Pages/Dashboard/Extra/Extra.jsx";
 import Team from "../Pages/Dashboard/Team/team.jsx";
 import FaqCollapse from "../Pages/Dashboard/FAQ/FAQCollapese.jsx";
-import DriverSchedule from "../Pages/Dashboard/Driver Schedule/DriverSchedule.jsx";
+
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import ContactList from "../Pages/Dashboard/ContactList/contactList.jsx";
 import DriverManagementSchedule from "../Pages/Dashboard/Driver Management/DriverManagementSchedule.jsx";

@@ -161,7 +161,7 @@ function DriverManagementSchedule() {
           {debugInfo.totalDrivers} drivers | {debugInfo.driversWithBookings}{" "}
           with bookings | {debugInfo.totalBookings} total bookings
         </div>
-        <Select className="w-32" placeholder="--Month--">
+        {/* <Select className="w-32" placeholder="--Month--">
           <Option value="jan">January</Option>
           <Option value="feb">February</Option>
           <Option value="mar">March</Option>
@@ -174,7 +174,7 @@ function DriverManagementSchedule() {
           <Option value="oct">October</Option>
           <Option value="nov">November</Option>
           <Option value="dec">December</Option>
-        </Select>
+        </Select> */}
       </div>
 
       {transformedData.length === 0 ? (
