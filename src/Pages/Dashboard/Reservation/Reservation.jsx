@@ -141,6 +141,7 @@ function Reservation() {
     return data?.map((item, index) => ({
       key: item?._id || index,
       id: item?._id,
+      createdAt: dayjs(item?.createdAt).format("DD/MM/YYYY, h:mm A"),
       pickupTime: dayjs(item?.pickupTime).format("DD/MM/YYYY, h:mm A"),
       pickupLocation: item?.pickupLocation?.location || "N/A",
       returnTime: dayjs(item?.returnTime).format("DD/MM/YYYY, h:mm A"),
@@ -338,6 +339,22 @@ function Reservation() {
   };
 
   const columns = [
+    {
+      title: "Reserved on",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      sorter: (a, b) => {
+        const dateA = dayjs(a.createdAt, "DD/MM/YYYY, h:mm A").toDate();
+        const dateB = dayjs(b.createdAt, "DD/MM/YYYY, h:mm A").toDate();
+        return dateA - dateB;
+      },
+      sortDirections: ["ascend", "descend"],
+      render: (text, record) => (
+        <div className="flex flex-col">
+          <span className="font-medium">{record.createdAt}</span>
+        </div>
+      ),
+    },
     {
       title: "Pickup",
       dataIndex: "pickUp",
