@@ -340,7 +340,7 @@ function Reservation() {
 
   const columns = [
     {
-      title: "Reserved on",
+      title: "Res..Date",
       dataIndex: "createdAt",
       key: "createdAt",
       sorter: (a, b) => {
@@ -393,6 +393,7 @@ function Reservation() {
       title: "Car",
       dataIndex: "car",
       key: "car",
+      width: "10%",
       sorter: (a, b) => {
         const nameA = a.carName || "";
         const nameB = b.carName || "";
@@ -432,6 +433,7 @@ function Reservation() {
       title: "Client",
       dataIndex: "client",
       key: "client",
+
       sorter: (a, b) => {
         const clientA = a.client || "";
         const clientB = b.client || "";
@@ -463,7 +465,7 @@ function Reservation() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: "20%",
+      width: "18%",
       sorter: (a, b) => {
         const statusA = a.status || "";
         const statusB = b.status || "";
@@ -563,7 +565,7 @@ function Reservation() {
       title: "Action",
       dataIndex: "action",
       key: "action",
-      width: "15%",
+      width: "10%",
       render: (text, record) => {
         const isDriverAssignmentDisabled =
           record.status?.toLowerCase() === "on ride";
