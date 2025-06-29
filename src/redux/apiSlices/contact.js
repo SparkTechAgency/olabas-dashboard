@@ -19,6 +19,16 @@ const conactSlice = api.injectEndpoints({
       }),
       invalidatesTags: ["CONTACT"],
     }),
+
+    updateSocials: builder.mutation({
+      query: ({ data }) => ({
+        url: `company-cms/socials`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["CONTACT"],
+    }),
+
     deleteContact: builder.mutation({
       query: (id) => ({
         url: `/company-cms/contact/${id}`,
@@ -30,6 +40,13 @@ const conactSlice = api.injectEndpoints({
     getContact: builder.query({
       query: () => ({
         url: `/company-cms/contact`,
+        method: "GET",
+      }),
+      providesTags: ["CONTACT"],
+    }),
+    getSocials: builder.query({
+      query: () => ({
+        url: `company-cms/socials`,
         method: "GET",
       }),
       providesTags: ["CONTACT"],
@@ -51,4 +68,6 @@ export const {
   useGetContactQuery,
   useDeleteContactMutation,
   useGetContactListQuery,
+  useGetSocialsQuery,
+  useUpdateSocialsMutation,
 } = conactSlice;

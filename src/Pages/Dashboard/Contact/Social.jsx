@@ -3,18 +3,19 @@ import { Modal, Form, Input, Button, Flex, message } from "antd";
 import { FaFacebook, FaWhatsapp, FaInstagram, FaTiktok } from "react-icons/fa";
 import ButtonEDU from "../../../components/common/ButtonEDU";
 import {
-  useGetContactQuery,
-  useUpdateContactMutation,
+  useGetSocialsQuery,
+  useUpdateSocialsMutation,
 } from "../../../redux/apiSlices/contact";
 
 const Social = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
 
-  const { data: getContact, isSuccess } = useGetContactQuery();
-  const [updateContact, { isLoading: isUpdating }] = useUpdateContactMutation();
+  const { data: getSocials, isSuccess } = useGetSocialsQuery();
+  const [updateContact, { isLoading: isUpdating }] = useUpdateSocialsMutation();
 
-  const contactInfo = getContact?.data;
+  const contactInfo = getSocials?.data;
+  console.log("Soacials", getSocials?.data);
 
   // Local state to edit form
   const [editedContact, setEditedContact] = useState({
@@ -42,13 +43,15 @@ const Social = () => {
 
   const handleUpdate = async (values) => {
     try {
-      const res = await updateContact(values).unwrap();
+      // Wrap the values in a data object to match the API expectation
+      const res = await updateContact({ data: values }).unwrap();
       if (res.success) {
         message.success("Contact info updated successfully");
         setIsModalOpen(false);
       }
     } catch (err) {
       message.error("Failed to update contact info");
+      console.error("Update error:", err);
     }
   };
 
