@@ -481,3 +481,8 @@ p {
   border-color: #04bf61 !important;
   color: white !important;
 }
+
+.ant-picker-cell-selected .ant-picker-cell-inner {
+  background-color: lavender !important;
+  color: white !important;
+}
