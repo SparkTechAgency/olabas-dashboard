@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Table, Button, Select, message, Modal, Pagination } from "antd";
-import { AlignCenterOutlined, DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
 import { CSVLink } from "react-csv";
@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import CustomSearch from "../../../components/common/CustomSearch";
 import GetPageName from "../../../components/common/GetPageName";
 import ReservationAddModal from "./ReservationAddModal";
-
+import { FiEye } from "react-icons/fi";
 import {
   useAssignDreiverMutation,
   useGetReservationQuery,
@@ -18,6 +18,7 @@ import {
 } from "../../../redux/apiSlices/reservation";
 import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi";
 import ExportModal from "./ExportModal";
+import ReservationViewModal from "./ReservationViewModal";
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -25,6 +26,8 @@ const { confirm } = Modal;
 function Reservation() {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(50);
@@ -57,6 +60,22 @@ function Reservation() {
 
   const showModal = () => setIsModalOpen(true);
   const handleOk = () => setIsModalOpen(false);
+
+  const handleViewReservation = (record) => {
+    // Find the original data from the API response
+    const originalData = reservationData?.data?.result?.find(
+      (item) => item._id === record.id
+    );
+
+    // Create enhanced record with both formatted and raw data
+    const enhancedRecord = {
+      ...record,
+      rawData: originalData,
+    };
+
+    setSelectedReservation(enhancedRecord);
+    setIsViewModalOpen(true);
+  };
 
   const rowSelection = {
     selectedRowKeys,
@@ -258,13 +277,6 @@ function Reservation() {
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
       }).unwrap();
-
-      console.log("=== API RESPONSE ===");
-      console.log("Full API Response:", apiResponse);
-      console.log("API Data:", apiResponse?.data);
-      console.log("API Data Result:", apiResponse?.data?.result);
-      console.log("API Data Length:", apiResponse?.data?.result?.length || 0);
-      console.log("===================");
 
       // Get the export data from API response
       const exportData = apiResponse?.data?.result || [];
@@ -565,7 +577,7 @@ function Reservation() {
       title: "Action",
       dataIndex: "action",
       key: "action",
-      width: "10%",
+
       render: (text, record) => {
         const isDriverAssignmentDisabled =
           record.status?.toLowerCase() === "on ride";
@@ -573,7 +585,7 @@ function Reservation() {
         return (
           <div className="flex gap-2">
             <Select
-              className="w-[160px]"
+              className="min-w-32"
               placeholder="Assign Driver"
               value={record.driverId || undefined}
               onChange={(value) => handleAssignDriver(record.id, value)}
@@ -585,6 +597,18 @@ function Reservation() {
                 </Option>
               ))}
             </Select>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Action",
+      dataIndex: "action",
+      key: "action",
+
+      render: (text, record) => {
+        return (
+          <div className="flex gap-2">
             <Button
               danger
               icon={<DeleteOutlined />}
@@ -600,6 +624,12 @@ function Reservation() {
                   },
                 });
               }}
+            />
+            <Button
+              info
+              icon={<FiEye />}
+              className="border-green-500"
+              onClick={() => handleViewReservation(record)}
             />
           </div>
         );
@@ -705,6 +735,15 @@ function Reservation() {
         onExport={handleExportWithDateRange}
         exportLoading={exportLoading}
         selectedCount={selectedRowKeys.length}
+      />
+
+      <ReservationViewModal
+        isVisible={isViewModalOpen}
+        onClose={() => {
+          setIsViewModalOpen(false);
+          setSelectedReservatio(null);
+        }}
+        reservationData={selectedReservation}
       />
     </>
   );
