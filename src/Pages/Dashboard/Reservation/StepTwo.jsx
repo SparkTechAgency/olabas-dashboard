@@ -9,7 +9,7 @@ import {
   setVehicleRate,
   calculateTotals,
 } from "../../../redux/features/ReservationSlice";
-
+import { TbCurrencyNaira } from "react-icons/tb";
 const { Option } = Select;
 
 const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
@@ -430,7 +430,13 @@ const StepTwo = ({ setHasError, isClicked, setIsClicked }) => {
 
         return (
           <Input
-            value={`$${displayRate.toFixed(2)}`}
+            value={`${displayRate.toFixed(2)}`}
+            prefix={
+              <TbCurrencyNaira
+                size={18}
+                className={`${isSelected ? "text-green-500" : null}`}
+              />
+            }
             className="w-full"
             disabled={!isSelected}
             onChange={(e) => handlePriceChange(e.target.value, record)}

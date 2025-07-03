@@ -10,6 +10,7 @@ import {
   setSelectedExtraIds,
 } from "../../../redux/features/ReservationSlice"; // Adjust path as needed
 import { useGetExtraQuery } from "../../../redux/apiSlices/extra";
+import { TbCurrencyNaira } from "react-icons/tb";
 
 const StepThree = ({ isClicked, setIsClicked }) => {
   const {
@@ -85,6 +86,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
   const handlePriceChange = (value, index) => {
     dispatch(updateExtra({ index, field: "price", value: value || 0 }));
     // Recalculate totals after price change
+
     dispatch(calculateTotals());
   };
 
@@ -211,8 +213,8 @@ const StepThree = ({ isClicked, setIsClicked }) => {
               </div>
             ) : (
               <div className="flex items-center">
-                <BiDollar className="text-gray-500" />
                 <InputNumber
+                  prefix={<TbCurrencyNaira size={18} />}
                   min={0}
                   step={0.01}
                   precision={2}
@@ -271,7 +273,7 @@ const StepThree = ({ isClicked, setIsClicked }) => {
                 total > 0 ? "text-green-600" : "text-gray-400"
               }`}
             >
-              ${total.toFixed(2)}
+              &#8358; {total.toFixed(2)}
             </span>
             {record.includeStatus && record.isPerDay && (
               <div className="text-xs text-gray-500 mt-1">per day</div>
@@ -311,50 +313,6 @@ const StepThree = ({ isClicked, setIsClicked }) => {
         className="extras-table"
         scroll={{ x: 800 }}
       />
-
-      {/* <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-        <div className="flex justify-between items-center">
-          <div className="text-sm text-gray-600">
-            <span className="font-medium">{selectedExtrasCount}</span> extra
-            service(s) selected
-          </div>
-          <div className="text-lg font-semibold text-green-600">
-            Total Extras: ${totalExtrasAmount.toFixed(2)}
-          </div>
-        </div>
-
-       
-        {selectedExtrasCount > 0 && (
-          <div className="mt-2 text-xs text-gray-500">
-            <div className="flex flex-wrap gap-4">
-              {extras.filter((extra) => extra.includeStatus && extra.isPerDay)
-                .length > 0 && (
-                <span>
-                  <strong>Per Day:</strong>{" "}
-                  {
-                    extras.filter(
-                      (extra) => extra.includeStatus && extra.isPerDay
-                    ).length
-                  }{" "}
-                  service(s)
-                </span>
-              )}
-              {extras.filter((extra) => extra.includeStatus && !extra.isPerDay)
-                .length > 0 && (
-                <span>
-                  <strong>One Time:</strong>{" "}
-                  {
-                    extras.filter(
-                      (extra) => extra.includeStatus && !extra.isPerDay
-                    ).length
-                  }{" "}
-                  service(s)
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-      </div> */}
     </div>
   );
 };

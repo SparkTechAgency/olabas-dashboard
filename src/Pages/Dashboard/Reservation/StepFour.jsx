@@ -9,6 +9,7 @@ import {
   calculateTotals,
 } from "../../../redux/features/ReservationSlice"; // Update the import path
 import { useGetAllProtectionsQuery } from "../../../redux/apiSlices/extra";
+import { TbCurrencyNaira } from "react-icons/tb";
 
 const StepFour = () => {
   const dispatch = useDispatch();
@@ -130,7 +131,7 @@ const StepFour = () => {
             <span className="text-green-600 font-medium">Included</span>
           ) : (
             <InputNumber
-              addonBefore={<BiDollar />}
+              addonBefore={<TbCurrencyNaira />}
               min={0}
               value={record.price}
               onChange={(value) => handlePriceChange(value, index)}
@@ -175,7 +176,13 @@ const StepFour = () => {
       key: "total",
       width: 120,
       align: "right",
-      render: (text) => `$${(text || 0).toFixed(2)}`,
+      render: (text, record, index) => (
+        <div className="text-right">
+          <span className="font-semibold text-green-600">
+            &#8358; {(text || 0).toFixed(2)}
+          </span>
+        </div>
+      ),
     },
   ];
 

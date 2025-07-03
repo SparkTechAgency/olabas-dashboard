@@ -587,11 +587,11 @@ function ReservationAddModal({ isModalOpen, handleCancel, handleOk }) {
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
               <div className="flex justify-between text-sm">
                 <span>Subtotal:</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>&#8358; {subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-base font-semibold">
                 <span>Total:</span>
-                <span>${total.toFixed(2)}</span>
+                <span>&#8358; {total.toFixed(2)}</span>
               </div>
             </div>
           )}
