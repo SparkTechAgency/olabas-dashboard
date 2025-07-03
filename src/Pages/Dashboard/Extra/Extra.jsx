@@ -77,6 +77,7 @@ function Extra() {
       description: values.description,
       cost: parseFloat(values.cost),
       status: values.status.toUpperCase(),
+      vat: Number(values.vat),
       isPerDay: values.serviceDuration === true ? true : false,
     };
 
@@ -180,6 +181,7 @@ function Extra() {
     name: item.name,
     description: item.description,
     cost: `$${item.cost}`,
+    vat: item.vat,
     status: item.status === "ACTIVE" ? "Active" : "Inactive",
     isProtection: item.isProtection,
     originalRecord: item,
@@ -221,6 +223,17 @@ function Extra() {
       sorter: (a, b) => {
         const numA = parseFloat(a.cost.replace(/[^\d.]/g, "")) || 0;
         const numB = parseFloat(b.cost.replace(/[^\d.]/g, "")) || 0;
+        return numA - numB;
+      },
+      sortDirections: ["ascend", "descend"],
+    },
+    {
+      title: "VAT",
+      dataIndex: "vat",
+      key: "vat",
+      sorter: (a, b) => {
+        const numA = parseFloat(a.vat.replace(/[^\d.]/g, "")) || 0;
+        const numB = parseFloat(b.vat.replace(/[^\d.]/g, "")) || 0;
         return numA - numB;
       },
       sortDirections: ["ascend", "descend"],

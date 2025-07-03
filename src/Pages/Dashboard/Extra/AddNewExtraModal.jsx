@@ -61,19 +61,35 @@ function AddNewExtraModal({
         >
           <Input placeholder="Enter Name" />
         </Form.Item>
-        <Form.Item
-          label="Cost"
-          name="cost"
-          rules={[{ required: true, message: "Please enter the cost!" }]}
-        >
-          <InputNumber
-            style={{ width: "100%" }}
-            placeholder="Enter Cost"
-            formatter={(value) => (value ? `${value}` : "")} // no $ added
-            parser={(value) => value.replace(/\$\s?|(,*)/g, "")} // strips $ if pasted
-            prefix={<FaMoneyBillAlt style={{ color: "#999" }} />}
-          />
-        </Form.Item>
+        <div className="flex gap-10">
+          <Form.Item
+            label="Cost"
+            name="cost"
+            rules={[{ required: true, message: "Please enter the cost!" }]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter Cost"
+              formatter={(value) => (value ? `${value}` : "")} // no $ added
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")} // strips $ if pasted
+              prefix={<FaMoneyBillAlt style={{ color: "#17a34a" }} />}
+            />
+          </Form.Item>
+          <Form.Item
+            label="VAT"
+            name="vat"
+            rules={[{ required: true, message: "Please enter the VAT!" }]}
+          >
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter VAT"
+              formatter={(value) => (value ? `${value}` : "")} // no $ added
+              parser={(value) => value.replace(/\$\s?|(,*)/g, "")} // strips $ if pasted
+              prefix={<FaMoneyBillAlt style={{ color: "#17a34a" }} />}
+            />
+          </Form.Item>
+        </div>
+
         <div className="w-full border flex gap-40">
           {" "}
           <Form.Item

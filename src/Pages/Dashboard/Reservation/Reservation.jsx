@@ -191,6 +191,7 @@ function Reservation() {
       returnDate: dayjs(item?.returnTime).format("DD/MM/YYYY"),
       returnTimeOnly: dayjs(item?.returnTime).format("h:mm A"),
       originalPickupTime: item?.pickupTime,
+      isPaid: item?.isPaid,
     }));
   };
 
@@ -469,15 +470,26 @@ function Reservation() {
         return priceA - priceB;
       },
       sortDirections: ["ascend", "descend"],
-      render: (text) => (
-        <span className="font-medium text-green-600">{text}</span>
+      render: (text, record) => (
+        <div className="flex flex-col">
+          <span className="font-medium text-green-600">{text}</span>
+          <span
+            className={`text-xs w-fit px-1.5 py-.5 border rounded mt-1 ${
+              record.isPaid
+                ? "text-green-600 bg-green-50 border-green-600"
+                : "text-red-600 bg-red-50 border-red-600"
+            } `}
+          >
+            {record.isPaid ? "Paid" : "Unpaid"}
+          </span>
+        </div>
       ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      // width: "18%",
+      width: "18%",
       sorter: (a, b) => {
         const statusA = a.status || "";
         const statusB = b.status || "";
