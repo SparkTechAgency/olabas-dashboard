@@ -45,13 +45,15 @@ const Ratings = () => {
   // Get reviews from API data
   const reviews = ratingData?.data?.reviews || [];
 
+  console.log("ratings", reviews);
+
   const onFinish = async (values) => {
     try {
       const formData = {
         rating: values.rating,
         comment: values.comment,
-        clientEmail: values.name, // Using name as clientEmail based on your API structure
-        // Add image handling if needed
+        clientEmail: values.email, // Using name as clientEmail based on your API structure
+        clientName: values.clientName,
       };
 
       await createRating(formData).unwrap();
@@ -106,13 +108,6 @@ const Ratings = () => {
 
       message.error(errorMessage);
     }
-  };
-
-  const normFile = (e) => {
-    if (Array.isArray(e)) {
-      return e;
-    }
-    return e?.fileList;
   };
 
   // Format date for display
@@ -194,11 +189,22 @@ const Ratings = () => {
                       }
                       description={
                         <div>
-                          <p style={{ marginTop: 8 }}>{review.comment}</p>
+                          <div
+                            className="max-h-40 overflow-auto [&::-webkit-scrollbar]:w-1
+  [&::-webkit-scrollbar-track]:rounded-full
+  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  [&::-webkit-scrollbar-thumb]:bg-gray-300
+  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+                          >
+                            <p style={{ marginTop: 8 }}>{review.comment}</p>
+                          </div>
+
                           <div
                             style={{ color: "rgba(0,0,0,0.45)", marginTop: 8 }}
                           >
-                            <p>- {review.clientEmail}</p>
+                            <p>- {review.clientName}</p>
                             <p style={{ fontSize: "12px" }}>
                               {formatDate(review.createdAt)}
                             </p>
@@ -265,9 +271,16 @@ const Ratings = () => {
               style={{ color: "#52c41a", fontSize: 24 }}
             />
           </Form.Item>
+          <Form.Item
+            name="clientName"
+            label="Your Name"
+            rules={[{ required: true, message: "Please input your name!" }]}
+          >
+            <Input placeholder="john" />
+          </Form.Item>
 
           <Form.Item
-            name="name"
+            name="email"
             label="Your Email"
             rules={[
               { required: true, message: "Please input your email!" },
@@ -284,22 +297,6 @@ const Ratings = () => {
           >
             <TextArea rows={4} placeholder="Share your experience..." />
           </Form.Item>
-
-          {/* <Form.Item
-            name="image"
-            label="Upload Image"
-            valuePropName="fileList"
-            getValueFromEvent={normFile}
-          >
-            <Upload
-              listType="picture"
-              beforeUpload={() => false}
-              maxCount={1}
-              accept="image/*"
-            >
-              <Button icon={<UploadOutlined />}>Click to upload</Button>
-            </Upload>
-          </Form.Item> */}
 
           <Form.Item>
             <div
