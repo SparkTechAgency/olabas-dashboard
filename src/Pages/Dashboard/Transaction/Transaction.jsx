@@ -44,7 +44,9 @@ export default function TransactionList() {
       title: "Amount",
       dataIndex: "amount",
       key: "amount",
-      render: (amount) => `$${amount.toFixed(2)}`,
+      render: (amount) => {
+        return <span>&#8358; {`${amount.toFixed(2)}`}</span>;
+      },
       sorter: (a, b) => a.amount - b.amount,
     },
     {

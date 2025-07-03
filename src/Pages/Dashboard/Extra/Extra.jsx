@@ -17,6 +17,7 @@ import {
   useUpdateExtraMutation,
 } from "../../../redux/apiSlices/extra";
 import { getImageUrl } from "../../../utils/baseUrl";
+import { render } from "react-dom";
 
 // Utility function to extract error message from API response
 const getErrorMessage = (error) => {
@@ -75,9 +76,9 @@ function Extra() {
     const data = {
       name: values.name,
       description: values.description,
-      cost: parseFloat(values.cost),
+      baseCost: parseFloat(values.baseCost),
       status: values.status.toUpperCase(),
-      vat: Number(values.vat),
+      vat: parseFloat(values.vat),
       isPerDay: values.serviceDuration === true ? true : false,
     };
 
@@ -180,7 +181,8 @@ function Extra() {
     image: item.image,
     name: item.name,
     description: item.description,
-    cost: `$${item.cost}`,
+    cost: `₦ ${item.cost}`,
+    baseCost: item.baseCost,
     vat: item.vat,
     status: item.status === "ACTIVE" ? "Active" : "Inactive",
     isProtection: item.isProtection,
@@ -215,14 +217,26 @@ function Extra() {
       sorter: (a, b) => a.name.localeCompare(b.name),
       sortDirections: ["ascend", "descend"],
     },
-    { title: "Description", dataIndex: "description", key: "description" },
     {
-      title: "Cost",
-      dataIndex: "cost",
-      key: "cost",
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+
+      render: (_, record) => {
+        return (
+          <div className="w-[35rem] max-h-28  overflow-y-auto">
+            {record.description}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Base Cost",
+      dataIndex: "baseCost",
+      key: "baseCost",
       sorter: (a, b) => {
-        const numA = parseFloat(a.cost.replace(/[^\d.]/g, "")) || 0;
-        const numB = parseFloat(b.cost.replace(/[^\d.]/g, "")) || 0;
+        const numA = parseFloat(a.baseCost.replace(/[^\d.]/g, "")) || 0;
+        const numB = parseFloat(b.baseCost.replace(/[^\d.]/g, "")) || 0;
         return numA - numB;
       },
       sortDirections: ["ascend", "descend"],
@@ -238,6 +252,18 @@ function Extra() {
       },
       sortDirections: ["ascend", "descend"],
     },
+    {
+      title: "Cost",
+      dataIndex: "cost",
+      key: "cost",
+      sorter: (a, b) => {
+        const numA = parseFloat(a.cost.replace(/[^\d.]/g, "")) || 0;
+        const numB = parseFloat(b.cost.replace(/[^\d.]/g, "")) || 0;
+        return numA - numB;
+      },
+      sortDirections: ["ascend", "descend"],
+    },
+
     {
       title: "Status",
       dataIndex: "status",

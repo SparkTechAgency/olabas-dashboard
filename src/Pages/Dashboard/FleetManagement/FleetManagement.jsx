@@ -396,7 +396,7 @@ function FleetManagement() {
       },
       render: (dailyRate) => {
         const rate = parseFloat(dailyRate) || 0;
-        return <span>₦{dailyRate.toLocaleString()}</span>;
+        return <span>₦ {dailyRate.toLocaleString()}</span>;
       },
     },
     {

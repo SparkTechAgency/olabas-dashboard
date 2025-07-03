@@ -63,13 +63,13 @@ function AddNewExtraModal({
         </Form.Item>
         <div className="flex gap-10">
           <Form.Item
-            label="Cost"
-            name="cost"
-            rules={[{ required: true, message: "Please enter the cost!" }]}
+            label="Base Cost"
+            name="baseCost"
+            rules={[{ required: true, message: "Please enter the base cost!" }]}
           >
             <InputNumber
               style={{ width: "100%" }}
-              placeholder="Enter Cost"
+              placeholder="Enter Base Cost"
               formatter={(value) => (value ? `${value}` : "")} // no $ added
               parser={(value) => value.replace(/\$\s?|(,*)/g, "")} // strips $ if pasted
               prefix={<FaMoneyBillAlt style={{ color: "#17a34a" }} />}
