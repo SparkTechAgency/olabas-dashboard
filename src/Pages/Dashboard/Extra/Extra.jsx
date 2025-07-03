@@ -17,7 +17,6 @@ import {
   useUpdateExtraMutation,
 } from "../../../redux/apiSlices/extra";
 import { getImageUrl } from "../../../utils/baseUrl";
-import { render } from "react-dom";
 
 // Utility function to extract error message from API response
 const getErrorMessage = (error) => {
@@ -46,6 +45,7 @@ function Extra() {
     isLoading,
     isError,
     error: fetchError,
+    refetch, // Add refetch function
   } = useGetAllServicesQuery({ page, limit, status: filter.toUpperCase() });
 
   console.log("sss", extraData);
@@ -100,6 +100,7 @@ function Extra() {
 
         if (res.success) {
           message.success("Update Success");
+          refetch(); // Refetch data after successful update
         } else {
           message.error(res.message || "Update Failed");
         }
@@ -107,6 +108,7 @@ function Extra() {
         const res = await createExtra(formData).unwrap();
         if (res.success) {
           message.success("Create Success");
+          refetch(); // Refetch data after successful creation
         } else {
           message.error(res.message || "Create Failed");
         }
@@ -134,6 +136,7 @@ function Extra() {
       if (failures.length === 0) {
         message.success("Deleted successfully");
         setSelectedRowKeys([]);
+        refetch(); // Refetch data after successful deletion
       } else {
         // Show specific error message from the first failure
         const errorMessage = getErrorMessage(failures[0].reason);
@@ -161,6 +164,7 @@ function Extra() {
         message.success(
           `Protection ${checked ? "enabled" : "disabled"} successfully`
         );
+        refetch(); // Refetch data after successful protection toggle
       } else {
         message.error(res.message || "Failed to update protection status");
       }
