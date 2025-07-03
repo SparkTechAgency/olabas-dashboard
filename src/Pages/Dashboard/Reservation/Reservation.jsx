@@ -8,7 +8,7 @@ import dayjs from "dayjs";
 import CustomSearch from "../../../components/common/CustomSearch";
 import GetPageName from "../../../components/common/GetPageName";
 import ReservationAddModal from "./ReservationAddModal";
-import { FiEye } from "react-icons/fi";
+import { FiEdit3, FiEye } from "react-icons/fi";
 import {
   useAssignDreiverMutation,
   useGetReservationQuery,
@@ -405,7 +405,7 @@ function Reservation() {
       title: "Car",
       dataIndex: "car",
       key: "car",
-      width: "10%",
+      // width: "10%",
       sorter: (a, b) => {
         const nameA = a.carName || "";
         const nameB = b.carName || "";
@@ -477,7 +477,7 @@ function Reservation() {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: "18%",
+      // width: "18%",
       sorter: (a, b) => {
         const statusA = a.status || "";
         const statusB = b.status || "";
@@ -574,18 +574,17 @@ function Reservation() {
       },
     },
     {
-      title: "Action",
-      dataIndex: "action",
-      key: "action",
-
+      title: "Assign Driver",
+      dataIndex: "assignDriver",
+      key: "assignDriver",
       render: (text, record) => {
         const isDriverAssignmentDisabled =
           record.status?.toLowerCase() === "on ride";
 
         return (
-          <div className="flex gap-2">
+          <div className="flex">
             <Select
-              className="min-w-32"
+              className=" w-32"
               placeholder="Assign Driver"
               value={record.driverId || undefined}
               onChange={(value) => handleAssignDriver(record.id, value)}
@@ -605,10 +604,16 @@ function Reservation() {
       title: "Action",
       dataIndex: "action",
       key: "action",
-
       render: (text, record) => {
         return (
           <div className="flex gap-2">
+            <Button info icon={<FiEdit3 />} className="border-green-500" />
+            <Button
+              info
+              icon={<FiEye />}
+              className="border-green-500"
+              onClick={() => handleViewReservation(record)}
+            />
             <Button
               danger
               icon={<DeleteOutlined />}
@@ -624,12 +629,6 @@ function Reservation() {
                   },
                 });
               }}
-            />
-            <Button
-              info
-              icon={<FiEye />}
-              className="border-green-500"
-              onClick={() => handleViewReservation(record)}
             />
           </div>
         );
