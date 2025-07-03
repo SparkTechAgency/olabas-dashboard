@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Table, Button, Select, message, Modal, Pagination } from "antd";
+import {
+  Table,
+  Button,
+  Select,
+  message,
+  Modal,
+  Pagination,
+  DatePicker,
+} from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import { LuDownload } from "react-icons/lu";
 import { GrFormAdd } from "react-icons/gr";
@@ -19,6 +27,7 @@ import {
 import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi";
 import ExportModal from "./ExportModal";
 import ReservationViewModal from "./ReservationViewModal";
+import { MdFilterAlt } from "react-icons/md";
 
 const { Option } = Select;
 const { confirm } = Modal;
@@ -35,6 +44,7 @@ function Reservation() {
   const [exportLoading, setExportLoading] = useState(false);
   const [csvLinkRef, setCsvLinkRef] = useState(null);
   const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState(false);
 
   const [updateStatus] = useUpdateReservationStatusMutation();
 
@@ -687,6 +697,24 @@ function Reservation() {
             ref={(r) => setCsvLinkRef(r)}
             style={{ display: "none" }}
           />
+          <Button
+            icon={<MdFilterAlt size={20} />}
+            className="bg-smart hover:bg-smart text-white border-none h-8"
+            onClick={() => setFilter(!filter)}
+          ></Button>
+          <div className={`${filter ? "flex" : "hidden"} gap-3`}>
+            <DatePicker placeholder="P/R Date" />
+            <Select
+              className="w-28"
+              defaultValue="Completed"
+              placeholder="--SELECT--"
+            >
+              <Option>Completed</Option>
+              <Option>Confirmed</Option>
+              <Option>Canceled</Option>
+              <Option>Onride</Option>
+            </Select>
+          </div>
         </div>
       </div>
 
