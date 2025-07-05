@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Switch,
@@ -8,48 +8,52 @@ import {
   Row,
   Col,
   Space,
+  Spin,
 } from "antd";
+import { useGetExtraQuery } from "../../../../redux/apiSlices/extra";
 
 const { Title, Text } = Typography;
 
 function ExtraServices() {
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "GWAGON TRAVEL FUELING",
-      description: "GWAGON IS FUELED BY US",
-      idCode: "ID: 685d9ba540249f1f70fcae77",
-      price: 10000,
-      quantity: 1,
-      included: false,
-      billing: "One Time",
-      isFree: true,
-    },
-    {
-      id: 2,
-      name: "TRAVEL FEE - December rate",
-      description:
-        "Our Operation is mostly based in Lagos Nigeria. If you will be traveling out of Lagos state let us know. We do not travel to every location, but to those places we go there is a travel fee that you must select and pay for.",
-      idCode: "ID: 685d9b1540249f1f70fcae75",
-      price: 150000,
-      quantity: 1,
-      included: true,
-      billing: "One Time",
-      isFree: false,
-    },
-  ]);
+  const {
+    data: extraData,
+    isLoading,
+    error,
+  } = useGetExtraQuery({
+    page: null,
+    limit: null,
+  });
+
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    if (extraData?.data?.result) {
+      const mappedServices = extraData.data.result.map((item, index) => ({
+        id: item._id,
+        name: item.name,
+        description: item.description,
+        idCode: `ID: ${item._id}`,
+        price: item.cost || 0,
+        quantity: 1,
+        included: index === 1, // default second item included
+        billing: item.isPerDay ? "Per Day" : "One Time",
+        isFree: item.cost === 0,
+      }));
+      setServices(mappedServices);
+    }
+  }, [extraData]);
 
   const handleSwitchChange = (serviceId, checked) => {
-    setServices(
-      services.map((service) =>
+    setServices((prev) =>
+      prev.map((service) =>
         service.id === serviceId ? { ...service, included: checked } : service
       )
     );
   };
 
   const handleQuantityChange = (serviceId, value) => {
-    setServices(
-      services.map((service) =>
+    setServices((prev) =>
+      prev.map((service) =>
         service.id === serviceId
           ? { ...service, quantity: value || 1 }
           : service
@@ -57,23 +61,29 @@ function ExtraServices() {
     );
   };
 
-  const formatPrice = (price) => {
-    return `₦ ${price.toLocaleString()}.00`;
-  };
+  const formatPrice = (price) => `₦ ${price.toLocaleString()}.00`;
 
-  const calculateTotal = (service) => {
-    return service.included ? service.price * service.quantity : 0;
-  };
+  const calculateTotal = (service) =>
+    service.included ? service.price * service.quantity : 0;
+
+  if (isLoading) return <Spin />;
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <Title level={3} style={{ marginBottom: "8px" }}>
-        Select Extra Services
-      </Title>
-      <Text type="secondary" style={{ marginBottom: "24px", display: "block" }}>
-        Choose additional services for your rental. Free services are marked in
-        green. Per-day charges will be calculated based on your rental duration.
-      </Text>
+    <div className="w-full p-6">
+      <div>
+        <div>
+          <h3 className="text-lg font-semibold mb-4"> Select Extra Services</h3>
+        </div>
+
+        <Text
+          type="secondary"
+          style={{ marginBottom: "24px", display: "block" }}
+        >
+          Choose additional services for your rental. Free services are marked
+          in green. Per-day charges will be calculated based on your rental
+          duration.
+        </Text>
+      </div>
 
       <Card>
         <Row

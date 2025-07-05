@@ -26,6 +26,9 @@ const nigeriaStates = [
 function Details() {
   return (
     <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Personal Details</h3>
+      </div>
       <Row gutter={24}>
         <Col xs={24} md={8}>
           <Form.Item

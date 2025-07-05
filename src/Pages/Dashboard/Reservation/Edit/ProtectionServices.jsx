@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   Switch,
@@ -7,63 +7,47 @@ import {
   Typography,
   Row,
   Col,
-  Space,
+  Spin,
 } from "antd";
+import { useGetAllProtectionsQuery } from "../../../../redux/apiSlices/extra";
 
 const { Title, Text } = Typography;
 
 function ProtectionServices() {
-  const [services, setServices] = useState([
-    {
-      id: 1,
-      name: "Extra Protection",
-      description:
-        "Thorough exterior and interior car wash with waxing service. Extra Protection",
-      price: 290,
-      quantity: 1,
-      included: true,
-      billing: "Per Day",
-    },
-    {
-      id: 2,
-      name: "Theft Protection",
-      description: "Theft Protection",
-      price: 8,
-      quantity: 1,
-      included: true,
-      billing: "Per Day",
-    },
-    {
-      id: 3,
-      name: "Collision Damage Waiver",
-      description: "Collision Damage Waiver",
-      price: 50,
-      quantity: 1,
-      included: false,
-      billing: "One Time",
-    },
-    {
-      id: 4,
-      name: "Default protection",
-      description: "Default Protection",
-      price: 0,
-      quantity: 1,
-      included: false,
-      billing: "Per Day",
-    },
-  ]);
+  const {
+    data: protectionData,
+    isLoading,
+    isError,
+  } = useGetAllProtectionsQuery();
+
+  const [services, setServices] = useState([]);
+
+  useEffect(() => {
+    if (protectionData?.data?.result) {
+      const mapped = protectionData.data.result.map((item, index) => ({
+        id: item._id,
+        name: item.name,
+        description: item.description,
+        price: item.cost || 0,
+        quantity: 1,
+        included: index < 2, // First 2 services preselected
+        billing: item.isPerDay ? "Per Day" : "One Time",
+      }));
+      setServices(mapped);
+    }
+  }, [protectionData]);
 
   const handleSwitchChange = (serviceId, checked) => {
-    setServices(
-      services.map((service) =>
+    setServices((prev) =>
+      prev.map((service) =>
         service.id === serviceId ? { ...service, included: checked } : service
       )
     );
   };
 
   const handleQuantityChange = (serviceId, value) => {
-    setServices(
-      services.map((service) =>
+    setServices((prev) =>
+      prev.map((service) =>
         service.id === serviceId
           ? { ...service, quantity: value || 1 }
           : service
@@ -79,11 +63,14 @@ function ProtectionServices() {
     return services.filter((service) => service.included).length;
   };
 
+  if (isLoading) return <Spin />;
+
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      <Title level={3} style={{ marginBottom: "8px" }}>
-        Protection Services
-      </Title>
+    <div className="w-full p-6">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">Protection Services</h3>
+      </div>
+
       <Text type="secondary" style={{ marginBottom: "8px", display: "block" }}>
         Select the protection services you want to include in your rental.
       </Text>

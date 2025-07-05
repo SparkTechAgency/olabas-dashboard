@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Form, Select, DatePicker, TimePicker, Row, Col } from "antd";
+import {
+  Form,
+  Select,
+  DatePicker,
+  TimePicker,
+  Row,
+  Col,
+  Typography,
+} from "antd";
 import {
   CalendarOutlined,
   ClockCircleOutlined,
@@ -7,7 +15,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useGetAllLocationQuery } from "../../../../redux/apiSlices/LocationApi";
-
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 const PickUpAndReturn = () => {
@@ -217,6 +225,9 @@ const PickUpAndReturn = () => {
 
   return (
     <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
+      <div>
+        <h3 className="text-lg font-semibold mb-4">PickUp and Return</h3>
+      </div>
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Row gutter={24}>
           {/* Pick-up column */}

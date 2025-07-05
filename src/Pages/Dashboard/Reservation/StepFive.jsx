@@ -104,21 +104,6 @@ const StepFive = () => {
         onValuesChange={onValuesChange}
         initialValues={clientDetails}
       >
-        {/* {!clientDetails.isNewClient && (
-          <Form.Item
-            name="searchQuery"
-            label={<h3 className="text-xs font-semibold">Find Client</h3>}
-            rules={[{ required: true, message: "Please input Client!" }]}
-            className="flex-1 mb-0"
-          >
-            <CustomSearch
-              placeholder="Search by name, email, or Phone"
-              value={clientDetails.searchQuery}
-              onChange={(value) => handleFieldChange("searchQuery", value)}
-            />
-          </Form.Item>
-        )} */}
-
         {clientDetails.isNewClient && (
           <>
             <div className="flex items-center my-4">

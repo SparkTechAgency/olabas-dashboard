@@ -94,7 +94,15 @@ export default function ReservationEdit() {
      JSX
   -------------*/
   return (
-    <div className="max-w-full mx-auto p-6 bg-gray-50 max-h-[60vh] overflow-auto">
+    <div
+      className="rounded-lg h-[94%] overflow-auto [&::-webkit-scrollbar]:w-0
+  [&::-webkit-scrollbar-track]:rounded-full
+  [&::-webkit-scrollbar-track]:bg-gray-100
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  [&::-webkit-scrollbar-thumb]:bg-gray-300
+  dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+  dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+    >
       <Form
         form={form}
         layout="vertical"
