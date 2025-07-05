@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import {
   Form,
   Select,
@@ -15,39 +16,94 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useGetAllLocationQuery } from "../../../../redux/apiSlices/LocationApi";
+import { updatePickupReturn } from "../../../../redux/features/EditReservationSlice";
+
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const PickUpAndReturn = () => {
+  const dispatch = useDispatch();
   const [form] = Form.useForm();
   const [pickupDateTime, setPickupDateTime] = useState(null);
   const [returnDateTime, setReturnDateTime] = useState(null);
-  const [pickupLocation, setPickupLocation] = useState(null);
-  const [returnLocation, setReturnLocation] = useState(null);
+
+  // Get Redux state
+  const {
+    pickupDate,
+    pickupTime,
+    pickupLocation,
+    returnDate,
+    returnTime,
+    returnLocation,
+    bookingId,
+  } = useSelector((state) => state.editReservation);
 
   const { data: locationData, isLoading } = useGetAllLocationQuery();
   const locations = locationData?.data?.result || [];
 
-  // Set default values on component mount
+  // Set values from Redux when data is available
   useEffect(() => {
-    const now = dayjs();
-    const defaultReturnTime = now.add(3, "hour");
+    if (bookingId && pickupDate && pickupTime && returnDate && returnTime) {
+      console.log("Setting pickup/return data from Redux:", {
+        pickupDate,
+        pickupTime,
+        returnDate,
+        returnTime,
+        pickupLocation,
+        returnLocation,
+      });
 
-    const defaultPickupDate = now.format("DD/MM/YYYY");
-    const defaultPickupTime = now.format("HH:mm");
-    const defaultReturnDate = defaultReturnTime.format("DD/MM/YYYY");
-    const defaultReturnTimeFormatted = defaultReturnTime.format("HH:mm");
+      const pickupDateObj = dayjs(pickupDate);
+      const pickupTimeObj = dayjs(pickupTime);
+      const returnDateObj = dayjs(returnDate);
+      const returnTimeObj = dayjs(returnTime);
 
-    setPickupDateTime(now);
-    setReturnDateTime(defaultReturnTime);
+      // Combine date and time
+      const combinedPickup = pickupDateObj
+        .hour(pickupTimeObj.hour())
+        .minute(pickupTimeObj.minute());
 
-    form.setFieldsValue({
-      pickupDate: now,
-      pickupTime: now,
-      returnDate: defaultReturnTime,
-      returnTime: defaultReturnTime,
-    });
-  }, [form]);
+      const combinedReturn = returnDateObj
+        .hour(returnTimeObj.hour())
+        .minute(returnTimeObj.minute());
+
+      setPickupDateTime(combinedPickup);
+      setReturnDateTime(combinedReturn);
+
+      // Set form values
+      form.setFieldsValue({
+        pickupDate: combinedPickup,
+        pickupTime: combinedPickup,
+        returnDate: combinedReturn,
+        returnTime: combinedReturn,
+        pickupLocation: pickupLocation?._id || pickupLocation,
+        returnLocation: returnLocation?._id || returnLocation,
+      });
+    } else {
+      // Set default values if no Redux data
+      const now = dayjs();
+      const defaultReturnTime = now.add(3, "hour");
+
+      setPickupDateTime(now);
+      setReturnDateTime(defaultReturnTime);
+
+      form.setFieldsValue({
+        pickupDate: now,
+        pickupTime: now,
+        returnDate: defaultReturnTime,
+        returnTime: defaultReturnTime,
+      });
+    }
+  }, [
+    bookingId,
+    pickupDate,
+    pickupTime,
+    returnDate,
+    returnTime,
+    pickupLocation,
+    returnLocation,
+    form,
+  ]);
 
   // Disable past dates for pickup
   const disabledPickupDate = (current) => {
@@ -167,6 +223,14 @@ const PickUpAndReturn = () => {
         returnDate: autoReturnTime,
         returnTime: autoReturnTime,
       });
+
+      // Update Redux state
+      dispatch(
+        updatePickupReturn({
+          pickupDate: combined.toISOString(),
+          returnDate: autoReturnTime.toISOString(),
+        })
+      );
     }
   };
 
@@ -184,6 +248,14 @@ const PickUpAndReturn = () => {
         returnDate: autoReturnTime,
         returnTime: autoReturnTime,
       });
+
+      // Update Redux state
+      dispatch(
+        updatePickupReturn({
+          pickupTime: combined.toISOString(),
+          returnTime: autoReturnTime.toISOString(),
+        })
+      );
     }
   };
 
@@ -194,6 +266,13 @@ const PickUpAndReturn = () => {
         .hour(currentTime.hour())
         .minute(currentTime.minute());
       setReturnDateTime(combined);
+
+      // Update Redux state
+      dispatch(
+        updatePickupReturn({
+          returnDate: combined.toISOString(),
+        })
+      );
     }
   };
 
@@ -202,15 +281,38 @@ const PickUpAndReturn = () => {
       const currentDate = form.getFieldValue("returnDate") || dayjs();
       const combined = currentDate.hour(time.hour()).minute(time.minute());
       setReturnDateTime(combined);
+
+      // Update Redux state
+      dispatch(
+        updatePickupReturn({
+          returnTime: combined.toISOString(),
+        })
+      );
     }
   };
 
   const handlePickupLocationChange = (locationId) => {
-    setPickupLocation(locationId);
+    // Find the location object
+    const selectedLocation = locations.find((loc) => loc._id === locationId);
+
+    // Update Redux state
+    dispatch(
+      updatePickupReturn({
+        pickupLocation: selectedLocation,
+      })
+    );
   };
 
   const handleReturnLocationChange = (locationId) => {
-    setReturnLocation(locationId);
+    // Find the location object
+    const selectedLocation = locations.find((loc) => loc._id === locationId);
+
+    // Update Redux state
+    dispatch(
+      updatePickupReturn({
+        returnLocation: selectedLocation,
+      })
+    );
   };
 
   const onFinish = (values) => {
@@ -218,8 +320,8 @@ const PickUpAndReturn = () => {
     console.log("Combined DateTime Values:", {
       pickupDateTime: pickupDateTime?.format("MM/DD/YYYY HH:mm"),
       returnDateTime: returnDateTime?.format("MM/DD/YYYY HH:mm"),
-      pickupLocation,
-      returnLocation,
+      pickupLocation: pickupLocation,
+      returnLocation: returnLocation,
     });
   };
 
@@ -227,6 +329,31 @@ const PickUpAndReturn = () => {
     <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
       <div>
         <h3 className="text-lg font-semibold mb-4">PickUp and Return</h3>
+        {/* Debug info - remove in production */}
+        {bookingId && (
+          <div className="mb-4 p-3 bg-gray-50 rounded text-sm">
+            <p>
+              <strong>Current Pickup:</strong>{" "}
+              {pickupLocation?.location || "Not set"}
+            </p>
+            <p>
+              <strong>Current Return:</strong>{" "}
+              {returnLocation?.location || "Not set"}
+            </p>
+            <p>
+              <strong>Pickup Date:</strong>{" "}
+              {pickupDate
+                ? dayjs(pickupDate).format("DD/MM/YYYY HH:mm")
+                : "Not set"}
+            </p>
+            <p>
+              <strong>Return Date:</strong>{" "}
+              {returnDate
+                ? dayjs(returnDate).format("DD/MM/YYYY HH:mm")
+                : "Not set"}
+            </p>
+          </div>
+        )}
       </div>
       <Form form={form} layout="vertical" onFinish={onFinish}>
         <Row gutter={24}>

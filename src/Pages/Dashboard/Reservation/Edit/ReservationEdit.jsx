@@ -1,83 +1,100 @@
-// ReservationEdit.jsx
-import React from "react";
 import { useParams } from "react-router-dom";
-import {
-  Form,
-  Input,
-  DatePicker,
-  TimePicker,
-  Select,
-  Checkbox,
-  Row,
-  Col,
-  Button,
-  message,
-} from "antd";
+import { Form, Select, Button, message } from "antd";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
-import {
-  CalendarOutlined,
-  ClockCircleOutlined,
-  EnvironmentOutlined,
-} from "@ant-design/icons";
 import ExtraServices from "./ExtraServices";
 import ProtectionServices from "./ProtectionServices";
 import PickUpAndReturn from "./PickUp&Return";
 import Details from "./Details";
 import Vehicle from "./Vehicle";
-
-const { Option } = Select;
-
-const carSizes = [
-  { value: "Large: Premium", price: "₦ 840.00" },
-  { value: "Large: Station wagon", price: "₦ 840.00" },
-  { value: "Medium: Low emission", price: "₦ 840.00" },
-  { value: "Small: Economy", price: "₦ 840.00" },
-  { value: "Small: Mini", price: "₦ 840.00" },
-];
-
-const nigeriaStates = [
-  "Lagos",
-  "Abuja",
-  "Kano",
-  "Rivers",
-  "Oyo",
-  "Kaduna",
-  "Plateau",
-  "Delta",
-  "Edo",
-  "Anambra",
-  "Other",
-];
-const extraServices = [
-  {
-    id: "685d9bc5402491ff70fcee77",
-    label: "GWAGON TRAVEL FUELING",
-    description: "GWAGON IS FUELED BY US",
-    price: 100000,
-    billing: "One Time",
-    defaultChecked: false,
-  },
-  {
-    id: "685d9b16402491ff70fcee75",
-    label: "TRAVEL FEE – December rate",
-    description:
-      "Our operation is mostly based in Lagos Nigeria. If you will be traveling out of Lagos state let us know...",
-    price: 150000,
-    billing: "One Time",
-    defaultChecked: true,
-  },
-];
+import { useGetReservationByIdQuery } from "../../../../redux/apiSlices/reservation";
+import {
+  clearReservationData,
+  setError,
+  setLoading,
+  setReservationData,
+} from "../../../../redux/features/EditReservationSlice";
 
 export default function ReservationEdit() {
   const { id } = useParams(); // comes from /edit-reservation/:id
-
+  const dispatch = useDispatch();
   const [form] = Form.useForm();
+
+  // Get data from API
+  const {
+    data: reservationData,
+    isLoading,
+    error,
+  } = useGetReservationByIdQuery(id);
+
+  // Get Redux state
+  const reservationState = useSelector((state) => state.editReservation);
+
+  // Effect to populate Redux when data is fetched
+  useEffect(() => {
+    if (reservationData?.data) {
+      console.log("Setting reservation data in Redux:", reservationData.data);
+      dispatch(setReservationData(reservationData.data));
+    }
+  }, [reservationData, dispatch]);
+
+  // Effect to handle loading states
+  useEffect(() => {
+    dispatch(setLoading(isLoading));
+    if (error) {
+      dispatch(setError(error));
+    }
+  }, [isLoading, error, dispatch]);
+
+  // Effect to populate form when Redux state is updated
+  useEffect(() => {
+    if (reservationState.bookingId && reservationData?.data) {
+      const data = reservationData.data;
+
+      // Set form fields with the data
+      form.setFieldsValue({
+        // Pickup and Return
+        pickupDate: data.pickupDate ? moment(data.pickupDate) : null,
+        pickupTime: data.pickupTime ? moment(data.pickupTime) : null,
+        pickupLocation: data.pickupLocation?._id,
+        returnDate: data.returnDate ? moment(data.returnDate) : null,
+        returnTime: data.returnTime ? moment(data.returnTime) : null,
+        returnLocation: data.returnLocation?._id,
+
+        // Vehicle
+        vehicle: data.vehicle?._id,
+        vehicleType: data.vehicleType,
+
+        // Client details
+        firstName: data.clientId?.firstName,
+        lastName: data.clientId?.lastName,
+        email: data.clientId?.email,
+        phone: data.clientId?.phone,
+        parmanentAddress: data.clientId?.parmanentAddress,
+        presentAddress: data.clientId?.presentAddress,
+        country: data.clientId?.country,
+        state: data.clientId?.state,
+        postCode: data.clientId?.postCode,
+
+        // Payment
+        paymentMethod: data.paymentMethod,
+        status: data.status,
+      });
+    }
+  }, [reservationState.bookingId, reservationData, form]);
+
+  // Clear Redux state on unmount
+  useEffect(() => {
+    return () => {
+      dispatch(clearReservationData());
+    };
+  }, [dispatch]);
 
   /* ------------
      SUBMIT
   -------------*/
   const onFinish = (values) => {
-    // Flatten date/time values
     const payload = {
       ...values,
       pickupDate: values.pickupDate.format("DD/MM/YYYY"),
@@ -90,9 +107,24 @@ export default function ReservationEdit() {
     message.success("Reservation saved!");
   };
 
-  /* ------------
-     JSX
-  -------------*/
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading reservation data...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-red-500">
+          Error loading reservation: {error.message}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className="rounded-lg h-[94%] overflow-auto [&::-webkit-scrollbar]:w-0
@@ -103,37 +135,7 @@ export default function ReservationEdit() {
   dark:[&::-webkit-scrollbar-track]:bg-neutral-700
   dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
     >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        initialValues={{
-          pickupDate: moment("05/07/2025", "DD/MM/YYYY"),
-          pickupTime: moment("09:41", "HH:mm"),
-          pickupLocation: "",
-          returnDate: moment("05/07/2025", "DD/MM/YYYY"),
-          returnTime: moment("12:41", "HH:mm"),
-          returnLocation: "",
-          carSize: "Large: Premium",
-          vehicle: "",
-          firstName: "",
-          lastName: "",
-          email: "",
-          phone: "",
-          permanentAddress: "",
-          presentAddress: "",
-          country: "",
-          stateDivision: "",
-          postCode: "",
-          extraServices: { gwagonTravel: false, travelFee: true },
-          protectionServices: {
-            extraProtection: true,
-            theftProtection: true,
-            collisionDamage: false,
-            defaultProtection: false,
-          },
-        }}
-      >
+      <Form form={form} layout="vertical" onFinish={onFinish}>
         {/* ──────────── 1. PICK‑UP / RETURN ──────────── */}
         <PickUpAndReturn />
 
@@ -145,8 +147,10 @@ export default function ReservationEdit() {
           <ExtraServices />
           <ProtectionServices />
         </div>
+
         {/* ──────────── 3. RENTER DETAILS ──────────── */}
         <Details />
+
         {/* ──────────── 5. SUBMIT ──────────── */}
         <Form.Item>
           <Button type="primary" htmlType="submit" block>

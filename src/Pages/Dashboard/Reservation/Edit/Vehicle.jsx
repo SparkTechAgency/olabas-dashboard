@@ -1,22 +1,57 @@
 import React, { useState, useEffect } from "react";
 import { Form, Input, Select, Table, Radio, Row, Col } from "antd";
 import { TbCurrencyNaira } from "react-icons/tb";
+import { useDispatch, useSelector } from "react-redux";
 import { useGetAvailableFleetQuery } from "../../../../redux/apiSlices/fleetManagement";
+import {
+  updateField,
+  updateVehicle,
+} from "../../../../redux/features/EditReservationSlice";
 
 const { Option } = Select;
 
 function Vehicle() {
   const [form] = Form.useForm();
-  const [selectedCarSize, setSelectedCarSize] = useState("Large: Premium");
+  const dispatch = useDispatch();
+
+  // Get state from Redux store
+  const { vehicle, vehicleType, amount } = useSelector(
+    (state) => state.editReservation
+  );
+
+  // Local state for UI interactions
+  const [selectedCarSize, setSelectedCarSize] = useState(
+    vehicleType || "Large: Premium"
+  );
   const [selectedVehicle, setSelectedVehicle] = useState(null);
-  const [vehiclePrice, setVehiclePrice] = useState(840.0);
+  const [vehiclePrice, setVehiclePrice] = useState(amount || 840.0);
 
   const { data: vehicleData, isLoading } = useGetAvailableFleetQuery({
     page: null,
     limit: null,
   });
   const vehicleList = vehicleData?.data?.result || [];
-  console.log("Vehicle List:", vehicleList);
+
+  // Initialize component with Redux data
+  useEffect(() => {
+    if (vehicle && vehicleList.length > 0) {
+      // Handle both cases: vehicle as ID string or vehicle as object
+      const vehicleId =
+        vehicle && typeof vehicle === "object" ? vehicle._id : vehicle;
+      if (vehicleId) {
+        const foundVehicle = vehicleList.find((v) => v._id === vehicleId);
+        if (foundVehicle) {
+          setSelectedVehicle(foundVehicle);
+        }
+      }
+    }
+    if (vehicleType) {
+      setSelectedCarSize(vehicleType);
+    }
+    if (amount) {
+      setVehiclePrice(amount);
+    }
+  }, [vehicle, vehicleType, amount, vehicleList]);
 
   const getVehicleTypeFromCarSize = (carSize) => {
     const mapping = {
@@ -102,12 +137,28 @@ function Vehicle() {
     const selectedSize = e.target.value;
     const selectedData = data.find((item) => item.key === selectedSize);
     if (!selectedData) return;
+
     setSelectedCarSize(selectedData.carSize);
     const selectedVehicleType = getVehicleTypeFromCarSize(selectedData.carSize);
     let newRate = selectedVehicle?.dailyRates
       ? getRateForVehicleType(selectedVehicleType)
       : selectedData.price;
+
     setVehiclePrice(newRate);
+
+    // Update Redux store
+    dispatch(
+      updateVehicle({
+        vehicleType: selectedData.carSize,
+      })
+    );
+    dispatch(
+      updateField({
+        field: "amount",
+        value: newRate,
+      })
+    );
+
     form.setFieldsValue({ carSize: selectedData.carSize });
   };
 
@@ -115,6 +166,20 @@ function Vehicle() {
     if (!vehicleId) {
       setSelectedVehicle(null);
       setVehiclePrice(840.0);
+
+      // Update Redux store
+      dispatch(
+        updateVehicle({
+          vehicle: null,
+        })
+      );
+      dispatch(
+        updateField({
+          field: "amount",
+          value: 840.0,
+        })
+      );
+
       form.setFieldsValue({ vehicle: undefined });
       return;
     }
@@ -126,7 +191,22 @@ function Vehicle() {
       const rateData = selectedVehicleData.dailyRates?.find(
         (rate) => rate.vehicleType === selectedVehicleType
       );
-      setVehiclePrice(rateData ? rateData.rate : 840.0);
+      const newRate = rateData ? rateData.rate : 840.0;
+      setVehiclePrice(newRate);
+
+      // Update Redux store
+      dispatch(
+        updateVehicle({
+          vehicle: vehicleId,
+        })
+      );
+      dispatch(
+        updateField({
+          field: "amount",
+          value: newRate,
+        })
+      );
+
       form.setFieldsValue({ vehicle: vehicleId });
     }
   };
@@ -135,15 +215,28 @@ function Vehicle() {
     if (getSelectedKey() === record.key) {
       const numericPrice = parseFloat(value.replace(/[^0-9.]/g, "")) || 0;
       setVehiclePrice(numericPrice);
+
+      // Update Redux store
+      dispatch(
+        updateField({
+          field: "amount",
+          value: numericPrice,
+        })
+      );
     }
   };
 
   useEffect(() => {
+    // Get the vehicle ID properly (handle both object and string cases)
+    const vehicleId =
+      selectedVehicle?._id ||
+      (vehicle && typeof vehicle === "object" ? vehicle._id : vehicle);
+
     form.setFieldsValue({
       carSize: selectedCarSize,
-      vehicle: selectedVehicle?._id,
+      vehicle: vehicleId || undefined,
     });
-  }, [selectedCarSize, selectedVehicle, form]);
+  }, [selectedCarSize, selectedVehicle, form, vehicle]);
 
   const columns = [
     {
@@ -218,7 +311,13 @@ function Vehicle() {
               <Select
                 placeholder="-- Choose Vehicle --"
                 className="w-full"
-                value={selectedVehicle?._id || undefined}
+                value={
+                  selectedVehicle?._id ||
+                  (vehicle && typeof vehicle === "object"
+                    ? vehicle._id
+                    : vehicle) ||
+                  undefined
+                }
                 onChange={handleVehicleChange}
                 showSearch
                 optionFilterProp="children"
@@ -236,6 +335,21 @@ function Vehicle() {
           </Col>
         </Row>
       </Form>
+
+      {/* Debug info - remove in production */}
+      <div className="mt-4 p-4 bg-gray-50 rounded text-sm">
+        <p>
+          <strong>Redux State:</strong>
+        </p>
+        <p>
+          Vehicle ID:{" "}
+          {vehicle && typeof vehicle === "object"
+            ? vehicle._id
+            : vehicle || "None"}
+        </p>
+        <p>Vehicle Type: {vehicleType || "None"}</p>
+        <p>Amount: {amount || "None"}</p>
+      </div>
     </div>
   );
 }

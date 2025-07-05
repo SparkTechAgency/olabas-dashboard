@@ -32,6 +32,14 @@ const reservationSlice = api.injectEndpoints({
       providesTags: ["RESERVATION"],
     }),
 
+    getReservationById: builder.query({
+      query: (id) => ({
+        url: `/booking/admin/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["RESERVATION"],
+    }),
+
     createReservation: builder.mutation({
       query: (data) => ({
         url: `/booking`,
@@ -67,4 +75,5 @@ export const {
   useCreateReservationMutation,
   useUpdateReservationStatusMutation,
   useLazyGetExportDataQuery,
+  useGetReservationByIdQuery,
 } = reservationSlice;
