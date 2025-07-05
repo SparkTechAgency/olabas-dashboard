@@ -23,6 +23,7 @@ import ExtraServices from "./ExtraServices";
 import ProtectionServices from "./ProtectionServices";
 import PickUpAndReturn from "./PickUp&Return";
 import Details from "./Details";
+import Vehicle from "./Vehicle";
 
 const { Option } = Select;
 
@@ -93,11 +94,10 @@ export default function ReservationEdit() {
      JSX
   -------------*/
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-gray-50 max-h-[60vh] overflow-auto">
+    <div className="max-w-full mx-auto p-6 bg-gray-50 max-h-[60vh] overflow-auto">
       <Form
         form={form}
         layout="vertical"
-        className="border border-red-400"
         onFinish={onFinish}
         initialValues={{
           pickupDate: moment("05/07/2025", "DD/MM/YYYY"),
@@ -130,40 +130,7 @@ export default function ReservationEdit() {
         <PickUpAndReturn />
 
         {/* ──────────── 2. VEHICLE / SIZE ──────────── */}
-        <div className="bg-white shadow-sm rounded-lg p-6 mb-8">
-          <Row gutter={24}>
-            <Col xs={24} md={12}>
-              <Form.Item
-                label="Car Size"
-                name="carSize"
-                rules={[{ required: true, message: "Select a car size" }]}
-              >
-                <Select placeholder="Select size">
-                  {carSizes.map((c) => (
-                    <Option key={c.value} value={c.value}>
-                      {c.value} ({c.price})
-                    </Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-
-            <Col xs={24} md={12}>
-              <Form.Item label="Specific Vehicle (optional)" name="vehicle">
-                <Select placeholder="Select a vehicle">
-                  <Option value="Toyota Corolla">Toyota Corolla</Option>
-                  <Option value="Honda Civic">Honda Civic</Option>
-                  <Option value="Mercedes-Benz G-Wagon">
-                    Mercedes-Benz G-Wagon
-                  </Option>
-                  <Option value="BMW X5">BMW X5</Option>
-                  <Option value="Tesla Model 3">Tesla Model 3</Option>
-                  <Option value="Other">Other</Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-        </div>
+        <Vehicle />
 
         {/* ──────────── 4. EXTRA SERVICES ──────────── */}
         <div className="bg-white shadow-sm rounded-lg  mb-8">

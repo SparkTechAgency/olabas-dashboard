@@ -6,6 +6,7 @@ import {
   EnvironmentOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useGetAllLocationQuery } from "../../../../redux/apiSlices/LocationApi";
 
 const { Option } = Select;
 
@@ -15,6 +16,9 @@ const PickUpAndReturn = () => {
   const [returnDateTime, setReturnDateTime] = useState(null);
   const [pickupLocation, setPickupLocation] = useState(null);
   const [returnLocation, setReturnLocation] = useState(null);
+
+  const { data: locationData, isLoading } = useGetAllLocationQuery();
+  const locations = locationData?.data?.result || [];
 
   // Set default values on component mount
   useEffect(() => {
@@ -256,11 +260,13 @@ const PickUpAndReturn = () => {
                 placeholder="Select location"
                 suffixIcon={<EnvironmentOutlined />}
                 onChange={handlePickupLocationChange}
+                loading={isLoading}
               >
-                <Option value="airport-terminal-1">Airport Terminal 1</Option>
-                <Option value="airport-terminal-2">Airport Terminal 2</Option>
-                <Option value="downtown-office">Downtown Office</Option>
-                <Option value="hotel-district">Hotel District</Option>
+                {locations.map((locationItem) => (
+                  <Option key={locationItem._id} value={locationItem._id}>
+                    {locationItem.location}
+                  </Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
@@ -306,11 +312,13 @@ const PickUpAndReturn = () => {
                 placeholder="Select location"
                 suffixIcon={<EnvironmentOutlined />}
                 onChange={handleReturnLocationChange}
+                loading={isLoading}
               >
-                <Option value="airport-terminal-1">Airport Terminal 1</Option>
-                <Option value="airport-terminal-2">Airport Terminal 2</Option>
-                <Option value="downtown-office">Downtown Office</Option>
-                <Option value="hotel-district">Hotel District</Option>
+                {locations.map((locationItem) => (
+                  <Option key={locationItem._id} value={locationItem._id}>
+                    {locationItem.location}
+                  </Option>
+                ))}
               </Select>
             </Form.Item>
           </Col>
