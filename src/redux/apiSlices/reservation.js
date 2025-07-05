@@ -20,15 +20,12 @@ const reservationSlice = api.injectEndpoints({
     }),
 
     getReservation: builder.query({
-      query: ({ page, limit, searchTerm, pickupTime, returnTime }) => ({
-        // url: `/booking?page=${page}&limit=${limit}&searchTerm=${searchTerm}${!pickupTime===false||null?"":&pickupTime={pickupTime}}`,
+      query: ({ page, limit, searchTerm, pickupTime, returnTime, status }) => ({
         url:
           `/booking?page=${page}&limit=${limit}&searchTerm=${searchTerm}` +
-          (pickupTime
-            ? `&pickupTime=${pickupTime}`
-            : returnTime
-            ? `&returnTime=${returnTime}`
-            : ""),
+          (pickupTime ? `&pickupTime=${pickupTime}` : "") +
+          (!pickupTime && returnTime ? `&returnTime=${returnTime}` : "") +
+          (status ? `&status=${status}` : ""),
 
         method: "GET",
       }),

@@ -63,6 +63,7 @@ function Reservation() {
     searchTerm: search,
     ...(pickupTime && { pickupTime }),
     ...(returnTime && { returnTime }),
+    ...(status && { status }),
   });
 
   console.log("reservationData:", reservationData);
@@ -111,6 +112,10 @@ function Reservation() {
     }
   };
 
+  const handleSelectStatus = (selectedStatus) => {
+    setStatus(selectedStatus);
+    console.log("Selected status:", selectedStatus);
+  };
   const onSearch = (value) => {
     console.log("Search value:", value);
     setSearch(value);
@@ -741,14 +746,16 @@ function Reservation() {
             />
             <Select
               className="w-28"
-              defaultValue="Completed"
-              placeholder="--SELECT--"
-              name="status"
+              value={status}
+              placeholder="--Select One--"
+              onChange={handleSelectStatus}
+              allowClear
             >
-              <Option>Completed</Option>
-              <Option>Confirmed</Option>
-              <Option>Canceled</Option>
-              <Option>Onride</Option>
+              <Option value="COMPLETED">Completed</Option>
+              <Option value="NOT CONFIRMED">Not Confirmed</Option>
+              <Option value="CONFIRMED">Confirmed</Option>
+              <Option value="CANCELLED">Canceled</Option>
+              <Option value="ON RIDE">On Ride</Option>
             </Select>
           </div>
         </div>
