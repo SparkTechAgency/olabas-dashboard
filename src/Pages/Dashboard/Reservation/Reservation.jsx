@@ -28,6 +28,7 @@ import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi"
 import ExportModal from "./ExportModal";
 import ReservationViewModal from "./ReservationViewModal";
 import { MdFilterAlt } from "react-icons/md";
+import { Link } from "react-router-dom";
 const { Option } = Select;
 const { confirm } = Modal;
 
@@ -653,7 +654,9 @@ function Reservation() {
       render: (text, record) => {
         return (
           <div className="flex gap-2">
-            <Button info icon={<FiEdit3 />} className="border-green-500" />
+            <Link to={`/edit-reservation/${record.key}`}>
+              <Button info icon={<FiEdit3 />} className="border-green-500" />
+            </Link>
             <Button
               info
               icon={<FiEye />}

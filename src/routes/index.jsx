@@ -31,6 +31,7 @@ import ContactList from "../Pages/Dashboard/ContactList/contactList.jsx";
 import DriverManagementSchedule from "../Pages/Dashboard/Driver Management/DriverManagementSchedule.jsx";
 import ContactSegment from "../Pages/Dashboard/Contact/ContactSegment.jsx";
 import Ratings from "../Pages/Dashboard/Ratings/Ratings.jsx";
+import ReservationEdit from "../Pages/Dashboard/Reservation/Edit/ReservationEdit.jsx";
 
 const router = createBrowserRouter([
   {
@@ -57,6 +58,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Reservation />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/edit-reservation/:id",
+        element: (
+          <ProtectedRoute>
+            <ReservationEdit />
           </ProtectedRoute>
         ),
       },
