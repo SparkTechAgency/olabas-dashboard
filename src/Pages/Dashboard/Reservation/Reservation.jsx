@@ -28,7 +28,6 @@ import { useGetDriverQuery } from "../../../redux/apiSlices/driverManagementApi"
 import ExportModal from "./ExportModal";
 import ReservationViewModal from "./ReservationViewModal";
 import { MdFilterAlt } from "react-icons/md";
-
 const { Option } = Select;
 const { confirm } = Modal;
 
@@ -45,6 +44,11 @@ function Reservation() {
   const [csvLinkRef, setCsvLinkRef] = useState(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState(false);
+  const [pickupTime, setPickupTime] = useState(null);
+  const [returnTime, setReturnTime] = useState(null);
+  const [status, setStatus] = useState(null);
+
+  const [activePicker, setActivePicker] = useState(null);
 
   const [updateStatus] = useUpdateReservationStatusMutation();
 
@@ -53,7 +57,13 @@ function Reservation() {
     data: reservationData,
     isLoading,
     refetch,
-  } = useGetReservationQuery({ page, limit, searchTerm: search });
+  } = useGetReservationQuery({
+    page,
+    limit,
+    searchTerm: search,
+    ...(pickupTime && { pickupTime }),
+    ...(returnTime && { returnTime }),
+  });
 
   console.log("reservationData:", reservationData);
 
@@ -90,6 +100,15 @@ function Reservation() {
   const rowSelection = {
     selectedRowKeys,
     onChange: setSelectedRowKeys,
+  };
+
+  const handleDateChange = (type) => (date) => {
+    const iso = date ? date.toDate().toISOString() : null;
+    if (type === "pickup") {
+      setPickupTime(iso);
+    } else {
+      setReturnTime(iso);
+    }
   };
 
   const onSearch = (value) => {
@@ -703,11 +722,28 @@ function Reservation() {
             onClick={() => setFilter(!filter)}
           ></Button>
           <div className={`${filter ? "flex" : "hidden"} gap-3`}>
-            <DatePicker placeholder="P/R Date" />
+            <DatePicker
+              picker="date"
+              placeholder="Pick‑Up Date"
+              disabled={activePicker === "return"}
+              onFocus={() => setActivePicker("pickup")}
+              onBlur={() => setActivePicker(null)}
+              onChange={handleDateChange("pickup")}
+            />
+
+            <DatePicker
+              picker="date"
+              placeholder="Return Date"
+              disabled={activePicker === "pickup"}
+              onFocus={() => setActivePicker("return")}
+              onBlur={() => setActivePicker(null)}
+              onChange={handleDateChange("return")}
+            />
             <Select
               className="w-28"
               defaultValue="Completed"
               placeholder="--SELECT--"
+              name="status"
             >
               <Option>Completed</Option>
               <Option>Confirmed</Option>
