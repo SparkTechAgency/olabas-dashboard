@@ -117,7 +117,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         <div className="bg-white p-2 text-black text-[14px] rounded shadow-md ">
           {payload.map((pld, index) => (
             <div key={index}>
-              Total Revenue:{" $"}
+              Total Revenue:{" ₦ "}
               <span className="text-smart font-bold">{pld.value}</span>
             </div>
           ))}
